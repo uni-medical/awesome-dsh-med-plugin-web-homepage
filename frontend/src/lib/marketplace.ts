@@ -15,3 +15,8 @@ export function clampSplitRatio(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_SPLIT_RATIO;
   return Math.min(MAX_SPLIT_RATIO, Math.max(MIN_SPLIT_RATIO, value));
 }
+
+export function resolveSelectedEntry<T extends { id: string }>(entries: readonly T[], selectedId: string | null): T | undefined {
+  if (!selectedId) return undefined;
+  return entries.find(entry => entry.id === selectedId);
+}

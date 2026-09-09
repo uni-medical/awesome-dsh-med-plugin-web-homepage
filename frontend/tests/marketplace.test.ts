@@ -5,6 +5,7 @@ import {
   MAX_SPLIT_RATIO,
   MIN_SPLIT_RATIO,
   parseMarketplaceView,
+  resolveSelectedEntry,
 } from "../src/lib/marketplace";
 
 describe("marketplace workbench state", () => {
@@ -21,5 +22,12 @@ describe("marketplace workbench state", () => {
     expect(clampSplitRatio(10)).toBe(MIN_SPLIT_RATIO);
     expect(clampSplitRatio(95)).toBe(MAX_SPLIT_RATIO);
     expect(clampSplitRatio(Number.NaN)).toBe(DEFAULT_SPLIT_RATIO);
+  });
+
+  it("keeps details closed until a repository id is explicitly selected", () => {
+    const entries = [{ id: "owner/one" }, { id: "owner/two" }];
+    expect(resolveSelectedEntry(entries, null)).toBeUndefined();
+    expect(resolveSelectedEntry(entries, "owner/two")).toEqual({ id: "owner/two" });
+    expect(resolveSelectedEntry(entries, "missing/repository")).toBeUndefined();
   });
 });

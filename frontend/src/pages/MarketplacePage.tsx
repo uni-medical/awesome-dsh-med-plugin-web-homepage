@@ -4,12 +4,23 @@ import { EntryDetail } from "../components/EntryDetail";
 import { MarketplaceNavRail } from "../components/MarketplaceNavRail";
 import { MarketplaceResults } from "../components/MarketplaceResults";
 import { ResizableSplit } from "../components/ResizableSplit";
-import { parseMarketplaceView, type MarketplaceView } from "../lib/marketplace";
+import { parseMarketplaceView, resolveSelectedEntry, type MarketplaceView } from "../lib/marketplace";
+import type { CatalogEntry } from "../lib/catalog";
 import { useCatalog } from "../state/useCatalog";
 import { filterCatalog } from "../utils/filterCatalog";
 import "../styles/marketplace.css";
 
 const FILTER_KEYS = ["q", "type", "domain", "tier", "license"];
+
+function CatalogFilterPanel({ entries, params, onUpdate, onClear }: { entries: CatalogEntry[]; params: URLSearchParams; onUpdate: (key: string, value: string) => void; onClear: () => void }) {
+  const filters = [
+    { key: "type", label: "Component type", values: [...new Set(entries.map(entry => entry.primaryCategory))].sort() },
+    { key: "domain", label: "Domain", values: ["medical", "general"] },
+    { key: "tier", label: "Source tier", values: ["stable", "candidate"] },
+    { key: "license", label: "License", values: [...new Set(entries.map(entry => entry.license))].sort() },
+  ];
+  return <aside className="repository-filter-panel" aria-label="Catalog filters"><div className="filter-panel-heading"><span>REFINE</span><h2>Browse catalog</h2></div>{filters.map(filter => <label key={filter.key}>{filter.label}<select value={params.get(filter.key) ?? ""} onChange={event => onUpdate(filter.key, event.target.value)}><option value="">All</option>{filter.values.map(value => <option key={value} value={value}>{value}</option>)}</select></label>)}<button type="button" onClick={onClear}>Clear filters</button><p>Stable is present in the reviewed main snapshot. Candidate is present only in the automated discovery snapshot. Neither is a verification badge.</p></aside>;
+}
 
 export function MarketplacePage() {
   const { entries, loading, error } = useCatalog();
@@ -17,7 +28,7 @@ export function MarketplacePage() {
   const shown = useMemo(() => filterCatalog(entries, params), [entries, params]);
   const view = parseMarketplaceView(params.get("view"));
   const selectedId = params.get("entry");
-  const selected = selectedId ? entries.find(entry => entry.id === selectedId) : shown[0];
+  const selected = resolveSelectedEntry(entries, selectedId);
 
   function update(key: string, value: string, replace = false) {
     const next = new URLSearchParams(params);
@@ -36,13 +47,6 @@ export function MarketplacePage() {
     update("view", nextView);
   }
 
-  const filters = [
-    { key: "type", label: "All types", values: [...new Set(entries.map(entry => entry.primaryCategory))].sort() },
-    { key: "domain", label: "All domains", values: ["medical", "general"] },
-    { key: "tier", label: "All tiers", values: ["stable", "candidate"] },
-    { key: "license", label: "All licenses", values: [...new Set(entries.map(entry => entry.license))].sort() },
-  ];
-
   const browser = <section className="repository-pane" aria-label="Repository browser">
     <div className="repository-heading">
       <div><span className="workbench-eyebrow">MARKETPLACE</span><h1>Repository</h1><p>Discover and compare open medical AI components.</p></div>
@@ -51,9 +55,9 @@ export function MarketplacePage() {
       </div>
     </div>
     <div className="result-summary"><p role="status">{loading ? "Loading catalog…" : error || `${shown.length} repositories`}</p><button type="button" onClick={clearFilters}>Clear filters</button></div>
-    <div className="repository-scroll">
+    <div className="repository-body"><CatalogFilterPanel entries={entries} params={params} onUpdate={update} onClear={clearFilters}/><div className="repository-scroll">
       {!loading && !error && !shown.length ? <div className="workbench-empty"><h2>No matching components</h2><p>Try another term or clear the active filters.</p></div> : <MarketplaceResults view={view} entries={shown} selectedId={selected?.id} onSelect={entry => update("entry", entry.id)}/>}
-    </div>
+    </div></div>
   </section>;
 
   return <main className="market marketplace-workbench">
@@ -61,9 +65,8 @@ export function MarketplacePage() {
     <div className="marketplace-stage">
       <header className="workbench-topbar">
         <label className="workbench-search"><span className="sr-only">Search repositories</span><b aria-hidden="true">⌕</b><input type="search" placeholder="Search repositories, tags, or keywords…" value={params.get("q") ?? ""} onChange={event => update("q", event.target.value, true)}/></label>
-        <div className="top-filters">{filters.map(filter => <label key={filter.key}><span className="sr-only">{filter.label}</span><select value={params.get(filter.key) ?? ""} onChange={event => update(filter.key, event.target.value)}><option value="">{filter.label}</option>{filter.values.map(value => <option key={value} value={value}>{value}</option>)}</select></label>)}</div>
       </header>
-      <ResizableSplit primary={browser} secondary={<EntryDetail entry={selected}/>}/>
+      {selected ? <ResizableSplit primary={browser} secondary={<EntryDetail entry={selected} onClose={() => update("entry", "")}/>}/> : browser}
     </div>
   </main>;
 }
