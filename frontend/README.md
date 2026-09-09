@@ -23,8 +23,8 @@ npm run dev
 With the repository base path configured, open:
 
 ```text
-http://localhost:5173/medical-component-market-web-homepage/
-http://localhost:5173/medical-component-market-web-homepage/marketplace/
+http://localhost:5173/awesome-dsh-med-plugin-web-homepage/
+http://localhost:5173/awesome-dsh-med-plugin-web-homepage/marketplace/
 ```
 
 ## Verify

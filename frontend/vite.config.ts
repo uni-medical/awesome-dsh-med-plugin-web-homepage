@@ -1,3 +1,3 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-export default defineConfig({ plugins: [react()], base: "/medical-component-market-web-homepage/" });
+export default defineConfig({ plugins: [react()], base: "/awesome-dsh-med-plugin-web-homepage/" });
