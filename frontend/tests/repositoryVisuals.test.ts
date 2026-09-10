@@ -2,7 +2,11 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { catalog } from "../src/data/catalog";
-import { repositoryVisuals, resolveRepositoryVisual } from "../src/data/repositoryVisuals";
+import {
+  repositoryVisualAssetUrl,
+  repositoryVisuals,
+  resolveRepositoryVisual,
+} from "../src/data/repositoryVisuals";
 
 describe("repository visual provenance", () => {
   it("covers every catalog entry exactly once", () => {
@@ -30,5 +34,13 @@ describe("repository visual provenance", () => {
     for (const visual of repositoryVisuals) {
       expect(existsSync(resolve(process.cwd(), "public", visual.localPath))).toBe(true);
     }
+  });
+
+  it("builds image URLs beneath the configured GitHub Pages base path", () => {
+    const visual = resolveRepositoryVisual("bowang-lab/MedSAMSlicer");
+    expect(repositoryVisualAssetUrl(visual, "/awesome-dsh-med-plugin-web-homepage/")).toBe(
+      "/awesome-dsh-med-plugin-web-homepage/images/repositories/bowang-lab__medsamslicer.webp",
+    );
+    expect(repositoryVisualAssetUrl(undefined, "/awesome-dsh-med-plugin-web-homepage/")).toBeUndefined();
   });
 });
