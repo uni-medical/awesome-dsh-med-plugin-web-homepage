@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "1",
+  "generatedAt": "2026-09-11T04:00:00+08:00",
+  "visuals": [
+    {
+      "repositoryId": "bowang-lab/MedSAMSlicer",
+      "localPath": "images/repositories/bowang-lab__medsamslicer.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/50999261?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "Ericwong5021/deepseek-plugin-store",
+      "localPath": "images/repositories/ericwong5021__deepseek-plugin-store.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/26177736?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "aipoch/medical-research-skills",
+      "localPath": "images/repositories/aipoch__medical-research-skills.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/243506841?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "FreedomIntelligence/OpenClaw-Medical-Skills",
+      "localPath": "images/repositories/freedomintelligence__openclaw-medical-skills.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/127706844?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "Wangyixinxin/MMedAgent",
+      "localPath": "images/repositories/wangyixinxin__mmedagent.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/54788216?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "mims-harvard/ToolUniverse",
+      "localPath": "images/repositories/mims-harvard__tooluniverse.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/60720343?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "andybrandt/mcp-simple-pubmed",
+      "localPath": "images/repositories/andybrandt__mcp-simple-pubmed.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/5551980?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "medplum/medplum",
+      "localPath": "images/repositories/medplum__medplum.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/75462971?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "google-gemini/gemini-cli",
+      "localPath": "images/repositories/google-gemini__gemini-cli.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/161781182?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "Haohao-end/GPT-2-Based-Medical-Dialogue-System",
+      "localPath": "images/repositories/haohao-end__gpt-2-based-medical-dialogue-system.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/184792454?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "deepseek-ai/deepseek-harness",
+      "localPath": "images/repositories/deepseek-ai__deepseek-harness.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/148330874?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "omdsh-dev/DSH-better-sidebar",
+      "localPath": "images/repositories/omdsh-dev__dsh-better-sidebar.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/312905287?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "obra/superpowers",
+      "localPath": "images/repositories/obra__superpowers.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/45416?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "openclaw/openclaw",
+      "localPath": "images/repositories/openclaw__openclaw.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/252820863?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "tinyhumansai/openhuman",
+      "localPath": "images/repositories/tinyhumansai__openhuman.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/246003628?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "oobabooga/textgen",
+      "localPath": "images/repositories/oobabooga__textgen.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/112222186?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "headroomlabs-ai/headroom",
+      "localPath": "images/repositories/headroomlabs-ai__headroom.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/294291659?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "affaan-m/ECC",
+      "localPath": "images/repositories/affaan-m__ecc.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/124439313?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "earendil-works/pi",
+      "localPath": "images/repositories/earendil-works__pi.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/207902832?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    },
+    {
+      "repositoryId": "Egonex-AI/Understand-Anything",
+      "localPath": "images/repositories/egonex-ai__understand-anything.webp",
+      "sourceUrl": "https://avatars.githubusercontent.com/u/257477979?v=4",
+      "sourceKind": "github-owner-avatar",
+      "checkedAt": "2026-09-11T04:00:00+08:00",
+      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+    }
+  ]
+}

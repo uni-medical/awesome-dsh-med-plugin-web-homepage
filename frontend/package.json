@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "visuals:sync": "node scripts/fetch-repository-visuals.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",
@@ -22,6 +23,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.0",
+    "sharp": "^0.35.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.69.0",
     "vitest": "^4.0.18"
