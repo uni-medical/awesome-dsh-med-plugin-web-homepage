@@ -83,3 +83,9 @@ export const repositoryVisuals = index.visuals;
 export function resolveRepositoryVisual(repositoryId: string): RepositoryVisual | undefined {
   return visualByRepository.get(repositoryId.toLowerCase());
 }
+
+export function repositoryVisualAssetUrl(visual: RepositoryVisual | undefined, baseUrl: string): string | undefined {
+  if (!visual) return undefined;
+  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return `${normalizedBase}${visual.localPath}`;
+}
