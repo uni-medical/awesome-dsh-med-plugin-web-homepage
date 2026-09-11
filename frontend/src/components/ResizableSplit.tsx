@@ -1,69 +1,51 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { clampSplitRatio, DEFAULT_SPLIT_RATIO, MAX_SPLIT_RATIO, MIN_SPLIT_RATIO } from "../lib/marketplace";
+import { clampSplitRatio, MAX_SPLIT_RATIO, MIN_SPLIT_RATIO } from "../lib/marketplace";
+import { useWorkspace } from "../state/WorkspaceContext";
 
-const STORAGE_KEY = "marketplace.splitRatio.v1";
-
-function initialRatio() {
-  if (typeof window === "undefined") return DEFAULT_SPLIT_RATIO;
-  const stored = window.sessionStorage.getItem(STORAGE_KEY);
-  return stored === null ? DEFAULT_SPLIT_RATIO : clampSplitRatio(Number(stored));
-}
-
-export function ResizableSplit({ primary, secondary }: { primary: ReactNode; secondary: ReactNode }) {
+export function ResizableSplit({ primary, secondary, closing = false, onClosed }: { primary: ReactNode; secondary: ReactNode; closing?: boolean; onClosed?: () => void }) {
+  const { preferences, updatePreferences } = useWorkspace();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [ratio, setRatio] = useState(initialRatio);
+  const completedRef = useRef(false);
+  const [ratio, setRatio] = useState(preferences.splitRatio);
   const [dragging, setDragging] = useState(false);
   const [entered, setEntered] = useState(false);
+  const reduced = preferences.motion === "reduced" || (preferences.motion === "system" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
+  useEffect(() => { const frame = requestAnimationFrame(() => setEntered(true)); return () => cancelAnimationFrame(frame); }, []);
+  useEffect(() => { if (!preferences.rememberSplitRatio) setRatio(preferences.splitRatio); }, [preferences.rememberSplitRatio, preferences.splitRatio]);
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => setEntered(true));
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
+    if (!closing) { completedRef.current = false; return; }
+    if (reduced) { onClosed?.(); return; }
+    const timeout = window.setTimeout(() => { if (!completedRef.current) { completedRef.current = true; onClosed?.(); } }, 470);
+    return () => window.clearTimeout(timeout);
+  }, [closing, onClosed, reduced]);
 
-  useEffect(() => {
-    window.sessionStorage.setItem(STORAGE_KEY, String(ratio));
-  }, [ratio]);
-
+  function setNextRatio(next: number | ((value: number) => number)) {
+    setRatio(current => {
+      const value = clampSplitRatio(typeof next === "function" ? next(current) : next);
+      if (preferences.rememberSplitRatio) updatePreferences({ splitRatio: value });
+      return value;
+    });
+  }
   function updateFromPointer(clientX: number) {
     const bounds = containerRef.current?.getBoundingClientRect();
     if (!bounds?.width) return;
-    setRatio(clampSplitRatio(((clientX - bounds.left) / bounds.width) * 100));
+    setNextRatio(((clientX - bounds.left) / bounds.width) * 100);
+  }
+  function completeClose() {
+    if (!closing || completedRef.current) return;
+    completedRef.current = true;
+    onClosed?.();
   }
 
-  return <div ref={containerRef} className={`split-layout${dragging ? " is-resizing" : ""}${entered ? " has-entered" : ""}`}>
-    <div className="split-primary" style={{ flexBasis: `${entered ? ratio : 100}%` }}>{primary}</div>
-    <div
-      className="splitter"
-      role="separator"
-      aria-label="Resize repository and details panels"
-      aria-orientation="vertical"
-      aria-valuemin={MIN_SPLIT_RATIO}
-      aria-valuemax={MAX_SPLIT_RATIO}
-      aria-valuenow={Math.round(ratio)}
-      tabIndex={0}
-      onPointerDown={(event) => {
-        event.currentTarget.setPointerCapture(event.pointerId);
-        setDragging(true);
-        updateFromPointer(event.clientX);
-      }}
-      onPointerMove={(event) => dragging && updateFromPointer(event.clientX)}
-      onPointerUp={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-        setDragging(false);
-      }}
-      onPointerCancel={() => setDragging(false)}
-      onKeyDown={(event) => {
-        if (event.key === "ArrowLeft") setRatio(value => clampSplitRatio(value - 2));
-        else if (event.key === "ArrowRight") setRatio(value => clampSplitRatio(value + 2));
-        else if (event.key === "Home") setRatio(MIN_SPLIT_RATIO);
-        else if (event.key === "End") setRatio(MAX_SPLIT_RATIO);
-        else return;
-        event.preventDefault();
-      }}
-    >
-      <span className="splitter-grip"><i/><i/><i/><i/><i/><i/></span>
-      <span className="splitter-tooltip">Drag to resize</span>
-    </div>
-    <div className="split-secondary">{secondary}</div>
+  return <div ref={containerRef} className={`split-layout${dragging ? " is-resizing" : ""}${entered ? " has-entered" : ""}${closing ? " is-closing" : ""}${reduced ? " reduce-motion" : ""}`}>
+    <div className="split-primary" style={{ flexBasis: `${entered && !closing ? ratio : 100}%` }} onTransitionEnd={event => { if (event.propertyName === "flex-basis") completeClose(); }}>{primary}</div>
+    <div className="splitter" role="separator" aria-label="Resize repository and details panels" aria-orientation="vertical" aria-valuemin={MIN_SPLIT_RATIO} aria-valuemax={MAX_SPLIT_RATIO} aria-valuenow={Math.round(ratio)} aria-disabled={closing} tabIndex={closing ? -1 : 0}
+      onPointerDown={event => { if (closing) return; event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); updateFromPointer(event.clientX); }}
+      onPointerMove={event => dragging && !closing && updateFromPointer(event.clientX)}
+      onPointerUp={event => { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); setDragging(false); }} onPointerCancel={() => setDragging(false)}
+      onKeyDown={event => { if (closing) return; if (event.key === "ArrowLeft") setNextRatio(value => value - 2); else if (event.key === "ArrowRight") setNextRatio(value => value + 2); else if (event.key === "Home") setNextRatio(MIN_SPLIT_RATIO); else if (event.key === "End") setNextRatio(MAX_SPLIT_RATIO); else return; event.preventDefault(); }}>
+      <span className="splitter-grip"><i/><i/><i/><i/><i/><i/></span><span className="splitter-tooltip">Drag to resize</span>
+    </div><div className="split-secondary">{secondary}</div>
   </div>;
 }

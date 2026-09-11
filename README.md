@@ -15,4 +15,4 @@ npm install
 npm run dev
 ```
 
-The site does not connect to CRC-MDT or request GitHub at runtime. Future backend boundaries are documented in `docs/backend-integration.md`.
+The site does not request GitHub at runtime. Future backend boundaries are documented in `docs/backend-integration.md`.

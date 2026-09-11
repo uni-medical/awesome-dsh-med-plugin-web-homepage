@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EntryDetail } from "../components/EntryDetail";
 import { MarketplaceNavRail } from "../components/MarketplaceNavRail";
@@ -7,6 +7,7 @@ import { ResizableSplit } from "../components/ResizableSplit";
 import { parseMarketplaceView, resolveSelectedEntry, toggleMultiValue, type MarketplaceView } from "../lib/marketplace";
 import type { CatalogEntry } from "../lib/catalog";
 import { useCatalog } from "../state/useCatalog";
+import { useWorkspace } from "../state/WorkspaceContext";
 import { filterCatalog } from "../utils/filterCatalog";
 import "../styles/marketplace.css";
 
@@ -25,11 +26,32 @@ function CatalogFilterPanel({ entries, params, onUpdate, onToggleType, onClear }
 
 export function MarketplacePage() {
   const { entries, loading, error } = useCatalog();
+  const { preferences } = useWorkspace();
   const [params, setParams] = useSearchParams();
   const shown = useMemo(() => filterCatalog(entries, params), [entries, params]);
-  const view = parseMarketplaceView(params.get("view"));
+  const view = params.has("view") ? parseMarketplaceView(params.get("view")) : preferences.defaultView;
   const selectedId = params.get("entry");
   const selected = resolveSelectedEntry(entries, selectedId);
+  const [detailEntry, setDetailEntry] = useState<CatalogEntry>();
+  const [closing, setClosing] = useState(false);
+  const focusEntryRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (selected) { setDetailEntry(selected); setClosing(false); }
+    else if (detailEntry) setClosing(true);
+  }, [selected, detailEntry]);
+
+  const finishClose = useCallback(() => {
+    setDetailEntry(undefined); setClosing(false);
+    setParams(current => { const next = new URLSearchParams(current); next.delete("entry"); return next; }, { replace: true });
+    const id = focusEntryRef.current;
+    if (id) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-entry-id="${CSS.escape(id)}"]`)?.focus());
+  }, [setParams]);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) { if (event.key === "Escape" && detailEntry && !closing) setClosing(true); }
+    window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
+  }, [detailEntry, closing]);
 
   function update(key: string, value: string, replace = false) {
     const next = new URLSearchParams(params);
@@ -61,7 +83,7 @@ export function MarketplacePage() {
     </div>
     <div className="result-summary"><p role="status">{loading ? "Loading catalog…" : error || `${shown.length} repositories`}</p><button type="button" onClick={clearFilters}>Clear filters</button></div>
     <div className="repository-body"><CatalogFilterPanel entries={entries} params={params} onUpdate={update} onToggleType={toggleType} onClear={clearFilters}/><div className="repository-scroll">
-      {!loading && !error && !shown.length ? <div className="workbench-empty"><h2>No matching components</h2><p>Try another term or clear the active filters.</p></div> : <MarketplaceResults view={view} entries={shown} selectedId={selected?.id} onSelect={entry => update("entry", entry.id)}/>}
+      {!loading && !error && !shown.length ? <div className="workbench-empty"><h2>No matching components</h2><p>Try another term or clear the active filters.</p></div> : <MarketplaceResults view={view} entries={shown} selectedId={selected?.id} onSelect={entry => { focusEntryRef.current = entry.id; update("entry", entry.id); }}/>}
     </div></div>
   </section>;
 
@@ -71,7 +93,7 @@ export function MarketplacePage() {
       <header className="workbench-topbar">
         <label className="workbench-search"><span className="sr-only">Search repositories</span><b aria-hidden="true">⌕</b><input type="search" placeholder="Search repositories, tags, or keywords…" value={params.get("q") ?? ""} onChange={event => update("q", event.target.value, true)}/></label>
       </header>
-      {selected ? <ResizableSplit primary={browser} secondary={<EntryDetail entry={selected} onClose={() => update("entry", "")}/>}/> : browser}
+      {detailEntry ? <ResizableSplit primary={browser} secondary={<EntryDetail entry={detailEntry} focusOnOpen={preferences.focusDetails} onClose={() => { if (!closing) setClosing(true); }}/>} closing={closing} onClosed={finishClose}/> : browser}
     </div>
   </main>;
 }

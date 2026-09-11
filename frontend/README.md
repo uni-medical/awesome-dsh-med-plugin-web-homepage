@@ -9,7 +9,7 @@ This directory contains the Vite + React homepage and marketplace routes deploye
 - The snapshot contains 20 public-safe repository records assembled from the sources recorded in the catalog.
 - Star counts and update timestamps are observations from that snapshot, not live GitHub metrics.
 - Stable means an entry is present in the reviewed `main` snapshot; Candidate means it is present only in the automated discovery snapshot. Neither indicates medical validity, security, compatibility, or quality.
-- The frontend does not call GitHub, CRC-MDT, or a runtime API.
+- The frontend does not call GitHub or a runtime API.
 - Repository icons are committed local snapshots described by `../data/repository-visuals.json`. The manifest distinguishes official project assets, homepage icons, GitHub owner avatars, and generated neutral visuals. Personal owner photos are not used as project icons; neutral visuals are explicitly identified as non-official demo assets.
 
 The doctor-researcher hero is an AI-generated fictional editorial image. It does not depict a real clinician, patient, institution, or clinical result. The RSI Component Market mascot is an original generated mark based only on the friendly rounded-robot mood of the supplied visual reference; the exact wordmark is rendered in HTML.

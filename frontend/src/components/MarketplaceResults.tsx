@@ -2,11 +2,12 @@ import type { KeyboardEvent } from "react";
 import type { CatalogEntry } from "../lib/catalog";
 import type { MarketplaceView } from "../lib/marketplace";
 import { RepositoryVisual } from "./RepositoryVisual";
+import { CollectionPicker } from "./CollectionPicker";
 
 const formatDate = (value: string) => new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
 
 function EntryActions({ entry, onSelect }: { entry: CatalogEntry; onSelect: (entry: CatalogEntry) => void }) {
-  return <div className="result-actions"><button type="button" onClick={(event) => { event.stopPropagation(); onSelect(entry); }}>View details</button><a href={entry.repositoryUrl} onClick={event => event.stopPropagation()} target="_blank" rel="noopener noreferrer">Repository ↗</a></div>;
+  return <div className="result-actions"><button type="button" onClick={(event) => { event.stopPropagation(); onSelect(entry); }}>View details</button><CollectionPicker entryId={entry.id}/><a href={entry.repositoryUrl} onClick={event => event.stopPropagation()} target="_blank" rel="noopener noreferrer">Repository ↗</a></div>;
 }
 
 function selectFromCard(event: KeyboardEvent<HTMLElement>, entry: CatalogEntry, onSelect: (entry: CatalogEntry) => void) {
@@ -24,7 +25,7 @@ interface ResultProps {
 }
 
 function CardView({ entries, selectedId, onSelect }: ResultProps) {
-  return <div className="repository-cards">{entries.map(entry => <article className={`repository-card${selectedId === entry.id ? " is-selected" : ""}`} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
+  return <div className="repository-cards">{entries.map(entry => <article data-entry-id={entry.id} className={`repository-card${selectedId === entry.id ? " is-selected" : ""}`} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
     <RepositoryVisual entry={entry}/>
     <div className="repository-card-copy">
       <div className="result-kicker"><span className={entry.tier}>{entry.tier}</span><code>{entry.primaryCategory}</code><span>★ {entry.stars.toLocaleString("en-US")}</span></div>
@@ -37,14 +38,14 @@ function CardView({ entries, selectedId, onSelect }: ResultProps) {
 }
 
 function TableView({ entries, selectedId, onSelect }: ResultProps) {
-  return <div className="workbench-table-scroll"><table className="workbench-table"><thead><tr><th>Project</th><th>Status</th><th>Category</th><th>Domain</th><th>Stars</th><th>License</th><th>Language</th><th>Updated</th><th>Actions</th></tr></thead><tbody>{entries.map(entry => <tr className={selectedId === entry.id ? "is-selected" : ""} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
+  return <div className="workbench-table-scroll"><table className="workbench-table"><thead><tr><th>Project</th><th>Status</th><th>Category</th><th>Domain</th><th>Stars</th><th>License</th><th>Language</th><th>Updated</th><th>Actions</th></tr></thead><tbody>{entries.map(entry => <tr data-entry-id={entry.id} className={selectedId === entry.id ? "is-selected" : ""} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
     <th scope="row"><div className="table-project"><RepositoryVisual entry={entry} className="table-project-visual"/><span><strong>{entry.fullName}</strong><small>{entry.source}</small></span></div></th>
     <td><span className={entry.tier}>{entry.tier}</span></td><td>{entry.primaryCategory}</td><td>{entry.domains.join(" · ")}</td><td>★ {entry.stars.toLocaleString("en-US")}</td><td>{entry.license}</td><td>{entry.language}</td><td>{formatDate(entry.updatedAt)}</td><td><EntryActions entry={entry} onSelect={onSelect}/></td>
   </tr>)}</tbody></table></div>;
 }
 
 function GalleryView({ entries, selectedId, onSelect }: ResultProps) {
-  return <div className="repository-gallery">{entries.map(entry => <article className={`gallery-card${selectedId === entry.id ? " is-selected" : ""}`} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
+  return <div className="repository-gallery">{entries.map(entry => <article data-entry-id={entry.id} className={`gallery-card${selectedId === entry.id ? " is-selected" : ""}`} key={entry.id} tabIndex={0} onClick={() => onSelect(entry)} onKeyDown={event => selectFromCard(event, entry, onSelect)}>
     <RepositoryVisual entry={entry} large/>
     <div className="gallery-copy"><div className="result-kicker"><span className={entry.tier}>{entry.tier}</span><span>★ {entry.stars.toLocaleString("en-US")}</span></div><h2>{entry.fullName}</h2><p>{entry.description ?? "No source description provided."}</p><div className="compact-tags">{[entry.primaryCategory, ...entry.domains, ...entry.topics].slice(0, 4).map((tag, index) => <span key={`${tag}-${index}`}>{tag}</span>)}</div><EntryActions entry={entry} onSelect={onSelect}/></div>
   </article>)}</div>;
