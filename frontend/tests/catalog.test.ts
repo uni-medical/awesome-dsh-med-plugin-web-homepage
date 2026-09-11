@@ -15,6 +15,11 @@ describe("catalog", () => {
     expect(result.map(e=>e.id)).toEqual(["bowang-lab/MedSAMSlicer"]);
     expect(filterCatalog(catalog.entries,new URLSearchParams("q=nonexistent-xyz"))).toEqual([]);
   });
+  it("matches any selected component type when the type parameter is repeated", () => {
+    const result = filterCatalog(catalog.entries, new URLSearchParams("type=Plugin&type=MCP+Server"));
+    expect(new Set(result.map(entry => entry.primaryCategory))).toEqual(new Set(["Plugin", "MCP Server"]));
+    expect(result).toHaveLength(8);
+  });
   it("searches tags and handles absent descriptions", () => {
     const e = {...catalog.entries[0], description:null, topics:["special-tag"]};
     expect(filterCatalog([e],new URLSearchParams("q=special-tag"))).toHaveLength(1);

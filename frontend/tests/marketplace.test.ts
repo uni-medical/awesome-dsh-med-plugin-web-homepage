@@ -6,6 +6,7 @@ import {
   MIN_SPLIT_RATIO,
   parseMarketplaceView,
   resolveSelectedEntry,
+  toggleMultiValue,
 } from "../src/lib/marketplace";
 
 describe("marketplace workbench state", () => {
@@ -29,5 +30,16 @@ describe("marketplace workbench state", () => {
     expect(resolveSelectedEntry(entries, null)).toBeUndefined();
     expect(resolveSelectedEntry(entries, "owner/two")).toEqual({ id: "owner/two" });
     expect(resolveSelectedEntry(entries, "missing/repository")).toBeUndefined();
+  });
+
+  it("toggles repeated query values without disturbing other filters", () => {
+    const params = new URLSearchParams("view=gallery&type=Plugin&type=Skill&domain=medical");
+    const removed = toggleMultiValue(params, "type", "Plugin");
+    expect(removed.getAll("type")).toEqual(["Skill"]);
+    expect(removed.get("view")).toBe("gallery");
+    expect(removed.get("domain")).toBe("medical");
+
+    const added = toggleMultiValue(removed, "type", "MCP Server");
+    expect(added.getAll("type")).toEqual(["Skill", "MCP Server"]);
   });
 });
