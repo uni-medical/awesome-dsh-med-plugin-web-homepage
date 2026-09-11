@@ -8,8 +8,15 @@ import {
   resolveSelectedEntry,
   toggleMultiValue,
 } from "../src/lib/marketplace";
+import { readFileSync } from "node:fs";
 
 describe("marketplace workbench state", () => {
+  it("generates static entry points for every workspace route", () => {
+    const script = readFileSync(new URL("../scripts/generate-routes.mjs", import.meta.url), "utf8");
+    for (const route of ["marketplace", "collections", "research", "settings"]) {
+      expect(script).toContain(`\"${route}\"`);
+    }
+  });
   it("accepts all supported view query values and defaults invalid values to cards", () => {
     expect(parseMarketplaceView("cards")).toBe("cards");
     expect(parseMarketplaceView("table")).toBe("table");
