@@ -18,6 +18,14 @@ describe("marketplace workbench state", () => {
       expect(script).toContain(`\"${route}\"`);
     }
   });
+
+  it("keeps one shared navigation rail across workspace route changes", () => {
+    const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+    const navigation = readFileSync(new URL("../src/components/MarketplaceNavRail.tsx", import.meta.url), "utf8");
+    expect(app).toContain("<WorkbenchLayout");
+    expect(app).toContain("<Route element={<WorkbenchLayout/>}>");
+    expect(navigation.match(/viewTransition/g)?.length).toBeGreaterThanOrEqual(5);
+  });
   it("accepts all supported view query values and defaults invalid values to cards", () => {
     expect(parseMarketplaceView("cards")).toBe("cards");
     expect(parseMarketplaceView("table")).toBe("table");
