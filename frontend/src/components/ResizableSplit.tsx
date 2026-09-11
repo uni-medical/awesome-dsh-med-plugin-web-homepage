@@ -13,6 +13,12 @@ export function ResizableSplit({ primary, secondary }: { primary: ReactNode; sec
   const containerRef = useRef<HTMLDivElement>(null);
   const [ratio, setRatio] = useState(initialRatio);
   const [dragging, setDragging] = useState(false);
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setEntered(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     window.sessionStorage.setItem(STORAGE_KEY, String(ratio));
@@ -24,8 +30,8 @@ export function ResizableSplit({ primary, secondary }: { primary: ReactNode; sec
     setRatio(clampSplitRatio(((clientX - bounds.left) / bounds.width) * 100));
   }
 
-  return <div ref={containerRef} className={`split-layout${dragging ? " is-resizing" : ""}`}>
-    <div className="split-primary" style={{ flexBasis: `${ratio}%` }}>{primary}</div>
+  return <div ref={containerRef} className={`split-layout${dragging ? " is-resizing" : ""}${entered ? " has-entered" : ""}`}>
+    <div className="split-primary" style={{ flexBasis: `${entered ? ratio : 100}%` }}>{primary}</div>
     <div
       className="splitter"
       role="separator"

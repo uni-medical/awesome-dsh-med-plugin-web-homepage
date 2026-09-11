@@ -20,3 +20,15 @@ export function resolveSelectedEntry<T extends { id: string }>(entries: readonly
   if (!selectedId) return undefined;
   return entries.find(entry => entry.id === selectedId);
 }
+
+export function toggleMultiValue(params: URLSearchParams, key: string, value: string): URLSearchParams {
+  const next = new URLSearchParams(params);
+  const values = next.getAll(key);
+  next.delete(key);
+  if (values.includes(value)) {
+    values.filter(item => item !== value).forEach(item => next.append(key, item));
+  } else {
+    [...values, value].forEach(item => next.append(key, item));
+  }
+  return next;
+}

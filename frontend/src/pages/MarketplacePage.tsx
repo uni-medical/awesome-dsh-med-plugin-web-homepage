@@ -4,7 +4,7 @@ import { EntryDetail } from "../components/EntryDetail";
 import { MarketplaceNavRail } from "../components/MarketplaceNavRail";
 import { MarketplaceResults } from "../components/MarketplaceResults";
 import { ResizableSplit } from "../components/ResizableSplit";
-import { parseMarketplaceView, resolveSelectedEntry, type MarketplaceView } from "../lib/marketplace";
+import { parseMarketplaceView, resolveSelectedEntry, toggleMultiValue, type MarketplaceView } from "../lib/marketplace";
 import type { CatalogEntry } from "../lib/catalog";
 import { useCatalog } from "../state/useCatalog";
 import { filterCatalog } from "../utils/filterCatalog";
@@ -12,14 +12,15 @@ import "../styles/marketplace.css";
 
 const FILTER_KEYS = ["q", "type", "domain", "tier", "license"];
 
-function CatalogFilterPanel({ entries, params, onUpdate, onClear }: { entries: CatalogEntry[]; params: URLSearchParams; onUpdate: (key: string, value: string) => void; onClear: () => void }) {
+function CatalogFilterPanel({ entries, params, onUpdate, onToggleType, onClear }: { entries: CatalogEntry[]; params: URLSearchParams; onUpdate: (key: string, value: string) => void; onToggleType: (value: string) => void; onClear: () => void }) {
+  const typeValues = [...new Set(entries.map(entry => entry.primaryCategory))].sort();
+  const selectedTypes = new Set(params.getAll("type"));
   const filters = [
-    { key: "type", label: "Component type", values: [...new Set(entries.map(entry => entry.primaryCategory))].sort() },
     { key: "domain", label: "Domain", values: ["medical", "general"] },
     { key: "tier", label: "Source tier", values: ["stable", "candidate"] },
     { key: "license", label: "License", values: [...new Set(entries.map(entry => entry.license))].sort() },
   ];
-  return <aside className="repository-filter-panel" aria-label="Catalog filters"><div className="filter-panel-heading"><span>REFINE</span><h2>Browse catalog</h2></div>{filters.map(filter => <label key={filter.key}>{filter.label}<select value={params.get(filter.key) ?? ""} onChange={event => onUpdate(filter.key, event.target.value)}><option value="">All</option>{filter.values.map(value => <option key={value} value={value}>{value}</option>)}</select></label>)}<button type="button" onClick={onClear}>Clear filters</button><p>Stable is present in the reviewed main snapshot. Candidate is present only in the automated discovery snapshot. Neither is a verification badge.</p></aside>;
+  return <aside className="repository-filter-panel" aria-label="Catalog filters"><div className="filter-panel-heading"><span>REFINE</span><h2>Browse catalog</h2></div><fieldset className="type-multiselect"><legend>Component type <small>{selectedTypes.size ? `${selectedTypes.size} selected` : "All"}</small></legend>{typeValues.map(value => <label key={value}><input type="checkbox" checked={selectedTypes.has(value)} onChange={() => onToggleType(value)}/><span>{value}</span><b>{entries.filter(entry => entry.primaryCategory === value).length}</b></label>)}</fieldset>{filters.map(filter => <label key={filter.key}>{filter.label}<select value={params.get(filter.key) ?? ""} onChange={event => onUpdate(filter.key, event.target.value)}><option value="">All</option>{filter.values.map(value => <option key={value} value={value}>{value}</option>)}</select></label>)}<button type="button" onClick={onClear}>Clear filters</button><p>Stable is present in the reviewed main snapshot. Candidate is present only in the automated discovery snapshot. Neither is a verification badge.</p></aside>;
 }
 
 export function MarketplacePage() {
@@ -43,6 +44,10 @@ export function MarketplacePage() {
     setParams(next);
   }
 
+  function toggleType(value: string) {
+    setParams(toggleMultiValue(params, "type", value));
+  }
+
   function setView(nextView: MarketplaceView) {
     update("view", nextView);
   }
@@ -55,7 +60,7 @@ export function MarketplacePage() {
       </div>
     </div>
     <div className="result-summary"><p role="status">{loading ? "Loading catalog…" : error || `${shown.length} repositories`}</p><button type="button" onClick={clearFilters}>Clear filters</button></div>
-    <div className="repository-body"><CatalogFilterPanel entries={entries} params={params} onUpdate={update} onClear={clearFilters}/><div className="repository-scroll">
+    <div className="repository-body"><CatalogFilterPanel entries={entries} params={params} onUpdate={update} onToggleType={toggleType} onClear={clearFilters}/><div className="repository-scroll">
       {!loading && !error && !shown.length ? <div className="workbench-empty"><h2>No matching components</h2><p>Try another term or clear the active filters.</p></div> : <MarketplaceResults view={view} entries={shown} selectedId={selected?.id} onSelect={entry => update("entry", entry.id)}/>}
     </div></div>
   </section>;

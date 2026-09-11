@@ -1,11 +1,12 @@
 import type { CatalogEntry } from "../lib/catalog";
 export function filterCatalog(entries: CatalogEntry[], params: URLSearchParams) {
   const q = (params.get("q") ?? "").trim().toLowerCase();
+  const selectedTypes = params.getAll("type").filter(Boolean);
   return entries.filter(entry =>
     ["type", "domain", "tier", "license"].every(key => {
       const value = params.get(key);
       if (!value) return true;
-      if (key === "type") return entry.primaryCategory === value;
+      if (key === "type") return selectedTypes.includes(entry.primaryCategory);
       if (key === "domain") return entry.domains.some(domain => domain === value);
       if (key === "tier") return entry.tier === value;
       return entry.license === value;
