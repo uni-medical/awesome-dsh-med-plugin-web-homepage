@@ -10,6 +10,7 @@ This directory contains the Vite + React homepage and marketplace routes deploye
 - Star counts and update timestamps are observations from that snapshot, not live GitHub metrics.
 - Stable means an entry is present in the reviewed `main` snapshot; Candidate means it is present only in the automated discovery snapshot. Neither indicates medical validity, security, compatibility, or quality.
 - The frontend does not call GitHub, CRC-MDT, or a runtime API.
+- Repository icons are committed local snapshots described by `../data/repository-visuals.json`. The manifest distinguishes official project assets, homepage icons, and GitHub owner avatars; an owner avatar is not presented as a project logo.
 
 The doctor-researcher hero is an AI-generated fictional editorial image. It does not depict a real clinician, patient, institution, or clinical result. The RSI Component Market mascot is an original generated mark based only on the friendly rounded-robot mood of the supplied visual reference; the exact wordmark is rendered in HTML.
 
@@ -35,5 +36,15 @@ npm run typecheck
 npm run test
 npm run build
 ```
+
+## Refresh repository visuals
+
+Review and update the source URLs and provenance notes in `../data/repository-visuals.json`, then run:
+
+```bash
+npm run visuals:sync
+```
+
+The curator-side command validates the response type and dimensions, then writes deterministic 320 × 320 WebP files to `public/images/repositories/`. These files are committed so the deployed site does not contact the original image hosts at runtime.
 
 Pushing `main` runs `.github/workflows/deploy-pages.yml` and publishes `dist/` to the repository's GitHub Pages site.

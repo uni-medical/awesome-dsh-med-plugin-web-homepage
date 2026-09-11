@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { catalog } from "../src/data/catalog";
 import {
@@ -34,6 +35,15 @@ describe("repository visual provenance", () => {
     for (const visual of repositoryVisuals) {
       expect(existsSync(resolve(process.cwd(), "public", visual.localPath))).toBe(true);
     }
+  });
+
+  it("stores normalized 320 × 320 WebP snapshots", async () => {
+    await Promise.all(repositoryVisuals.map(async visual => {
+      const metadata = await sharp(resolve(process.cwd(), "public", visual.localPath)).metadata();
+      expect(metadata.format).toBe("webp");
+      expect(metadata.width).toBe(320);
+      expect(metadata.height).toBe(320);
+    }));
   });
 
   it("builds image URLs beneath the configured GitHub Pages base path", () => {
