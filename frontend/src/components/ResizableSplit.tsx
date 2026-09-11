@@ -21,11 +21,9 @@ export function ResizableSplit({ primary, secondary, closing = false, onClosed }
   }, [closing, onClosed, reduced]);
 
   function setNextRatio(next: number | ((value: number) => number)) {
-    setRatio(current => {
-      const value = clampSplitRatio(typeof next === "function" ? next(current) : next);
-      if (preferences.rememberSplitRatio) updatePreferences({ splitRatio: value });
-      return value;
-    });
+    const value = clampSplitRatio(typeof next === "function" ? next(ratio) : next);
+    setRatio(value);
+    if (preferences.rememberSplitRatio) updatePreferences({ splitRatio: value });
   }
   function updateFromPointer(clientX: number) {
     const bounds = containerRef.current?.getBoundingClientRect();

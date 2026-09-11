@@ -14,14 +14,15 @@ interface WorkspaceValue {
 }
 
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
-const readPreferences = () => typeof window === "undefined" ? DEFAULT_PREFERENCES : parsePreferences(localStorage.getItem(PREFERENCES_KEY));
-const readCollections = () => typeof window === "undefined" ? [] : parseCollections(localStorage.getItem(COLLECTIONS_KEY));
+const readPreferences = () => { try { return typeof window === "undefined" ? DEFAULT_PREFERENCES : parsePreferences(localStorage.getItem(PREFERENCES_KEY)); } catch { return { ...DEFAULT_PREFERENCES }; } };
+const readCollections = () => { try { return typeof window === "undefined" ? [] : parseCollections(localStorage.getItem(COLLECTIONS_KEY)); } catch { return []; } };
+const safelyStore = (key: string, value: string) => { try { localStorage.setItem(key, value); } catch { /* The workspace remains usable without persistence. */ } };
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState(readPreferences);
   const [collections, setCollections] = useState<PersonalCollection[]>(readCollections);
-  useEffect(() => { localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
-  useEffect(() => { localStorage.setItem(COLLECTIONS_KEY, JSON.stringify({ version: 1, collections })); }, [collections]);
+  useEffect(() => { safelyStore(PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
+  useEffect(() => { safelyStore(COLLECTIONS_KEY, JSON.stringify({ version: 1, collections })); }, [collections]);
   useEffect(() => { document.documentElement.dataset.density = preferences.density; document.documentElement.dataset.motion = preferences.motion; }, [preferences]);
   const value: WorkspaceValue = {
     preferences, collections,
