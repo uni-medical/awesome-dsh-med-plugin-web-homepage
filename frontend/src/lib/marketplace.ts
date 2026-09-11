@@ -11,9 +11,16 @@ export function parseMarketplaceView(value: string | null): MarketplaceView {
     ? (value as MarketplaceView)
     : "cards";
 }
-export function clampSplitRatio(value: number): number {
-  if (!Number.isFinite(value)) return DEFAULT_SPLIT_RATIO;
-  return Math.min(MAX_SPLIT_RATIO, Math.max(MIN_SPLIT_RATIO, value));
+export function clampSplitRatio(value: number, min = MIN_SPLIT_RATIO, max = MAX_SPLIT_RATIO): number {
+  if (!Number.isFinite(value)) return Math.min(max, Math.max(min, DEFAULT_SPLIT_RATIO));
+  return Math.min(max, Math.max(min, value));
+}
+
+export function getResponsiveSplitBounds(width: number): { min: number; max: number } {
+  if (!Number.isFinite(width) || width <= 900) return { min: MIN_SPLIT_RATIO, max: MAX_SPLIT_RATIO };
+  const min = Math.max(MIN_SPLIT_RATIO, Math.ceil((520 / width) * 100));
+  const max = Math.min(MAX_SPLIT_RATIO, Math.floor(((width - 372) / width) * 100));
+  return min < max ? { min, max } : { min: MIN_SPLIT_RATIO, max: MAX_SPLIT_RATIO };
 }
 
 export function resolveSelectedEntry<T extends { id: string }>(entries: readonly T[], selectedId: string | null): T | undefined {
