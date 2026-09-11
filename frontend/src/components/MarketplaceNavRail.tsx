@@ -15,13 +15,13 @@ function RailIcon({ name }: { name: IconName }) {
 }
 export function MarketplaceNavRail() {
   return <nav className="market-rail" aria-label="Marketplace navigation">
-    <NavLink className="rail-brand" to="/" aria-label="Medical Component Market home">M</NavLink>
+    <NavLink viewTransition className="rail-brand" to="/" aria-label="Medical Component Market home">M</NavLink>
     <div className="rail-links">
-      <NavLink className="rail-item" to="/" end aria-label="Home" data-label="Home"><RailIcon name="home"/></NavLink>
-      <NavLink className="rail-item" to="/marketplace" aria-label="Marketplace" data-label="Marketplace"><RailIcon name="search"/></NavLink>
-      <NavLink className="rail-item" to="/collections" aria-label="Collections" data-label="Collections"><RailIcon name="layers"/></NavLink>
-      <NavLink className="rail-item" to="/research" aria-label="Research" data-label="Research"><RailIcon name="research"/></NavLink>
-      <NavLink className="rail-item rail-settings" to="/settings" aria-label="Settings" data-label="Settings"><RailIcon name="settings"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/" end aria-label="Home" data-label="Home"><RailIcon name="home"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/marketplace" aria-label="Marketplace" data-label="Marketplace"><RailIcon name="search"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/collections" aria-label="Collections" data-label="Collections"><RailIcon name="layers"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/research" aria-label="Research" data-label="Research"><RailIcon name="research"/></NavLink>
+      <NavLink viewTransition className="rail-item rail-settings" to="/settings" aria-label="Settings" data-label="Settings"><RailIcon name="settings"/></NavLink>
     </div>
   </nav>;
 }

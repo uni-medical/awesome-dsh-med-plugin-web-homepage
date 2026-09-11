@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EntryDetail } from "../components/EntryDetail";
-import { MarketplaceNavRail } from "../components/MarketplaceNavRail";
 import { MarketplaceResults } from "../components/MarketplaceResults";
 import { ResizableSplit } from "../components/ResizableSplit";
 import { parseMarketplaceView, resolveSelectedEntry, toggleMultiValue, type MarketplaceView } from "../lib/marketplace";
@@ -87,13 +86,10 @@ export function MarketplacePage() {
     </div></div>
   </section>;
 
-  return <main className="market marketplace-workbench">
-    <MarketplaceNavRail/>
-    <div className="marketplace-stage">
+  return <div className="marketplace-stage workspace-route-view">
       <header className="workbench-topbar">
         <label className="workbench-search"><span className="sr-only">Search repositories</span><b aria-hidden="true">⌕</b><input type="search" placeholder="Search repositories, tags, or keywords…" value={params.get("q") ?? ""} onChange={event => update("q", event.target.value, true)}/></label>
       </header>
       {detailEntry ? <ResizableSplit primary={browser} secondary={<EntryDetail entry={detailEntry} focusOnOpen={preferences.focusDetails} onClose={() => { if (!closing) setClosing(true); }}/>} closing={closing} onClosed={finishClose}/> : browser}
-    </div>
-  </main>;
+  </div>;
 }
