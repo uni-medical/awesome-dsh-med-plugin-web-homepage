@@ -5,6 +5,7 @@ import {
   MAX_SPLIT_RATIO,
   MIN_SPLIT_RATIO,
   parseMarketplaceView,
+  getResponsiveSplitBounds,
   resolveSelectedEntry,
   toggleMultiValue,
 } from "../src/lib/marketplace";
@@ -30,6 +31,14 @@ describe("marketplace workbench state", () => {
     expect(clampSplitRatio(10)).toBe(MIN_SPLIT_RATIO);
     expect(clampSplitRatio(95)).toBe(MAX_SPLIT_RATIO);
     expect(clampSplitRatio(Number.NaN)).toBe(DEFAULT_SPLIT_RATIO);
+  });
+
+  it("protects readable pane widths when the desktop workbench narrows", () => {
+    expect(getResponsiveSplitBounds(1600)).toEqual({ min: 40, max: 70 });
+    expect(getResponsiveSplitBounds(1000)).toEqual({ min: 52, max: 64 });
+    const compact = getResponsiveSplitBounds(920);
+    expect(compact.min).toBeGreaterThanOrEqual(56);
+    expect(compact.max).toBeGreaterThan(compact.min);
   });
 
   it("keeps details closed until a repository id is explicitly selected", () => {
