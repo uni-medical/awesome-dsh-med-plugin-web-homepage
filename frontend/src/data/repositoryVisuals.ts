@@ -4,6 +4,7 @@ export const REPOSITORY_VISUAL_SOURCE_KINDS = [
   "project-logo",
   "homepage-icon",
   "github-owner-avatar",
+  "generated-neutral-visual",
 ] as const;
 
 export type RepositoryVisualSourceKind = (typeof REPOSITORY_VISUAL_SOURCE_KINDS)[number];
@@ -11,7 +12,7 @@ export type RepositoryVisualSourceKind = (typeof REPOSITORY_VISUAL_SOURCE_KINDS)
 export interface RepositoryVisual {
   repositoryId: string;
   localPath: string;
-  sourceUrl: string;
+  sourceUrl: string | null;
   sourceKind: RepositoryVisualSourceKind;
   checkedAt: string;
   usageNote: string;
@@ -53,17 +54,21 @@ function parseRepositoryVisualIndex(value: unknown): RepositoryVisualIndex {
     const visual = candidate as Record<string, unknown>;
     assertString(visual.repositoryId, `visuals[${position}].repositoryId`);
     assertString(visual.localPath, `visuals[${position}].localPath`);
-    assertString(visual.sourceUrl, `visuals[${position}].sourceUrl`);
+    if (visual.sourceUrl !== null) assertString(visual.sourceUrl, `visuals[${position}].sourceUrl`);
     assertTimestamp(visual.checkedAt, `visuals[${position}].checkedAt`);
     assertString(visual.usageNote, `visuals[${position}].usageNote`);
     if (!LOCAL_PATH_PATTERN.test(visual.localPath)) {
       throw new Error(`visuals[${position}].localPath must be a repository WebP path`);
     }
-    if (!visual.sourceUrl.startsWith("https://")) {
+    if (visual.sourceUrl !== null && !visual.sourceUrl.startsWith("https://")) {
       throw new Error(`visuals[${position}].sourceUrl must use HTTPS`);
     }
     if (!REPOSITORY_VISUAL_SOURCE_KINDS.includes(visual.sourceKind as RepositoryVisualSourceKind)) {
       throw new Error(`visuals[${position}].sourceKind is unsupported`);
+    }
+    const generated = visual.sourceKind === "generated-neutral-visual";
+    if (generated !== (visual.sourceUrl === null)) {
+      throw new Error(`visuals[${position}] must use a null sourceUrl only for generated neutral visuals`);
     }
     if (seen.has(visual.repositoryId.toLowerCase())) {
       throw new Error(`duplicate repository visual: ${visual.repositoryId}`);

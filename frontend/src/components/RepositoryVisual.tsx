@@ -17,6 +17,7 @@ export function RepositoryVisual({ entry, large = false, className = "" }: { ent
     `visual-${visualVariant(entry)}`,
     large ? "is-large" : "",
     showSource ? "has-source" : "",
+    visual && visual.sourceKind !== "github-owner-avatar" ? "is-symbolic" : "",
     className,
   ].filter(Boolean).join(" ");
 

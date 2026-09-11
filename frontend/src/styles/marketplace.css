@@ -252,6 +252,7 @@
 
 .entry-visual { position: relative; min-height: 88px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(109, 159, 222, .36); border-radius: 8px; isolation: isolate; }
 .entry-visual img { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; object-fit: cover; background: #0b1729; }
+.entry-visual.is-symbolic img { object-fit: contain; padding: 8%; }
 .entry-visual.has-source span,
 .entry-visual.has-source i { visibility: hidden; }
 .entry-visual::before { content: ""; position: absolute; inset: -30%; background: repeating-radial-gradient(circle at 50% 50%, transparent 0 11px, rgba(145, 199, 255, .13) 12px 13px); transform: rotate(18deg); }

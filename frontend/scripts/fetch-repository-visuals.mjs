@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, rm } from "node:fs/promises";
+import { access, mkdir, readFile, rename, rm } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -50,6 +50,11 @@ async function normalizeVisual(visual) {
   const outputPath = resolve(publicDirectory, visual.localPath);
   if (!outputPath.startsWith(`${repositoryImageDirectory}/`)) {
     throw new Error(`${visual.repositoryId}: resolved localPath escapes the repository image directory`);
+  }
+  if (visual.sourceKind === "generated-neutral-visual") {
+    const existing = await access(outputPath).then(() => true).catch(() => false);
+    if (!existing) throw new Error(`${visual.repositoryId}: generated visual is missing at ${outputPath}`);
+    return join("public", visual.localPath);
   }
   const temporaryPath = `${outputPath}.tmp`;
   const input = await fetchImage(visual);

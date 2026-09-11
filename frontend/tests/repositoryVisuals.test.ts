@@ -19,10 +19,26 @@ describe("repository visual provenance", () => {
 
   it("uses traceable HTTPS sources and repository-local asset paths", () => {
     for (const visual of repositoryVisuals) {
-      expect(visual.sourceUrl).toMatch(/^https:\/\//);
+      if (visual.sourceKind === "generated-neutral-visual") expect(visual.sourceUrl).toBeNull();
+      else expect(visual.sourceUrl).toMatch(/^https:\/\//);
       expect(visual.localPath).toMatch(/^images\/repositories\/[a-z0-9_.-]+\.webp$/);
       expect(Number.isNaN(Date.parse(visual.checkedAt))).toBe(false);
       expect(visual.usageNote.length).toBeGreaterThan(10);
+    }
+  });
+
+  it("does not use personal owner avatars for the reviewed problem entries", () => {
+    const reviewedIds = new Set([
+      "affaan-m/ECC",
+      "andybrandt/mcp-simple-pubmed",
+      "Ericwong5021/deepseek-plugin-store",
+      "FreedomIntelligence/OpenClaw-Medical-Skills",
+      "obra/superpowers",
+      "oobabooga/textgen",
+      "Wangyixinxin/MMedAgent",
+    ]);
+    for (const visual of repositoryVisuals.filter(item => reviewedIds.has(item.repositoryId))) {
+      expect(visual.sourceKind).not.toBe("github-owner-avatar");
     }
   });
 

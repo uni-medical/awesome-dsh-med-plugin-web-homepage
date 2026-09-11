@@ -1,0 +1,19 @@
+import { mkdir } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
+
+const outputDirectory = resolve(fileURLToPath(new URL("../public/images/repositories", import.meta.url)));
+const icons = {
+  "wangyixinxin__mmedagent.webp": `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" rx="96" fill="#123456"/><circle cx="320" cy="280" r="150" fill="#62b6e8"/><rect x="190" y="160" width="260" height="190" rx="54" fill="#d9f0ff" stroke="#0a1930" stroke-width="18"/><circle cx="270" cy="250" r="22" fill="#0a1930"/><circle cx="370" cy="250" r="22" fill="#0a1930"/><path d="M270 300q50 36 100 0" fill="none" stroke="#0a1930" stroke-width="16" stroke-linecap="round"/><path d="M320 120V75m0 0q-28 0-28-25t28-25 28 25-28 25" fill="#f5c85b" stroke="#0a1930" stroke-width="12"/><path d="M155 430q165-75 330 0" fill="none" stroke="#7fceff" stroke-width="22" stroke-linecap="round"/><circle cx="155" cy="430" r="24" fill="#f17b8e"/><circle cx="485" cy="430" r="24" fill="#f17b8e"/></svg>`,
+  "andybrandt__mcp-simple-pubmed.webp": `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" rx="96" fill="#0c3852"/><rect x="170" y="105" width="300" height="430" rx="28" fill="#f2f7ff"/><path d="M220 180h200M220 240h200M220 300h130" stroke="#397b9f" stroke-width="24" stroke-linecap="round"/><circle cx="320" cy="405" r="92" fill="#d44c64"/><path d="M320 350v110M265 405h110" stroke="white" stroke-width="28" stroke-linecap="round"/><path d="M415 105v86h55" fill="none" stroke="#397b9f" stroke-width="20"/></svg>`,
+  "freedomintelligence__openclaw-medical-skills.webp": `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" rx="96" fill="#173a52"/><circle cx="320" cy="320" r="188" fill="#214f6b" stroke="#65c6d8" stroke-width="12"/><circle cx="230" cy="240" r="36" fill="#8ee1e8"/><circle cx="410" cy="240" r="36" fill="#8ee1e8"/><circle cx="230" cy="420" r="36" fill="#b794f4"/><circle cx="410" cy="420" r="36" fill="#b794f4"/><path d="M266 260 384 260M250 275 250 385M390 275 390 385M266 420h118" stroke="#d8f4ff" stroke-width="16" stroke-linecap="round"/><path d="M320 215v210M275 320h90" stroke="#f7d36b" stroke-width="18" stroke-linecap="round"/><circle cx="320" cy="320" r="26" fill="#f7d36b"/></svg>`,
+  "obra__superpowers.webp": `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" rx="96" fill="#35204b"/><path d="m320 106 50 145 154 7-120 96 40 150-124-84-124 84 40-150-120-96 154-7Z" fill="#f3c86a" stroke="#fff1b2" stroke-width="16" stroke-linejoin="round"/><circle cx="320" cy="320" r="58" fill="#673a82" stroke="#fff1b2" stroke-width="12"/><path d="M320 278v84M278 320h84" stroke="#fff1b2" stroke-width="12" stroke-linecap="round"/></svg>`,
+  "oobabooga__textgen.webp": `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" rx="96" fill="#102b47"/><rect x="105" y="145" width="430" height="300" rx="28" fill="#071421" stroke="#54a9ff" stroke-width="16"/><path d="m180 245 75 52-75 52M290 365h132" fill="none" stroke="#8bd4ff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="475" cy="500" r="26" fill="#6fe0b1"/><circle cx="320" cy="500" r="26" fill="#f3c86a"/><circle cx="165" cy="500" r="26" fill="#ef7898"/></svg>`,
+};
+
+await mkdir(outputDirectory, { recursive: true });
+for (const [filename, svg] of Object.entries(icons)) {
+  await sharp(Buffer.from(svg)).resize(320, 320).webp({ quality: 85, effort: 5 }).toFile(join(outputDirectory, filename));
+  console.log(`generated ${filename}`);
+}

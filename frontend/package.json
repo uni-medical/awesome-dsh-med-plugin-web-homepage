@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json",
     "test": "vitest run",
-    "visuals:sync": "node scripts/fetch-repository-visuals.mjs"
+    "visuals:sync": "node scripts/fetch-repository-visuals.mjs",
+    "visuals:generate-neutral": "node scripts/generate-neutral-visuals.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",

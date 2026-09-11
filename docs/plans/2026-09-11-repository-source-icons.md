@@ -24,8 +24,9 @@ Use the first acceptable source in this order:
 
 1. Official project logo/icon stored in the repository or linked from its README.
 2. Official project homepage icon when the repository has no suitable project asset.
-3. GitHub owner/organization avatar, labelled as an owner avatar rather than a project logo.
-4. Existing deterministic category tile when download, validation, or provenance fails.
+3. GitHub organization avatar, labelled as an organization avatar rather than a project logo; personal owner photos are excluded.
+4. A reproducible neutral visual labelled as a non-official demo asset when no suitable official identity exists.
+5. Existing deterministic category tile when generation, download, validation, or provenance fails.
 
 Do not use screenshots containing patient data, paper figures, performance charts, GitHub social cards with embedded claims, or arbitrary README illustrations. Record the exact source URL, source kind, check date, and usage note for every accepted image.
 
@@ -42,14 +43,14 @@ Do not use screenshots containing patient data, paper figures, performance chart
    interface RepositoryVisual {
      repositoryId: string;
      localPath: string;
-     sourceUrl: string;
-     sourceKind: "project-logo" | "homepage-icon" | "github-owner-avatar";
+     sourceUrl: string | null;
+     sourceKind: "project-logo" | "homepage-icon" | "github-owner-avatar" | "generated-neutral-visual";
      checkedAt: string;
      usageNote: string;
    }
    ```
-3. Require HTTPS source URLs, relative local paths under `images/repositories/`, valid dates, and unique repository ids.
-4. Populate the initial 20-record manifest using audited sources; owner avatars are the default until a clearly official project-specific asset is confirmed.
+3. Require HTTPS source URLs for externally sourced visuals, null source URLs for generated neutral visuals, relative local paths under `images/repositories/`, valid dates, and unique repository ids.
+4. Populate the initial 20-record manifest using audited sources; exclude personal owner photos and use generated neutral visuals where no official project identity is confirmed.
 5. Run `npm test -- repositoryVisuals.test.ts`; expect the manifest coverage test to pass.
 6. Commit: `feat: add repository visual provenance manifest`.
 
@@ -87,7 +88,7 @@ Do not use screenshots containing patient data, paper figures, performance chart
    - Detail header beside the repository title.
 4. Use `loading="lazy"` and `decoding="async"` for list/gallery assets. Use empty alt text where the adjacent visible repository title already names the item.
 5. On image error, hide the broken image and reveal the current deterministic category tile without changing layout.
-6. Add a `Visual source` row in the detail Links section showing source kind and linking to `sourceUrl`.
+6. Add a `Visual source` row in the detail Links section: link externally sourced visuals to `sourceUrl`, and label generated neutral visuals without an external link.
 7. Preserve card/row click behavior, filtering, URL state, detail close, and splitter behavior.
 8. Commit: `feat: show source visuals across marketplace views`.
 

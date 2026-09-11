@@ -13,10 +13,10 @@
     {
       "repositoryId": "Ericwong5021/deepseek-plugin-store",
       "localPath": "images/repositories/ericwong5021__deepseek-plugin-store.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/26177736?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": "https://deepseekplugin.store/assets/deepseek-store-whale.png",
+      "sourceKind": "homepage-icon",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Official DeepSeek Plugin Store whale icon from the project homepage."
     },
     {
       "repositoryId": "aipoch/medical-research-skills",
@@ -29,18 +29,18 @@
     {
       "repositoryId": "FreedomIntelligence/OpenClaw-Medical-Skills",
       "localPath": "images/repositories/freedomintelligence__openclaw-medical-skills.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/127706844?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": null,
+      "sourceKind": "generated-neutral-visual",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Neutral medical-skill symbol generated for the demo; no official project icon was confirmed."
     },
     {
       "repositoryId": "Wangyixinxin/MMedAgent",
       "localPath": "images/repositories/wangyixinxin__mmedagent.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/54788216?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": null,
+      "sourceKind": "generated-neutral-visual",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Neutral agent-tool symbol generated for the demo; no official project icon was confirmed."
     },
     {
       "repositoryId": "mims-harvard/ToolUniverse",
@@ -53,10 +53,10 @@
     {
       "repositoryId": "andybrandt/mcp-simple-pubmed",
       "localPath": "images/repositories/andybrandt__mcp-simple-pubmed.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/5551980?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": null,
+      "sourceKind": "generated-neutral-visual",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Neutral literature-search symbol generated for the demo; no official project icon was confirmed."
     },
     {
       "repositoryId": "medplum/medplum",
@@ -101,10 +101,10 @@
     {
       "repositoryId": "obra/superpowers",
       "localPath": "images/repositories/obra__superpowers.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/45416?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": null,
+      "sourceKind": "generated-neutral-visual",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Neutral capability symbol generated for the demo; no official project icon was confirmed."
     },
     {
       "repositoryId": "openclaw/openclaw",
@@ -125,10 +125,10 @@
     {
       "repositoryId": "oobabooga/textgen",
       "localPath": "images/repositories/oobabooga__textgen.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/112222186?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": null,
+      "sourceKind": "generated-neutral-visual",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Neutral terminal-generation symbol generated for the demo; no official project icon was confirmed."
     },
     {
       "repositoryId": "headroomlabs-ai/headroom",
@@ -141,10 +141,10 @@
     {
       "repositoryId": "affaan-m/ECC",
       "localPath": "images/repositories/affaan-m__ecc.webp",
-      "sourceUrl": "https://avatars.githubusercontent.com/u/124439313?v=4",
-      "sourceKind": "github-owner-avatar",
+      "sourceUrl": "https://ecc.tools/apple-touch-icon.png?v=ecc-mark",
+      "sourceKind": "homepage-icon",
       "checkedAt": "2026-09-11T04:00:00+08:00",
-      "usageNote": "GitHub owner avatar snapshot for demo identification; not a project logo."
+      "usageNote": "Official ECC product icon from the project homepage."
     },
     {
       "repositoryId": "earendil-works/pi",
