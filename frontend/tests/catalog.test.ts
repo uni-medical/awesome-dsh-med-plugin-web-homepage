@@ -19,6 +19,7 @@ describe("catalog", () => {
     const result = filterCatalog(catalog.entries, new URLSearchParams("type=Plugin&type=MCP+Server"));
     expect(new Set(result.map(entry => entry.primaryCategory))).toEqual(new Set(["Plugin", "MCP Server"]));
     expect(result).toHaveLength(8);
+    expect(filterCatalog(catalog.entries, new URLSearchParams("type=&type=Plugin"))).toHaveLength(4);
   });
   it("searches tags and handles absent descriptions", () => {
     const e = {...catalog.entries[0], description:null, topics:["special-tag"]};
