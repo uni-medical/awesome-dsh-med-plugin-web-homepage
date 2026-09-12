@@ -429,6 +429,196 @@
   .split-layout .splitter { opacity: 1; transform: none; }
 }
 
+/* Apple-inspired workspace finish: quiet depth, continuous corners, and spring motion. */
+.marketplace-workbench {
+  --apple-blue: #0a84ff;
+  --apple-blue-bright: #64b5ff;
+  --apple-surface: rgba(17, 29, 47, .72);
+  --apple-surface-raised: rgba(23, 39, 62, .82);
+  --apple-stroke: rgba(166, 197, 235, .18);
+  --apple-shadow: 0 18px 55px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .045);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  background:
+    radial-gradient(70% 65% at 78% -12%, rgba(40, 104, 190, .28), transparent 66%),
+    radial-gradient(45% 50% at -5% 100%, rgba(75, 62, 145, .12), transparent 70%),
+    #080f1b;
+}
+
+.marketplace-workbench .market-rail {
+  border-color: rgba(188, 213, 244, .13);
+  background: rgba(7, 14, 25, .76);
+  box-shadow: inset -1px 0 rgba(255, 255, 255, .025);
+  backdrop-filter: saturate(150%) blur(28px);
+}
+.marketplace-workbench .rail-brand,
+.marketplace-workbench .rail-item { border-radius: 14px; }
+.marketplace-workbench .rail-brand {
+  border-color: rgba(176, 207, 244, .2);
+  background: linear-gradient(145deg, rgba(51, 79, 117, .8), rgba(16, 30, 50, .9));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .1), 0 8px 24px rgba(0, 0, 0, .22);
+}
+.marketplace-workbench .rail-item.active {
+  border-color: rgba(92, 174, 255, .72);
+  background: linear-gradient(145deg, rgba(24, 126, 233, .95), rgba(10, 91, 190, .88));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .2), 0 7px 24px rgba(10, 132, 255, .27);
+}
+
+.marketplace-workbench .workbench-topbar {
+  padding-inline: 24px;
+  border-color: rgba(188, 213, 244, .12);
+  background: rgba(9, 18, 31, .62);
+  backdrop-filter: saturate(160%) blur(28px);
+}
+.workbench-search {
+  flex: 0 1 720px;
+  width: min(720px, 100%);
+  max-width: 720px;
+}
+.marketplace-workbench .workbench-search input {
+  min-height: 44px;
+  border-color: rgba(151, 187, 230, .24);
+  border-radius: 14px;
+  background: rgba(25, 41, 63, .62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045), 0 5px 18px rgba(0, 0, 0, .12);
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 300ms ease, transform 320ms cubic-bezier(.16, 1, .3, 1);
+}
+.marketplace-workbench .workbench-search input:focus {
+  border-color: rgba(100, 181, 255, .8);
+  background: rgba(28, 47, 73, .78);
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, .14), 0 10px 30px rgba(0, 0, 0, .2);
+}
+
+.repository-filter-panel,
+.repository-card,
+.gallery-card,
+.workbench-table-scroll,
+.comparison-scroll,
+.settings-card,
+.smart-grid button,
+.personal-list article,
+.workspace-empty,
+.workbench-empty {
+  border-color: var(--apple-stroke);
+  border-radius: 16px;
+  background-color: var(--apple-surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+}
+.repository-card,
+.gallery-card,
+.smart-grid button,
+.personal-list article,
+.settings-card {
+  transition: transform 420ms cubic-bezier(.16, 1, .3, 1), border-color 240ms ease, background 280ms ease, box-shadow 420ms cubic-bezier(.16, 1, .3, 1);
+}
+.repository-card:hover,
+.gallery-card:hover,
+.smart-grid button:hover {
+  transform: translateY(-2px) scale(1.002);
+  border-color: rgba(100, 181, 255, .5);
+  box-shadow: var(--apple-shadow);
+}
+.repository-card.is-selected,
+.gallery-card.is-selected {
+  border-color: rgba(74, 166, 255, .88);
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, .24), 0 12px 42px rgba(0, 77, 164, .16), inset 0 1px rgba(255, 255, 255, .055);
+}
+.view-switcher,
+.setting-choice {
+  padding: 3px;
+  border-color: rgba(151, 187, 230, .22);
+  border-radius: 13px;
+  background: rgba(10, 23, 40, .65);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+}
+.view-switcher button {
+  border: 0;
+  border-radius: 9px;
+  transition: color 180ms ease, background 260ms ease, box-shadow 300ms ease, transform 360ms cubic-bezier(.16, 1, .3, 1);
+}
+.view-switcher button.active,
+.setting-choice button.active {
+  background: linear-gradient(180deg, #168eff, #0874df);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .22), 0 5px 16px rgba(10, 132, 255, .25);
+}
+.result-actions button,
+.collection-picker summary,
+.marketplace-workbench .detail-links a,
+.repository-filter-panel > button,
+.new-collection button,
+.settings-actions button,
+.personal-list button {
+  border-radius: 10px;
+  transition: transform 320ms cubic-bezier(.16, 1, .3, 1), border-color 200ms ease, background 200ms ease, box-shadow 280ms ease;
+}
+.result-actions button:hover,
+.collection-picker summary:hover,
+.marketplace-workbench .detail-links a:hover,
+.repository-filter-panel > button:hover,
+.new-collection button:hover,
+.settings-actions button:hover { transform: translateY(-1px); }
+.result-actions button:active,
+.collection-picker summary:active,
+.marketplace-workbench .detail-links a:active,
+.view-switcher button:active { transform: scale(.97); }
+
+.entry-detail-pane { padding: 14px 14px 14px 2px; }
+.detail-scroll {
+  border-color: rgba(154, 193, 239, .22);
+  border-radius: 20px;
+  background:
+    radial-gradient(90% 62% at 82% -8%, rgba(52, 116, 205, .2), transparent 68%),
+    linear-gradient(150deg, rgba(20, 37, 60, .92), rgba(9, 20, 35, .94));
+  box-shadow: var(--apple-shadow);
+  backdrop-filter: saturate(135%) blur(24px);
+}
+.detail-scroll::before { inset-inline: 22%; opacity: .55; }
+.detail-content { min-height: 100%; transform-origin: 52% 16%; }
+.detail-content.is-switching-out {
+  animation: detailContentSwapOut 145ms cubic-bezier(.4, 0, 1, 1) both;
+  pointer-events: none;
+}
+.detail-content.is-switching-in {
+  animation: detailContentSwapIn 420ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.detail-close {
+  border-color: rgba(177, 207, 240, .22);
+  border-radius: 50%;
+  background: rgba(37, 55, 78, .72);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .08);
+  transition: color 180ms ease, background 220ms ease, transform 360ms cubic-bezier(.16, 1, .3, 1);
+}
+.detail-close:hover { transform: rotate(4deg) scale(1.06); }
+.marketplace-workbench .detail-hero { background: linear-gradient(135deg, rgba(55, 112, 181, .12), rgba(103, 74, 159, .08), transparent 72%); }
+.detail-entry-visual { border-radius: 17px; box-shadow: 0 12px 34px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .1); }
+.marketplace-workbench .detail-section { border-color: rgba(160, 193, 232, .12); }
+
+@keyframes detailContentSwapOut {
+  from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateY(-5px) scale(.992); filter: blur(4px); }
+}
+@keyframes detailContentSwapIn {
+  from { opacity: 0; transform: translateY(10px) scale(.985); filter: blur(7px); }
+  58% { opacity: 1; filter: blur(0); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+html[data-motion="reduced"] .detail-content,
+html[data-motion="reduced"] .repository-card,
+html[data-motion="reduced"] .gallery-card,
+html[data-motion="reduced"] .smart-grid button { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .detail-content,
+  html:not([data-motion="full"]) .repository-card,
+  html:not([data-motion="full"]) .gallery-card,
+  html:not([data-motion="full"]) .smart-grid button { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 760px) {
+  .marketplace-workbench .workbench-topbar { padding-inline: 14px; }
+  .workbench-search { width: 100%; max-width: none; }
+  .entry-detail-pane { padding-inline: 14px; }
+}
+
 /* Shared workspace pages */
 .workspace-page-stage { min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 .workspace-content-page .rail-settings { margin-top: 12px; border-color: rgba(79, 151, 231, .2); background: rgba(18, 48, 82, .35); }
@@ -673,4 +863,30 @@ html[data-motion="reduced"] .marketplace-workbench .rail-item::before { animatio
   html:not([data-motion="full"]) .marketplace-workbench .rail-item::before { animation: none !important; transition: none !important; }
   html:not([data-motion="full"])::view-transition-old(workspace-content),
   html:not([data-motion="full"])::view-transition-new(workspace-content) { animation: none !important; }
+}
+
+/* Keep the same material language on the non-Marketplace workspace routes. */
+.workspace-page-header {
+  border-color: rgba(188, 213, 244, .12);
+  background: rgba(9, 18, 31, .64);
+  backdrop-filter: saturate(150%) blur(26px);
+}
+.workspace-page-scroll { background: radial-gradient(70% 55% at 80% 0, rgba(42, 91, 158, .07), transparent 68%); }
+.smart-grid button,
+.settings-card,
+.personal-list article,
+.research-picker > div > button,
+.comparison-scroll,
+.workspace-empty {
+  border-color: var(--apple-stroke);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(21, 38, 61, .78), rgba(10, 23, 40, .82));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+}
+.new-collection input,
+.research-picker input,
+.repository-filter-panel select {
+  border-color: rgba(151, 187, 230, .24);
+  border-radius: 11px;
+  background: rgba(20, 36, 57, .74);
 }
