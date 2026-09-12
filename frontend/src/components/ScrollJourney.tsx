@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useWorkspace } from "../state/WorkspaceContext";
 
 type JourneyFrame = {
   keyword: string;
@@ -17,6 +18,15 @@ const frames: JourneyFrame[] = [
 ];
 
 export function ScrollJourney({ language }: { language: "en" | "zh" }) {
+  const { preferences } = useWorkspace();
+  const [systemReduced, setSystemReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setSystemReduced(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const reduced = preferences.motion === "reduced" || (preferences.motion === "system" && systemReduced);
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const imageBase = `${import.meta.env.BASE_URL}images/journey/`;
@@ -27,14 +37,14 @@ export function ScrollJourney({ language }: { language: "en" | "zh" }) {
     setStep(current => (current + delta + frames.length) % frames.length);
   };
   useEffect(() => {
-    if (paused) return;
+    if (paused || reduced) return;
     const timer = window.setInterval(() => {
       if (step === frames.length - 1) direction.current = -1;
       if (step === 0) direction.current = 1;
       setStep(step + direction.current);
     }, 4800);
     return () => window.clearInterval(timer);
-  }, [paused, step]);
+  }, [paused, step, reduced]);
 
   return (
     <section className="journey" aria-labelledby="journey-title">
@@ -79,7 +89,7 @@ export function ScrollJourney({ language }: { language: "en" | "zh" }) {
         <div className="journey-controls">
           <div className="journey-playback">
             <button onClick={() => move(-1)} aria-label={language === "en" ? "Previous slide" : "上一张"}>←</button>
-            <button onClick={() => setPaused(!paused)}>{paused ? (language === "en" ? "Play" : "播放") : (language === "en" ? "Pause" : "暂停")}</button>
+            {!reduced && <button onClick={() => setPaused(!paused)}>{paused ? (language === "en" ? "Play" : "播放") : (language === "en" ? "Pause" : "暂停")}</button>}
             <button onClick={() => move(1)} aria-label={language === "en" ? "Next slide" : "下一张"}>→</button>
           </div>
           <div aria-label="Journey steps">
