@@ -10,6 +10,7 @@ import {
   resolveComparisonEntries,
   toggleComparison,
 } from "../src/lib/workspace";
+import { translate } from "../src/lib/i18n";
 
 const entries = [
   { id: "a/medical", primaryCategory: "Plugin", domains: ["medical"], tier: "stable" },
@@ -24,8 +25,19 @@ describe("workspace preferences", () => {
   });
 
   it("accepts valid settings and clamps the split ratio", () => {
-    const value = JSON.stringify({ version: 1, defaultView: "gallery", density: "compact", motion: "reduced", splitRatio: 99, rememberSplitRatio: false, focusDetails: false });
-    expect(parsePreferences(value)).toMatchObject({ defaultView: "gallery", density: "compact", motion: "reduced", splitRatio: 70, rememberSplitRatio: false, focusDetails: false });
+    const value = JSON.stringify({ version: 1, locale: "zh", defaultView: "gallery", density: "compact", motion: "reduced", splitRatio: 99, rememberSplitRatio: false, focusDetails: false });
+    expect(parsePreferences(value)).toMatchObject({ locale: "zh", defaultView: "gallery", density: "compact", motion: "reduced", splitRatio: 70, rememberSplitRatio: false, focusDetails: false });
+  });
+
+  it("falls back to English for an invalid stored interface language", () => {
+    const value = JSON.stringify({ ...DEFAULT_PREFERENCES, version: 1, locale: "fr" });
+    expect(parsePreferences(value).locale).toBe("en");
+  });
+
+  it("provides stable English and Chinese interface copy", () => {
+    expect(translate("en", "marketplace.title")).toBe("Repository");
+    expect(translate("zh", "marketplace.title")).toBe("组件目录");
+    expect(translate("zh", "details.identity")).toBe("基本信息");
   });
 });
 

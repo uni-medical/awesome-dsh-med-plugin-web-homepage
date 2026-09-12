@@ -38,6 +38,13 @@ describe("marketplace workbench state", () => {
     expect(styles).toContain(".detail-content.is-switching-in");
     expect(styles).toMatch(/\.workbench-search\s*\{[^}]*max-width:\s*720px/s);
   });
+
+  it("expands gallery results to three or four columns on wide repository panes", () => {
+    const styles = readFileSync(new URL("../src/styles/marketplace.css", import.meta.url), "utf8");
+    expect(styles).toMatch(/\.repository-gallery\s*\{[^}]*grid-template-columns:\s*repeat\(4,/s);
+    expect(styles).toMatch(/@container\s*\(max-width:\s*1200px\)[\s\S]*?\.repository-gallery\s*\{[^}]*repeat\(3,/s);
+    expect(styles).toMatch(/@container\s*\(max-width:\s*860px\)[\s\S]*?\.repository-gallery\s*\{[^}]*repeat\(2,/s);
+  });
   it("accepts all supported view query values and defaults invalid values to cards", () => {
     expect(parseMarketplaceView("cards")).toBe("cards");
     expect(parseMarketplaceView("table")).toBe("table");
