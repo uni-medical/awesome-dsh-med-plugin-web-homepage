@@ -87,3 +87,14 @@ html[data-motion="reduced"] .landing-page *, html[data-motion="reduced"] .landin
   html:not([data-motion="full"]) .landing-page *, html:not([data-motion="full"]) .landing-page *::before, html:not([data-motion="full"]) .landing-page *::after { animation: none !important; transition: none !important; }
 }
 html[data-motion="full"] .landing-page .journey-track { transition: transform 650ms cubic-bezier(.22,.68,.2,1); }
+
+/* One fluid hierarchy keeps section headings subordinate at every breakpoint. */
+.landing-page { --landing-title-size: clamp(38px, 4.5vw, 72px); --landing-section-size: clamp(26px, 2.7vw, 40px); }
+.landing-page .landing-hero h1 { font-size: var(--landing-title-size); line-height: 1.14; letter-spacing: -.04em; text-wrap: balance; }
+.landing-page .landing-section-heading h2,
+.landing-page .journey-heading h2 { font-size: var(--landing-section-size); line-height: 1.3; font-weight: 550; letter-spacing: -.025em; text-wrap: balance; }
+.landing-page .journey-heading { max-width: 780px; }
+.landing-page .journey-heading .eyebrow { font-family: inherit; font-size: 10px; font-weight: 600; letter-spacing: .16em; color: #80c8e6; }
+.landing-page .journey-heading p { font-size: 14px; line-height: 1.75; color: #aebed2; }
+.landing-page .journey-copy h3 { font-size: clamp(30px, 3.2vw, 48px); line-height: 1.2; font-weight: 550; letter-spacing: -.025em; }
+.landing-page .journey-copy p { font-size: clamp(14px, 1.25vw, 17px); line-height: 1.75; }
