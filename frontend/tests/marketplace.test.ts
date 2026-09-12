@@ -26,6 +26,18 @@ describe("marketplace workbench state", () => {
     expect(app).toContain("<Route element={<WorkbenchLayout/>}>");
     expect(navigation.match(/viewTransition/g)?.length).toBeGreaterThanOrEqual(5);
   });
+
+  it("animates detail content swaps and keeps the search field intentionally compact", () => {
+    const detail = readFileSync(new URL("../src/components/EntryDetail.tsx", import.meta.url), "utf8");
+    const styles = readFileSync(new URL("../src/styles/marketplace.css", import.meta.url), "utf8");
+    expect(detail).toContain("displayedEntry");
+    expect(detail).toContain("pendingEntryRef");
+    expect(detail).toContain("is-switching-out");
+    expect(detail).toContain("is-switching-in");
+    expect(styles).toContain(".detail-content.is-switching-out");
+    expect(styles).toContain(".detail-content.is-switching-in");
+    expect(styles).toMatch(/\.workbench-search\s*\{[^}]*max-width:\s*720px/s);
+  });
   it("accepts all supported view query values and defaults invalid values to cards", () => {
     expect(parseMarketplaceView("cards")).toBe("cards");
     expect(parseMarketplaceView("table")).toBe("table");
