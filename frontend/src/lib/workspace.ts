@@ -1,11 +1,13 @@
 import type { CatalogEntry } from "./catalog";
 import { clampSplitRatio, type MarketplaceView } from "./marketplace";
+import type { UiLocale } from "./i18n";
 
 export type Density = "comfortable" | "compact";
 export type MotionMode = "system" | "full" | "reduced";
 
 export interface WorkspacePreferences {
   version: 1;
+  locale: UiLocale;
   defaultView: MarketplaceView;
   density: Density;
   motion: MotionMode;
@@ -32,7 +34,7 @@ export interface SmartCollection {
 export const PREFERENCES_KEY = "medical-workbench.preferences.v1";
 export const COLLECTIONS_KEY = "medical-workbench.collections.v1";
 export const DEFAULT_PREFERENCES: WorkspacePreferences = {
-  version: 1, defaultView: "cards", density: "comfortable", motion: "system",
+  version: 1, locale: "en", defaultView: "cards", density: "comfortable", motion: "system",
   splitRatio: 56, rememberSplitRatio: true, focusDetails: true,
 };
 
@@ -42,6 +44,7 @@ export function parsePreferences(raw: string | null): WorkspacePreferences {
     if (!value || value.version !== 1) return { ...DEFAULT_PREFERENCES };
     return {
       version: 1,
+      locale: value.locale === "zh" ? "zh" : "en",
       defaultView: ["cards", "table", "gallery"].includes(value.defaultView ?? "") ? value.defaultView! : DEFAULT_PREFERENCES.defaultView,
       density: value.density === "compact" ? "compact" : "comfortable",
       motion: ["system", "full", "reduced"].includes(value.motion ?? "") ? value.motion! : "system",

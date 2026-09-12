@@ -65,6 +65,7 @@
 }
 
 .marketplace-workbench .rail-item svg { width: 22px; height: 22px; }
+.marketplace-workbench .rail-locale { margin-top: 4px; font-size: 11px; font-weight: 750; letter-spacing: .04em; }
 .marketplace-workbench .rail-item.active { color: #fff; border-color: #287ed4; background: linear-gradient(135deg, #1262ba, #153c75); box-shadow: 0 0 24px rgba(37, 136, 255, .25); }
 .marketplace-workbench .rail-item:disabled { opacity: .58; cursor: not-allowed; }
 .marketplace-workbench .rail-item::after {
@@ -293,7 +294,7 @@
 .table-project-visual span { font-size: 9px; }
 .workbench-table tbody tr:hover { background: rgba(28, 62, 101, .38); }
 .workbench-table tbody tr.is-selected { background: rgba(26, 91, 153, .3); box-shadow: inset 3px 0 #1b9cff; }
-.repository-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.repository-gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .gallery-card { overflow: hidden; border: 1px solid rgba(93, 133, 185, .3); border-radius: 11px; background: rgba(9, 24, 42, .82); }
 .gallery-card.is-selected { border-color: #159cff; box-shadow: 0 0 24px rgba(17, 111, 205, .14); }
 .gallery-card .entry-visual { min-height: 140px; border: 0; border-bottom: 1px solid rgba(93, 133, 185, .3); border-radius: 0; }
@@ -382,6 +383,7 @@
   .marketplace-workbench .rail-brand { width: 40px; height: 40px; margin: 0; }
   .marketplace-workbench .rail-links { flex-direction: row; gap: 7px; }
   .marketplace-workbench .rail-item { width: 40px; height: 40px; }
+  .marketplace-workbench .rail-locale { margin-top: 0; }
   .marketplace-workbench .rail-item::after { display: none; }
   .marketplace-stage { display: block; }
   .marketplace-workbench .workbench-topbar { flex-wrap: wrap; padding: 12px; }
@@ -764,6 +766,14 @@ html[data-density="compact"] .gallery-copy { padding: 10px; }
 .repository-card h2,
 .gallery-card h2 { word-break: normal; overflow-wrap: break-word; hyphens: auto; }
 
+@container (max-width: 1200px) {
+  .repository-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@container (max-width: 860px) {
+  .repository-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @container (max-width: 820px) {
   .repository-heading { display: block; }
   .view-switcher { width: 100%; margin-top: 14px; }
@@ -788,6 +798,7 @@ html[data-density="compact"] .gallery-copy { padding: 10px; }
 }
 
 @container (max-width: 520px) {
+  .repository-gallery { grid-template-columns: 1fr; }
   .repository-pane { padding-inline: 12px; }
   .repository-card { grid-template-columns: 1fr; }
   .repository-card .entry-visual { width: 100%; min-height: 112px; max-height: 160px; }

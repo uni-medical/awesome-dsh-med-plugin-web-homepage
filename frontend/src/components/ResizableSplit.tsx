@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { clampSplitRatio, getResponsiveSplitBounds, MAX_SPLIT_RATIO, MIN_SPLIT_RATIO } from "../lib/marketplace";
 import { useWorkspace } from "../state/WorkspaceContext";
+import { useUiLanguage } from "../state/useUiLanguage";
 
 export function ResizableSplit({ primary, secondary, closing = false, onClosed }: { primary: ReactNode; secondary: ReactNode; closing?: boolean; onClosed?: () => void }) {
   const { preferences, updatePreferences } = useWorkspace();
+  const { t } = useUiLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const completedRef = useRef(false);
   const [ratio, setRatio] = useState(preferences.splitRatio);
@@ -47,12 +49,12 @@ export function ResizableSplit({ primary, secondary, closing = false, onClosed }
 
   return <div ref={containerRef} className={`split-layout${dragging ? " is-resizing" : ""}${entered ? " has-entered" : ""}${closing ? " is-closing" : ""}${reduced ? " reduce-motion" : ""}`}>
     <div className="split-primary" style={{ flexBasis: `${entered && !closing ? effectiveRatio : 100}%` }} onTransitionEnd={event => { if (event.propertyName === "flex-basis") completeClose(); }}>{primary}</div>
-    <div className="splitter" role="separator" aria-label="Resize repository and details panels" aria-orientation="vertical" aria-valuemin={bounds.min} aria-valuemax={bounds.max} aria-valuenow={Math.round(effectiveRatio)} aria-disabled={closing} tabIndex={closing ? -1 : 0}
+    <div className="splitter" role="separator" aria-label={t("splitter.aria")} aria-orientation="vertical" aria-valuemin={bounds.min} aria-valuemax={bounds.max} aria-valuenow={Math.round(effectiveRatio)} aria-disabled={closing} tabIndex={closing ? -1 : 0}
       onPointerDown={event => { if (closing) return; event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); updateFromPointer(event.clientX); }}
       onPointerMove={event => dragging && !closing && updateFromPointer(event.clientX)}
       onPointerUp={event => { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); setDragging(false); }} onPointerCancel={() => setDragging(false)}
       onKeyDown={event => { if (closing) return; if (event.key === "ArrowLeft") setNextRatio(value => value - 2); else if (event.key === "ArrowRight") setNextRatio(value => value + 2); else if (event.key === "Home") setNextRatio(bounds.min); else if (event.key === "End") setNextRatio(bounds.max); else return; event.preventDefault(); }}>
-      <span className="splitter-grip"><i/><i/><i/><i/><i/><i/></span><span className="splitter-tooltip">Drag to resize</span>
+      <span className="splitter-grip"><i/><i/><i/><i/><i/><i/></span><span className="splitter-tooltip">{t("splitter.hint")}</span>
     </div><div className="split-secondary">{secondary}</div>
   </div>;
 }

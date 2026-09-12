@@ -23,7 +23,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<PersonalCollection[]>(readCollections);
   useEffect(() => { safelyStore(PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
   useEffect(() => { safelyStore(COLLECTIONS_KEY, JSON.stringify({ version: 1, collections })); }, [collections]);
-  useEffect(() => { document.documentElement.dataset.density = preferences.density; document.documentElement.dataset.motion = preferences.motion; }, [preferences]);
+  useEffect(() => { document.documentElement.dataset.density = preferences.density; document.documentElement.dataset.motion = preferences.motion; document.documentElement.lang = preferences.locale === "zh" ? "zh-CN" : "en"; }, [preferences]);
   const value: WorkspaceValue = {
     preferences, collections,
     updatePreferences: patch => setPreferences(current => parsePreferences(JSON.stringify({ ...current, ...patch, version: 1 }))),

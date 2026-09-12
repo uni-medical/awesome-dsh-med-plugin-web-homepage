@@ -3,11 +3,10 @@ import { resolveRepositoryVisual } from "../data/repositoryVisuals";
 import type { CatalogEntry } from "../lib/catalog";
 import { RepositoryVisual } from "./RepositoryVisual";
 import { CollectionPicker } from "./CollectionPicker";
-
-const fmt = (value: string) => new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
-const Missing = () => <span className="missing">Not available</span>;
+import { useUiLanguage } from "../state/useUiLanguage";
 
 export function EntryDetail({ entry, onClose, focusOnOpen = false }: { entry?: CatalogEntry; onClose: () => void; focusOnOpen?: boolean }) {
+  const { formatDate, formatNumber, t } = useUiLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const [displayedEntry, setDisplayedEntry] = useState(entry);
   const [transition, setTransition] = useState<"idle" | "out" | "in">("idle");
@@ -48,20 +47,21 @@ export function EntryDetail({ entry, onClose, focusOnOpen = false }: { entry?: C
     if (focusOnOpen) ref.current?.focus({ preventScroll: true });
   }, [displayedEntry?.id, focusOnOpen]);
 
-  if (!displayedEntry) return <aside className="entry-detail-pane empty-detail" aria-label="Repository details"><div><span>RESEARCH PROFILE</span><h2>Select a repository</h2><p>Choose View details from any result to inspect its identity, source snapshot, classification, and links.</p></div></aside>;
+  if (!displayedEntry) return <aside className="entry-detail-pane empty-detail" aria-label={t("details.aria")}><div><span>{t("details.profile")}</span><h2>{t("details.selectTitle")}</h2><p>{t("details.selectHint")}</p></div></aside>;
 
   const currentEntry = displayedEntry;
   const visual = resolveRepositoryVisual(currentEntry.id);
-  const visualLabel = visual?.sourceKind === "github-owner-avatar" ? "GitHub owner avatar" : visual?.sourceKind === "homepage-icon" ? "Official homepage icon" : visual?.sourceKind === "generated-neutral-visual" ? "Generated neutral visual" : "Official project logo";
+  const visualLabel = visual?.sourceKind === "github-owner-avatar" ? t("details.visualGithub") : visual?.sourceKind === "homepage-icon" ? t("details.visualHomepage") : visual?.sourceKind === "generated-neutral-visual" ? t("details.visualGenerated") : t("details.visualOfficial");
+  const Missing = () => <span className="missing">{t("common.notAvailable")}</span>;
 
   return <aside className="entry-detail-pane" aria-labelledby="entry-title" aria-busy={transition === "out"}><div ref={ref} className="detail-scroll" tabIndex={-1}>
     <div className={`detail-content${transition === "out" ? " is-switching-out" : transition === "in" ? " is-switching-in" : ""}`} aria-live="polite">
-      <header className="detail-hero"><button type="button" className="detail-close" onClick={onClose} aria-label="Close details">×</button><RepositoryVisual entry={currentEntry} className="detail-entry-visual"/><div className="detail-hero-copy"><div className="detail-badges"><span className={currentEntry.tier}>{currentEntry.tier}</span><code>{currentEntry.primaryCategory}</code>{currentEntry.domains.map(domain => <code key={domain}>{domain}</code>)}</div><h2 id="entry-title">{currentEntry.fullName}</h2><p>{currentEntry.description ?? "No source description provided."}</p></div><div className="detail-stat"><strong>★ {currentEntry.stars.toLocaleString("en-US")}</strong><small>observed stars</small></div></header>
-      <section className="detail-section"><h3><span>01</span> Identity</h3><dl><div><dt>Repository</dt><dd>{currentEntry.fullName}</dd></div><div><dt>Source</dt><dd>{currentEntry.source}</dd></div><div><dt>License</dt><dd>{currentEntry.license}</dd></div><div><dt>Language</dt><dd>{currentEntry.language}</dd></div></dl></section>
-      <section className="detail-section"><h3><span>02</span> Evidence snapshot</h3><dl><div><dt>Updated</dt><dd>{fmt(currentEntry.updatedAt)}</dd></div><div><dt>Observed</dt><dd>{fmt(currentEntry.observedAt)}</dd></div><div><dt>Main snapshot SHA</dt><dd className="sha-value">{currentEntry.snapshot.mainSha ?? <Missing/>}</dd></div><div><dt>Automation snapshot SHA</dt><dd className="sha-value">{currentEntry.snapshot.automationSha ?? <Missing/>}</dd></div></dl></section>
-      <section className="detail-section"><h3><span>03</span> Classification</h3><div className="detail-tags">{currentEntry.categories.map(v => <span key={`category-${v}`}>{v}</span>)}{currentEntry.domains.map(v => <span key={`domain-${v}`}>{v}</span>)}{currentEntry.topics.map(v => <span key={`topic-${v}`}>{v}</span>)}</div></section>
-      <section className="detail-section detail-links"><h3><span>04</span> Links</h3><div><CollectionPicker entryId={currentEntry.id}/><a className="primary-detail-link" href={currentEntry.repositoryUrl} target="_blank" rel="noopener noreferrer">Open repository ↗</a>{currentEntry.homepageUrl ? <a href={currentEntry.homepageUrl} target="_blank" rel="noopener noreferrer">Project homepage ↗</a> : <span className="missing-link">Homepage not available</span>}{visual?.sourceUrl ? <a href={visual.sourceUrl} title={visual.usageNote} target="_blank" rel="noopener noreferrer">Visual source · {visualLabel} ↗</a> : visual ? <span className="missing-link" title={visual.usageNote}>Generated neutral visual</span> : <span className="missing-link">Visual source not available</span>}</div></section>
-      <section className="detail-section disclosure"><h3><span>05</span> Disclosure</h3><p>Stable means present in the reviewed main snapshot; Candidate means present only in the automated discovery snapshot. Neither indicates medical validation, security review, compatibility, or quality.</p></section>
+      <header className="detail-hero"><button type="button" className="detail-close" onClick={onClose} aria-label={t("details.close")}>×</button><RepositoryVisual entry={currentEntry} className="detail-entry-visual"/><div className="detail-hero-copy"><div className="detail-badges"><span className={currentEntry.tier}>{currentEntry.tier}</span><code>{currentEntry.primaryCategory}</code>{currentEntry.domains.map(domain => <code key={domain}>{domain}</code>)}</div><h2 id="entry-title">{currentEntry.fullName}</h2><p>{currentEntry.description ?? t("results.noDescription")}</p></div><div className="detail-stat"><strong>★ {formatNumber(currentEntry.stars)}</strong><small>{t("details.observedStars")}</small></div></header>
+      <section className="detail-section"><h3><span>01</span> {t("details.identity")}</h3><dl><div><dt>{t("details.repository")}</dt><dd>{currentEntry.fullName}</dd></div><div><dt>{t("details.source")}</dt><dd>{currentEntry.source}</dd></div><div><dt>{t("details.license")}</dt><dd>{currentEntry.license}</dd></div><div><dt>{t("details.language")}</dt><dd>{currentEntry.language}</dd></div></dl></section>
+      <section className="detail-section"><h3><span>02</span> {t("details.evidence")}</h3><dl><div><dt>{t("details.updated")}</dt><dd>{formatDate(currentEntry.updatedAt)}</dd></div><div><dt>{t("details.observed")}</dt><dd>{formatDate(currentEntry.observedAt)}</dd></div><div><dt>{t("details.mainSha")}</dt><dd className="sha-value">{currentEntry.snapshot.mainSha ?? <Missing/>}</dd></div><div><dt>{t("details.automationSha")}</dt><dd className="sha-value">{currentEntry.snapshot.automationSha ?? <Missing/>}</dd></div></dl></section>
+      <section className="detail-section"><h3><span>03</span> {t("details.classification")}</h3><div className="detail-tags">{currentEntry.categories.map(v => <span key={`category-${v}`}>{v}</span>)}{currentEntry.domains.map(v => <span key={`domain-${v}`}>{v}</span>)}{currentEntry.topics.map(v => <span key={`topic-${v}`}>{v}</span>)}</div></section>
+      <section className="detail-section detail-links"><h3><span>04</span> {t("details.links")}</h3><div><CollectionPicker entryId={currentEntry.id}/><a className="primary-detail-link" href={currentEntry.repositoryUrl} target="_blank" rel="noopener noreferrer">{t("details.openRepository")}</a>{currentEntry.homepageUrl ? <a href={currentEntry.homepageUrl} target="_blank" rel="noopener noreferrer">{t("details.projectHomepage")}</a> : <span className="missing-link">{t("details.homepageMissing")}</span>}{visual?.sourceUrl ? <a href={visual.sourceUrl} title={visual.usageNote} target="_blank" rel="noopener noreferrer">{t("details.visualSource")} · {visualLabel} ↗</a> : visual ? <span className="missing-link" title={visual.usageNote}>{t("details.generatedVisual")}</span> : <span className="missing-link">{t("details.visualMissing")}</span>}</div></section>
+      <section className="detail-section disclosure"><h3><span>05</span> {t("details.disclosure")}</h3><p>{t("details.disclosureText")}</p></section>
     </div>
   </div></aside>;
 }

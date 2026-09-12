@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
+import { useUiLanguage } from "../state/useUiLanguage";
 
 type IconName = "home" | "search" | "layers" | "research" | "settings";
 
@@ -14,14 +15,16 @@ function RailIcon({ name }: { name: IconName }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 export function MarketplaceNavRail() {
-  return <nav className="market-rail" aria-label="Marketplace navigation">
-    <NavLink viewTransition className="rail-brand" to="/" aria-label="Medical Component Market home">M</NavLink>
+  const { zh, t, toggleLocale } = useUiLanguage();
+  return <nav className="market-rail" aria-label={t("nav.navigation")}>
+    <NavLink viewTransition className="rail-brand" to="/" aria-label={t("nav.brandHome")}>M</NavLink>
     <div className="rail-links">
-      <NavLink viewTransition className="rail-item" to="/" end aria-label="Home" data-label="Home"><RailIcon name="home"/></NavLink>
-      <NavLink viewTransition className="rail-item" to="/marketplace" aria-label="Marketplace" data-label="Marketplace"><RailIcon name="search"/></NavLink>
-      <NavLink viewTransition className="rail-item" to="/collections" aria-label="Collections" data-label="Collections"><RailIcon name="layers"/></NavLink>
-      <NavLink viewTransition className="rail-item" to="/research" aria-label="Research" data-label="Research"><RailIcon name="research"/></NavLink>
-      <NavLink viewTransition className="rail-item rail-settings" to="/settings" aria-label="Settings" data-label="Settings"><RailIcon name="settings"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/" end aria-label={t("nav.home")} data-label={t("nav.home")}><RailIcon name="home"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/marketplace" aria-label={t("nav.marketplace")} data-label={t("nav.marketplace")}><RailIcon name="search"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/collections" aria-label={t("nav.collections")} data-label={t("nav.collections")}><RailIcon name="layers"/></NavLink>
+      <NavLink viewTransition className="rail-item" to="/research" aria-label={t("nav.research")} data-label={t("nav.research")}><RailIcon name="research"/></NavLink>
+      <NavLink viewTransition className="rail-item rail-settings" to="/settings" aria-label={t("nav.settings")} data-label={t("nav.settings")}><RailIcon name="settings"/></NavLink>
+      <button type="button" className="rail-item rail-locale" aria-label={zh ? t("nav.switchEnglish") : t("nav.switchChinese")} data-label={zh ? "English" : "中文"} onClick={toggleLocale}>{zh ? "EN" : "中"}</button>
     </div>
   </nav>;
 }
