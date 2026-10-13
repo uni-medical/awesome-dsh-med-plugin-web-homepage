@@ -34,8 +34,17 @@ http://localhost:5173/awesome-dsh-med-plugin-web-homepage/marketplace/
 npm run lint
 npm run typecheck
 npm run test
+npm run test:coverage
 npm run build
 ```
+
+## Appearance
+
+The site starts in dark mode. The sun/moon control on the home page and workspace navigation, or Appearance in Settings, switches the entire site to daylight mode. The choice is saved with the existing browser-local v1 preferences; older preferences without a theme continue to use dark mode. Restoring defaults resets the theme while preserving personal collections.
+
+`public/theme-init.js` applies the saved theme before the app's stylesheet loads. `src/styles/theme.css` defines daylight color roles; existing CSS fallbacks preserve the dark palette. Photographs and carousel scrims keep their original colors. The selected dark table row uses a brighter source label for readable contrast.
+
+The coverage check targets theme application and workspace preference/collection helpers, with an 80% minimum. Browser verification also covers the home, marketplace, detail, collection, research and settings views in both languages and themes at 320, 390, 768, 1024 and 1440 pixels.
 
 ## Refresh repository visuals
 

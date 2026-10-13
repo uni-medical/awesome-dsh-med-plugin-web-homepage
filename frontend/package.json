@@ -11,7 +11,8 @@
     "typecheck": "tsc -p tsconfig.app.json",
     "test": "vitest run",
     "visuals:sync": "node scripts/fetch-repository-visuals.mjs",
-    "visuals:generate-neutral": "node scripts/generate-neutral-visuals.mjs"
+    "visuals:generate-neutral": "node scripts/generate-neutral-visuals.mjs",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.39.0",
     "sharp": "^0.35.4",
     "typescript": "~5.9.3",

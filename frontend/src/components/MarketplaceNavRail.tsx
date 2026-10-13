@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 import { useUiLanguage } from "../state/useUiLanguage";
 
 type IconName = "home" | "search" | "layers" | "research" | "settings";
@@ -25,6 +26,7 @@ export function MarketplaceNavRail() {
       <NavLink viewTransition className="rail-item" to="/research" aria-label={t("nav.research")} data-label={t("nav.research")}><RailIcon name="research"/></NavLink>
       <NavLink viewTransition className="rail-item rail-settings" to="/settings" aria-label={t("nav.settings")} data-label={t("nav.settings")}><RailIcon name="settings"/></NavLink>
       <button type="button" className="rail-item rail-locale" aria-label={zh ? t("nav.switchEnglish") : t("nav.switchChinese")} data-label={zh ? "English" : "中文"} onClick={toggleLocale}>{zh ? "EN" : "中"}</button>
+      <ThemeToggle className="rail-item rail-theme"/>
     </div>
   </nav>;
 }

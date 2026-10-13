@@ -6,6 +6,7 @@ import { MarketplacePage } from "./pages/MarketplacePage";
 import { ResearchPage } from "./pages/ResearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { useUiLanguage } from "./state/useUiLanguage";
+import "./styles/theme.css";
 import "./styles/index.css";
 import "./styles/journey.css";
 import "./styles/journey-overrides.css";

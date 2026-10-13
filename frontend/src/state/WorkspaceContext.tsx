@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { applyTheme } from "../lib/theme";
 import { COLLECTIONS_KEY, DEFAULT_PREFERENCES, PREFERENCES_KEY, addEntryToCollection, createCollection, parseCollections, parsePreferences, removeEntryFromCollection, type PersonalCollection, type WorkspacePreferences } from "../lib/workspace";
 
 interface WorkspaceValue {
@@ -21,6 +22,7 @@ const safelyStore = (key: string, value: string) => { try { localStorage.setItem
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState(readPreferences);
   const [collections, setCollections] = useState<PersonalCollection[]>(readCollections);
+  useLayoutEffect(() => { applyTheme(preferences.theme); }, [preferences.theme]);
   useEffect(() => { safelyStore(PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
   useEffect(() => { safelyStore(COLLECTIONS_KEY, JSON.stringify({ version: 1, collections })); }, [collections]);
   useEffect(() => { document.documentElement.dataset.density = preferences.density; document.documentElement.dataset.motion = preferences.motion; document.documentElement.lang = preferences.locale === "zh" ? "zh-CN" : "en"; }, [preferences]);

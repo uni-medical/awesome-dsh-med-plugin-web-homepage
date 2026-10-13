@@ -7,6 +7,7 @@ import {
   createCollection,
   parseCollections,
   parsePreferences,
+  removeEntryFromCollection,
   resolveComparisonEntries,
   toggleComparison,
 } from "../src/lib/workspace";
@@ -56,6 +57,25 @@ describe("workspace preferences", () => {
 });
 
 describe("workspace collections", () => {
+  it("retains valid stored memberships and drops malformed records", () => {
+    const stored = { version: 1, collections: [null, {}, { id: "one", name: "Review", entryIds: ["a/medical", 1] }] };
+    expect(parseCollections(JSON.stringify(stored))).toEqual([{ id: "one", name: "Review", entryIds: ["a/medical"] }]);
+  });
+
+  it("ignores a blank collection name", () => {
+    expect(createCollection([], "   ", "one")).toEqual([]);
+  });
+
+  it("preserves other collections when removing a saved component", () => {
+    const one = createCollection([], "Review", "one");
+    const two = createCollection(one, "Clinical", "two");
+    const saved = addEntryToCollection(addEntryToCollection(two, "one", "a/medical"), "two", "a/medical");
+    expect(addEntryToCollection(saved, "one", "a/medical")[0].entryIds).toEqual(["a/medical"]);
+    const removed = removeEntryFromCollection(saved, "one", "a/medical");
+    expect(removed[0].entryIds).toEqual([]);
+    expect(removed[1].entryIds).toEqual(["a/medical"]);
+  });
+
   it("builds live smart collections from catalog metadata", () => {
     const smart = buildSmartCollections(entries);
     expect(smart.find(item => item.id === "medical")?.entryIds).toEqual(["a/medical", "c/both"]);

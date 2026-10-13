@@ -1,0 +1,72 @@
+/* Existing color fallbacks retain the exact dark finish. Only the daylight
+   theme supplies these shared roles; no content, geometry, or motion changes. */
+html[data-theme="light"] {
+  --theme-page-bg: #f6f5f1;
+  --theme-panel-bg: #fff;
+  --theme-raised-bg: #fff;
+  --theme-chrome-bg: rgba(246, 245, 241, .92);
+  --theme-input-bg: #fff;
+  --theme-control-bg: #eef2ee;
+  --theme-selected-bg: #e2eee8;
+  --theme-thumbnail-bg: #e2eee8;
+  --theme-evidence-records: #eef4f1;
+  --theme-evidence-medical: #e6f0eb;
+  --theme-evidence-date: #eff1ec;
+  --theme-heading: #1d2926;
+  --theme-text: #475c54;
+  --theme-muted: #586b62;
+  --theme-accent: #397b72;
+  --theme-accent-text: #326e66;
+  --theme-on-accent: #fff;
+  --theme-action-bg: #397b72;
+  --theme-border: #d5dfd8;
+  --theme-focus: #397b72;
+  --theme-scrollbar: #9bb6a8;
+  --theme-stable-bg: #e1eee7;
+  --theme-stable-text: #28624c;
+  --theme-candidate-bg: #f6ecd6;
+  --theme-candidate-text: #735718;
+  --theme-danger-bg: #fbe9eb;
+  --theme-danger-text: #9c3348;
+  --theme-overlay: rgba(29, 41, 38, .32);
+  --theme-shadow: 0 8px 28px rgba(29, 41, 38, .07), inset 0 1px rgba(255, 255, 255, .65);
+  --theme-text-shadow: none;
+  --theme-grid-image: linear-gradient(rgba(57,123,114,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(57,123,114,.035) 1px, transparent 1px);
+  --theme-decoration-bg: radial-gradient(circle, rgba(57, 123, 114, .04), transparent 68%);
+  --theme-decoration-shadow: 0 2px 16px rgba(57, 123, 114, .04);
+  color-scheme: light;
+}
+
+/* Captions sit on the original photographs and dark scrims in either theme. */
+.journey-copy { color: #f5f7ff; }
+/* Selected table rows need a brighter source label on the existing navy tint. */
+html[data-theme="dark"] .workbench-table tr.is-selected th small { color: #8fa5c2; }
+
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: 1px solid var(--theme-border, #b7dbff1a);
+  border-radius: 12px;
+  background: var(--theme-control-bg, #b7dbff06);
+  color: var(--theme-accent-text, #d9e9fa);
+  cursor: pointer;
+}
+.theme-toggle svg { display: block; width: 21px; height: 21px; }
+.theme-toggle:focus-visible { outline: 2px solid var(--theme-focus, #a0e5ff); outline-offset: 4px; }
+.landing-nav-links .theme-toggle:hover { background: var(--theme-selected-bg, #b7dbff14); }
+.marketplace-workbench .rail-theme { flex-shrink: 0; }
+.settings-card > .setting-appearance { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--theme-border, rgba(106, 148, 201, .14)); }
+.setting-appearance > span { color: var(--theme-heading, #d7e2f2); font-size: 12px; }
+.setting-appearance small { display: block; margin-top: 4px; color: var(--theme-muted, #748ba9); font-size: 9px; }
+
+@media (max-width: 900px) {
+  .marketplace-workbench .rail-brand,
+  .marketplace-workbench .rail-item { flex-shrink: 0; }
+}
+@media (max-width: 620px) {
+  .settings-card > .setting-appearance { align-items: flex-start; flex-direction: column; }
+}

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Brand } from "./Brand";
+import { ThemeToggle } from "./ThemeToggle";
 import { catalog } from "../data/catalog";
 import { getLandingEvidence, landingCopy } from "../lib/landing";
 import { useUiLanguage } from "../state/useUiLanguage";
@@ -14,6 +15,7 @@ export function LandingHeader() {
       <a className="landing-path-link" href="#research-path">{zh ? "研究路径" : "Research path"}</a>
       <Link viewTransition to="/marketplace">{zh ? "组件市场" : "Marketplace"}</Link>
       <button type="button" onClick={toggleLocale} aria-label={zh ? "Switch to English" : "切换中文"}>{zh ? "EN" : "中文"}</button>
+      <ThemeToggle/>
       <a className="landing-github" href={repositoryUrl}>GitHub ↗</a>
     </div>
   </nav>;

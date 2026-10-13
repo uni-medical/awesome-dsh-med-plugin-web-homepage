@@ -1,6 +1,12 @@
 export type UiLocale = "en" | "zh";
 
 const en = {
+  "theme.switchLight": "Switch to daylight theme",
+  "theme.switchDark": "Switch to dark theme",
+  "theme.appearance": "Appearance",
+  "theme.appearanceHint": "Used across the home page and workspace. Saved in this browser.",
+  "theme.dark": "Dark",
+  "theme.light": "Daylight",
   "nav.navigation": "Workspace navigation",
   "nav.brandHome": "Medical Component Market home",
   "nav.home": "Home",
@@ -182,6 +188,12 @@ const en = {
 type TranslationKey = keyof typeof en;
 
 const zh: Record<TranslationKey, string> = {
+  "theme.switchLight": "切换白天主题",
+  "theme.switchDark": "切换深色主题",
+  "theme.appearance": "外观",
+  "theme.appearanceHint": "应用于首页和整个工作台，保存在当前浏览器。",
+  "theme.dark": "深色",
+  "theme.light": "白天",
   "nav.navigation": "工作台导航",
   "nav.brandHome": "医疗组件市场首页",
   "nav.home": "首页",
