@@ -4,6 +4,7 @@ import type { UiLocale } from "./i18n";
 
 export type Density = "comfortable" | "compact";
 export type MotionMode = "system" | "full" | "reduced";
+export type ThemeMode = "dark" | "light";
 
 export interface WorkspacePreferences {
   version: 1;
@@ -11,6 +12,7 @@ export interface WorkspacePreferences {
   defaultView: MarketplaceView;
   density: Density;
   motion: MotionMode;
+  theme: ThemeMode;
   splitRatio: number;
   rememberSplitRatio: boolean;
   focusDetails: boolean;
@@ -34,7 +36,7 @@ export interface SmartCollection {
 export const PREFERENCES_KEY = "medical-workbench.preferences.v1";
 export const COLLECTIONS_KEY = "medical-workbench.collections.v1";
 export const DEFAULT_PREFERENCES: WorkspacePreferences = {
-  version: 1, locale: "en", defaultView: "cards", density: "comfortable", motion: "system",
+  version: 1, locale: "en", defaultView: "cards", density: "comfortable", motion: "system", theme: "dark",
   splitRatio: 56, rememberSplitRatio: true, focusDetails: true,
 };
 
@@ -48,6 +50,7 @@ export function parsePreferences(raw: string | null): WorkspacePreferences {
       defaultView: ["cards", "table", "gallery"].includes(value.defaultView ?? "") ? value.defaultView! : DEFAULT_PREFERENCES.defaultView,
       density: value.density === "compact" ? "compact" : "comfortable",
       motion: ["system", "full", "reduced"].includes(value.motion ?? "") ? value.motion! : "system",
+      theme: value.theme === "light" ? "light" : "dark",
       splitRatio: clampSplitRatio(Number(value.splitRatio)),
       rememberSplitRatio: value.rememberSplitRatio !== false,
       focusDetails: value.focusDetails !== false,
