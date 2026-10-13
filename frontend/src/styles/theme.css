@@ -22,6 +22,15 @@ html[data-theme="light"] {
   --theme-border: #d5dfd8;
   --theme-focus: #397b72;
   --theme-scrollbar: #9bb6a8;
+  --theme-splitter-border: transparent;
+  --theme-splitter-active-border: transparent;
+  --theme-splitter-bg: linear-gradient(90deg, transparent calc(50% - .5px), #d5dfd8 calc(50% - .5px), #d5dfd8 calc(50% + .5px), transparent calc(50% + .5px));
+  --theme-splitter-active-bg: linear-gradient(90deg, transparent calc(50% - .5px), #85a99e calc(50% - .5px), #85a99e calc(50% + .5px), transparent calc(50% + .5px));
+  --theme-splitter-shadow: none;
+  --theme-splitter-grip-bg: #fff;
+  --theme-splitter-grip-border: #adc6ba;
+  --theme-splitter-dot: #397b72;
+  --theme-splitter-tooltip-border: #d5dfd8;
   --theme-stable-bg: #e1eee7;
   --theme-stable-text: #28624c;
   --theme-candidate-bg: #f6ecd6;
@@ -41,6 +50,10 @@ html[data-theme="light"] {
 .journey-copy { color: #f5f7ff; }
 /* Selected table rows need a brighter source label on the existing navy tint. */
 html[data-theme="dark"] .workbench-table tr.is-selected th small { color: #8fa5c2; }
+html[data-theme="light"] .splitter:hover .splitter-grip,
+html[data-theme="light"] .splitter:focus-visible .splitter-grip,
+html[data-theme="light"] .split-layout.is-resizing .splitter-grip { border-color: #397b72; background: #e2eee8; }
+html[data-theme="light"] .splitter:focus-visible .splitter-grip { outline: 2px solid #397b72; outline-offset: 3px; }
 
 .theme-toggle {
   display: inline-grid;
