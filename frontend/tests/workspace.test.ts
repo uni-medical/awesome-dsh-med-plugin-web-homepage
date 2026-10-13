@@ -19,6 +19,20 @@ const entries = [
 ] as CatalogEntry[];
 
 describe("workspace preferences", () => {
+  it("keeps dark as the default for existing browsers without a theme", () => {
+    expect(parsePreferences(JSON.stringify({ version: 1, locale: "zh", defaultView: "table", splitRatio: 61 })))
+      .toMatchObject({ theme: "dark", locale: "zh", defaultView: "table", splitRatio: 61 });
+  });
+
+  it.each(["dark", "light"])("remembers the %s theme without losing other preferences", theme => {
+    const stored = { ...DEFAULT_PREFERENCES, theme, locale: "zh", density: "compact", motion: "reduced", splitRatio: 63, defaultView: "gallery" };
+    expect(parsePreferences(JSON.stringify(stored))).toEqual(stored);
+  });
+
+  it.each(["system", "LIGHT", "", 1, null])("defaults to dark for an invalid theme %s", theme => {
+    expect(parsePreferences(JSON.stringify({ ...DEFAULT_PREFERENCES, theme }))).toMatchObject({ theme: "dark" });
+  });
+
   it("uses safe defaults for missing or malformed stored values", () => {
     expect(parsePreferences(null)).toEqual(DEFAULT_PREFERENCES);
     expect(parsePreferences("broken json")).toEqual(DEFAULT_PREFERENCES);
