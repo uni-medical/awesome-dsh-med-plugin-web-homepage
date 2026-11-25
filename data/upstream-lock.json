@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "repository": "uni-medical/awesome-dsh-med-plugin",
+  "cloneUrl": "git@github.com:uni-medical/awesome-dsh-med-plugin.git",
+  "sources": {
+    "entries": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/standardization/entries.jsonl"
+    },
+    "entryIndex": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/entry-index.json"
+    },
+    "cards": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/cards/cards.jsonl.gz"
+    },
+    "entryTable": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/entry-table/entry-scores.tsv.gz"
+    }
+  }
+}
