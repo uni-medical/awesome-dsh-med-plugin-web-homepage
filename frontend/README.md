@@ -61,7 +61,12 @@ npm run build
 
 The site starts in dark mode. The sun/moon control or Appearance in Settings switches the entire site to daylight mode, saved with the browser-local v1 preferences. `public/theme-init.js` applies the saved theme before the stylesheet loads; `src/styles/theme.css` defines daylight colour roles and existing CSS fallbacks keep the dark palette.
 
-The plan ("方案") is stored in the browser under `medical-workbench.plan.v1`. Personal collections and research comparison from the earlier repository browser were removed; `/collections` and `/research` redirect to `/marketplace`.
+The plan ("方案") is a shortlist stored in the browser under `medical-workbench.plan.v1`. It can be copied as a dsh-med install script, and moved to another browser or person without a backend:
+
+- **Share link**: `…/marketplace?plan=<base64url JSON array of component ids>`. Opening it shows a confirmation bar (add to / replace my plan / ignore); the parameter is then removed from the URL.
+- **File**: "Export file" downloads `medical-component-plan-YYYY-MM-DD.json` (`{ kind: "medical-component-plan", version: 1, items }`); "Import file" reads it back.
+
+Imported ids are resolved against the current catalogue; ids that no longer exist are reported and skipped. Personal collections and research comparison from the earlier repository browser were removed; `/collections` and `/research` redirect to `/marketplace`.
 
 The doctor-researcher hero is an AI-generated fictional editorial image. It does not depict a real clinician, patient, institution, or clinical result.
 

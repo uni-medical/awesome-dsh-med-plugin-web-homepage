@@ -361,3 +361,9 @@ html[data-motion="reduced"] .component-card:hover { transform: none; }
 .plan-actions button:first-child { color: var(--theme-on-accent, #fff); border-color: transparent; background: var(--theme-action-bg, #1762a8); }
 .graph-detail-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; flex: 0 0 auto; }
 .overview-actions { flex-wrap: wrap; justify-content: flex-end; }
+.plan-transfer { margin: 0 0 14px; }
+.plan-transfer button:first-child { color: var(--theme-heading, #e7efff); border-color: var(--card-border); background: var(--theme-raised-bg, transparent); }
+.plan-import { display: grid; gap: 8px; padding: 12px clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--card-border); background: var(--theme-selected-bg, rgba(55, 148, 255, .12)); }
+.plan-import p { margin: 0; color: var(--theme-heading, #eef4ff); font-size: 14px; }
+.plan-import ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.plan-import li { padding: 2px 8px; border: 1px solid var(--card-border); border-radius: 999px; font-size: 12px; }

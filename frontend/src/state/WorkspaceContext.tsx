@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import type { ComponentSummary } from "../lib/components";
-import { PLAN_KEY, parsePlan, removePlanItem, serialisePlan, togglePlanItem, type PlanItem } from "../lib/plan";
+import { PLAN_KEY, PLAN_LIMIT, parsePlan, removePlanItem, serialisePlan, togglePlanItem, type PlanItem } from "../lib/plan";
 import { applyTheme } from "../lib/theme";
 import { DEFAULT_PREFERENCES, PREFERENCES_KEY, parsePreferences, type WorkspacePreferences } from "../lib/workspace";
 
@@ -12,6 +12,7 @@ interface WorkspaceValue {
   togglePlan: (component: Pick<ComponentSummary, "id" | "name" | "type" | "repo">) => void;
   removeFromPlan: (id: string) => void;
   clearPlan: () => void;
+  replacePlan: (items: PlanItem[]) => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
@@ -33,6 +34,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     togglePlan: component => setPlan(current => togglePlanItem(current, component)),
     removeFromPlan: id => setPlan(current => removePlanItem(current, id)),
     clearPlan: () => setPlan([]),
+    replacePlan: items => setPlan(items.slice(0, PLAN_LIMIT)),
   };
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }

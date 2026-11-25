@@ -61,3 +61,62 @@ export function formatInstallScript(items: readonly PlanItem[], installIds: Read
   });
   return [copy.header(items.length), copy.setup, ...lines].join("\n");
 }
+
+// ---- Moving a plan between browsers: share links and files ----
+
+export const PLAN_PARAM = "plan";
+export const PLAN_FILE_KIND = "medical-component-plan";
+
+const toBase64Url = (text: string) => btoa(String.fromCharCode(...new TextEncoder().encode(text))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const fromBase64Url = (value: string) => new TextDecoder().decode(Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/")), char => char.charCodeAt(0)));
+
+const cleanIds = (values: unknown): string[] => (Array.isArray(values)
+  ? [...new Set(values.filter((value): value is string => typeof value === "string" && value.length > 0 && value.length <= 512))].slice(0, PLAN_LIMIT)
+  : []);
+
+/** Compact, URL-safe encoding of the plan's component ids. */
+export function encodePlanShare(items: readonly Pick<PlanItem, "id">[]): string {
+  return toBase64Url(JSON.stringify(items.map(item => item.id)));
+}
+
+/** Ids from a share parameter; empty when the value is malformed. */
+export function decodePlanShare(value: string | null): string[] {
+  if (!value) return [];
+  try { return cleanIds(JSON.parse(fromBase64Url(value))); } catch { return []; }
+}
+
+export function sharePlanUrl(items: readonly Pick<PlanItem, "id">[], origin: string, baseUrl: string): string {
+  return `${origin}${baseUrl.replace(/\/?$/, "/")}marketplace?${PLAN_PARAM}=${encodePlanShare(items)}`;
+}
+
+/** Portable plan file. Names are included for people reading the file; ids are what is imported. */
+export function exportPlanFile(items: readonly PlanItem[], exportedAt = new Date().toISOString()): string {
+  return `${JSON.stringify({ kind: PLAN_FILE_KIND, version: 1, exportedAt, items }, null, 2)}\n`;
+}
+
+/** Ids from an exported plan file (or the stored plan format); empty when the file is not a plan. */
+export function parsePlanFile(text: string): string[] {
+  try {
+    const value = JSON.parse(text) as { kind?: unknown; version?: unknown; items?: unknown };
+    if (value?.version !== 1 || (value.kind !== undefined && value.kind !== PLAN_FILE_KIND) || !Array.isArray(value.items)) return [];
+    return cleanIds(value.items.map(item => (item && typeof item === "object" ? (item as { id?: unknown }).id : undefined)));
+  } catch { return []; }
+}
+
+/** Resolves imported ids against the current catalogue; unknown ids are reported, never guessed. */
+export function resolvePlanIds(ids: readonly string[], byId: ReadonlyMap<string, Pick<ComponentSummary, "id" | "name" | "type" | "repo">>): { items: PlanItem[]; missing: string[] } {
+  const items: PlanItem[] = [];
+  const missing: string[] = [];
+  for (const id of ids) {
+    const found = byId.get(id);
+    if (found) items.push({ id: found.id, name: found.name, type: found.type, repo: found.repo });
+    else missing.push(id);
+  }
+  return { items, missing };
+}
+
+/** Current items first, then new ones, without duplicates, within the limit. */
+export function mergePlans(current: readonly PlanItem[], incoming: readonly PlanItem[]): PlanItem[] {
+  const seen = new Set(current.map(item => item.id));
+  return [...current, ...incoming.filter(item => !seen.has(item.id) && seen.add(item.id))].slice(0, PLAN_LIMIT);
+}
