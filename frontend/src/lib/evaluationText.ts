@@ -14,10 +14,10 @@ const SOURCE_LABELS: Record<UiLocale, Record<string, string>> = {
  */
 export function evaluationText(locale: UiLocale, text: string): string {
   if (!text) return text;
-  if (SOURCE_LABELS[locale][text]) return SOURCE_LABELS[locale][text];
+  if (Object.hasOwn(SOURCE_LABELS[locale], text)) return SOURCE_LABELS[locale][text];
   if (locale === "zh") return text;
-  const known = EVALUATION_GLOSSARY_EN[text];
-  if (known) return known;
+  // Own-property lookup only: keys such as "constructor" must not resolve to Object.prototype members.
+  if (Object.hasOwn(EVALUATION_GLOSSARY_EN, text)) return EVALUATION_GLOSSARY_EN[text];
   const footer = FOOTER_DATE_LINE.exec(text);
   return footer ? `Checked ${footer[1]} · code version ${footer[2]}` : text;
 }

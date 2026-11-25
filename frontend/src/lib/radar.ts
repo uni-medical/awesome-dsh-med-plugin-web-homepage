@@ -31,7 +31,8 @@ const LINE_LENGTH = 16;
 /** Up to two lines at word boundaries; the full name stays in the node's tooltip. */
 export function wrapLabel(text: string, width = LINE_LENGTH): string[] {
   if (text.length <= width) return [text];
-  const words = text.split(/(?<=[\s_-])/);
+  // Words keep their trailing separator. No lookbehind: Safari before 16.4 cannot parse it.
+  const words = text.match(/[^\s_-]*[\s_-]?/g)?.filter(Boolean) ?? [text];
   let first = "";
   for (const word of words) {
     if ((first + word).length > width && first) break;

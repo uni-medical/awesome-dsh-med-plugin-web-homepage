@@ -6,12 +6,12 @@ import { useComponentDetail, useComponents } from "../state/useComponents";
 import { PlanToggle, RiskBadge } from "./ComponentCard";
 import { CopyBlock } from "./CopyBlock";
 import { QualityRadar } from "./QualityRadar";
+import { shellQuote } from "../lib/shell";
 
 type Copy = ReturnType<typeof useComponentCopy>;
 
 const SETUP_GUIDE_URL = "https://github.com/uni-medical/awesome-dsh-med-plugin/blob/integrate/README.metaharness.zh.md";
 const RELATION_PREVIEW = 8;
-const quote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
 
 function Panel({ title, className = "", children }: { title: string; className?: string; children: ReactNode }) {
   return <section className={`detail-panel ${className}`}><h3>{title}</h3>{children}</section>;
@@ -37,14 +37,14 @@ function InstallPanel({ detail, copy }: { detail: ComponentDetail; copy: Copy })
   const requirementLabels: Record<string, string> = { configuration: c.requiresConfiguration, runtime: c.requiresRuntime, resource: c.requiresResource };
   return <Panel title={c.install} className="install-panel">
     {install ? <>
-      <CopyBlock label={c.install} text={`dsh-med inspect ${quote(install.entryId)}\ndsh-med install ${quote(install.entryId)} --profile medical`}/>
+      <CopyBlock label={c.install} text={`dsh-med inspect ${shellQuote(install.entryId)}\ndsh-med install ${shellQuote(install.entryId)} --profile medical`}/>
       <div className="panel-field"><span>{c.entryId}</span><CopyBlock label={c.entryId} text={install.entryId} inline/></div>
       {install.installability !== "ready" && <p className="panel-warning">{c.installNotReady}</p>}
       {install.trust === "candidate" && <p className="panel-warning">{c.installCandidate}</p>}
       {install.requires.length > 0 && <ul className="panel-lines">{install.requires.map(kind => <li key={kind}>{requirementLabels[kind] ?? kind}</li>)}</ul>}
       <p className="panel-note">{c.installNote} <a href={SETUP_GUIDE_URL} target="_blank" rel="noopener noreferrer">{c.installGuide} ↗</a></p>
     </> : <p className="panel-note">{c.installUnavailable}</p>}
-    <div className="panel-field"><span>{c.source}</span><CopyBlock label={c.source} text={`git clone ${detail.repositoryUrl}.git`} inline/></div>
+    <div className="panel-field"><span>{c.source}</span><CopyBlock label={c.source} text={`git clone ${shellQuote(`${detail.repositoryUrl}.git`)}`} inline/></div>
   </Panel>;
 }
 

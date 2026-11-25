@@ -24,6 +24,8 @@ import { RELATION_TYPES, catalogueRelations, compactEdges, indexToCatalogueIds, 
 import { collectVocabulary } from "./lib/vocabulary.mjs";
 
 const SHARD_COUNT = 128;
+/** Repositories are rendered as links and copied into `git clone`; anything else is dropped. */
+const REPO_PATH = /^[\w.-]+\/[\w.-]+$/;
 const frontendDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = resolve(frontendDir, "..");
 const lock = JSON.parse(readFileSync(join(repoRoot, "data/upstream-lock.json"), "utf8"));
@@ -72,7 +74,7 @@ function writeJson(path, value) {
 }
 
 function count(values) {
-  const result = {};
+  const result = Object.create(null);
   for (const value of values) result[value] = (result[value] ?? 0) + 1;
   return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
 }
@@ -96,7 +98,9 @@ function main() {
   const publicCards = [];
 
   const summaries = [];
-  const shards = Array.from({ length: SHARD_COUNT }, () => ({}));
+  // Prototype-free objects: an upstream id such as "__proto__" must stay an ordinary key.
+  const shards = Array.from({ length: SHARD_COUNT }, () => Object.create(null));
+  const invalidRepository = [];
   let missingCard = 0;
   for (const entry of [...entries].sort((a, b) => a.id.localeCompare(b.id))) {
     const row = links.get(entry.id);
@@ -105,6 +109,7 @@ function main() {
     const publicCard = card ? toPublicCard(card, row) : null;
     if (publicCard) publicCards.push(publicCard);
     const repo = row?.repository || entryRepository(entry, records.get(entry.id));
+    if (!REPO_PATH.test(repo)) { invalidRepository.push(entry.id); continue; }
     summaries.push(toComponentSummary(entry, repo, publicCard));
     const detail = toComponentDetail(entry, records.get(entry.id), repo, publicCard, status.get(entry.id));
     shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = { ...detail, install: installHint(records.get(entry.id), requirements), relations: relationsById.get(entry.id) ?? [] };
@@ -155,6 +160,7 @@ function main() {
       exported: summaries.length,
       evaluatedExported: evaluated.length,
       linkedRowWithoutCard: missingCard,
+      skippedInvalidRepository: invalidRepository.length,
     },
     link: {
       rule: "repository (lower case) + type + component root path (case-sensitive) + name; skill root = SKILL.md directory, mcp = tool name (same-named tools narrowed by the provider's service suffix), cli = definition-file directory + name, dsh-plugin = cordis.patch.yml directory. A card is attached only when one row matches the entry and no other entry claims that row.",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "frontendBaseCommit": "a9be46bb4f353ead25e3722f5d6bf927e4c952bc",
+  "frontendBaseCommit": "e36e5249712b15fc22a0088d3c0ae482e79774d5",
   "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
   "upstream": {
     "entries": {
@@ -42,7 +42,8 @@
     "entryTableRows": 10432,
     "exported": 10425,
     "evaluatedExported": 10074,
-    "linkedRowWithoutCard": 0
+    "linkedRowWithoutCard": 0,
+    "skippedInvalidRepository": 0
   },
   "link": {
     "rule": "repository (lower case) + type + component root path (case-sensitive) + name; skill root = SKILL.md directory, mcp = tool name (same-named tools narrowed by the provider's service suffix), cli = definition-file directory + name, dsh-plugin = cordis.patch.yml directory. A card is attached only when one row matches the entry and no other entry claims that row.",

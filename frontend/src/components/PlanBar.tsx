@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { componentClient } from "../api/componentClient";
-import { PLAN_PARAM, decodePlanShare, exportPlanFile, formatInstallScript, formatPlan, mergePlans, parsePlanFile, resolvePlanIds, sharePlanUrl, type PlanItem } from "../lib/plan";
+import { MAX_PLAN_FILE_BYTES, MAX_SHARE_URL_LENGTH, PLAN_PARAM, decodePlanShare, exportPlanFile, formatInstallScript, formatPlan, mergePlans, parsePlanFile, resolvePlanIds, sharePlanUrl, type PlanItem } from "../lib/plan";
 import { useComponentCopy } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
 import { useWorkspace } from "../state/WorkspaceContext";
@@ -33,6 +33,7 @@ export function PlanBar() {
   const [state, setState] = useState<CopyState>("idle");
   const [pendingIds, setPendingIds] = useState<string[] | null>(null);
   const [invalid, setInvalid] = useState(false);
+  const [tooLong, setTooLong] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   // A share link carries the plan in ?plan=…; take it out of the URL and ask before importing.
@@ -58,7 +59,10 @@ export function PlanBar() {
     setState("busy");
     try {
       let text = formatPlan(plan);
-      if (kind === "share") text = sharePlanUrl(plan, window.location.origin, import.meta.env.BASE_URL);
+      if (kind === "share") {
+        text = sharePlanUrl(plan, window.location.origin, import.meta.env.BASE_URL);
+        if (text.length > MAX_SHARE_URL_LENGTH) { setState("idle"); setTooLong(true); return; }
+      }
       if (kind === "install") {
         const details = await Promise.all(plan.map(item => componentClient.getDetail(item.id)));
         text = formatInstallScript(plan, new Map(plan.map((item, index) => [item.id, details[index]?.install?.entryId ?? null])), locale);
@@ -84,6 +88,7 @@ export function PlanBar() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    if (file.size > MAX_PLAN_FILE_BYTES) { setInvalid(true); return; }
     try {
       const ids = parsePlanFile(await file.text());
       if (ids.length) { setPendingIds(ids); setInvalid(false); } else setInvalid(true);
@@ -103,6 +108,7 @@ export function PlanBar() {
     {invalid && <div className="plan-import" role="alert"><p>{c.importInvalid}</p><div className="plan-actions"><button type="button" onClick={() => setInvalid(false)}>{c.close}</button></div></div>}
     {open && <div className="plan-list" id="plan-list">
       <p className="plan-hint">{c.planHint} {c.transferHint}</p>
+      {tooLong && <p className="panel-warning">{c.shareTooLong}</p>}
       {plan.length ? <ol>{plan.map(item => <li key={item.id}><span><b>{item.name}</b><small>{types[item.type]} · {item.repo}</small></span><button type="button" onClick={() => removeFromPlan(item.id)} aria-label={`${c.remove}: ${item.name}`}>×</button></li>)}</ol> : <p>{c.planEmpty}</p>}
       <div className="plan-actions plan-transfer">
         <button type="button" disabled={!plan.length || state === "busy"} onClick={() => copy("share")}>{label("share", c.sharePlan)}</button>

@@ -56,6 +56,8 @@ describe("English evaluation text", () => {
     expect(evaluationText("en", "judge")).toBe("AI review");
     expect(evaluationText("zh", "rule v4")).toBe("规则 v4");
     expect(evaluationText("en", "组件通过 PubMed 检索论文。")).toBe("组件通过 PubMed 检索论文。");
+    expect(evaluationText("en", "constructor")).toBe("constructor");
+    expect(evaluationText("zh", "__proto__")).toBe("__proto__");
   });
 });
 
