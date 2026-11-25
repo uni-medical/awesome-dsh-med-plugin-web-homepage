@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { aliasesFor } from "../src/data/queryAliases";
 import { neighbourLinks, neighbours, prepare, queryTerms, searchCandidates, sharedRepositories, sharedWords, similarity } from "../src/lib/capabilitySearch";
 import type { ComponentSummary } from "../src/lib/components";
-import { formatPlan, parsePlan, removePlanItem, serialisePlan, togglePlanItem } from "../src/lib/plan";
+import { formatInstallScript, formatPlan, parsePlan, removePlanItem, serialisePlan, togglePlanItem } from "../src/lib/plan";
 import { radarPoint, radarPolygon, ringPositions, wrapLabel } from "../src/lib/radar";
 
 const summary = (id: string, name: string, overrides: Partial<ComponentSummary> = {}): ComponentSummary => ({
@@ -65,6 +65,18 @@ describe("plan", () => {
     expect(parsePlan(serialisePlan(added))).toEqual(added);
     expect(removePlanItem(added, "a")).toEqual([]);
     expect(formatPlan(added)).toBe("1. PubMed Search (mcp · o/r) — a");
+  });
+
+  it("formats a dsh-med install script, noting items without an install entry", () => {
+    const other = { id: "b", name: "Line\nbreak; rm -rf /", type: "skill" as const, repo: "x/y" };
+    const script = formatInstallScript([item, other], new Map([["a", "mcp:o/r/a-1"], ["b", null]]), "en");
+    expect(script.split("\n")).toEqual([
+      "# Plan: 2 components (Medical Component Market)",
+      expect.stringContaining("# Requires the dsh-med CLI"),
+      "dsh-med install 'mcp:o/r/a-1' --profile medical  # PubMed Search",
+      "# Line break; rm -rf /: no upstream install entry; get it from https://github.com/x/y",
+    ]);
+    expect(formatInstallScript([item], new Map([["a", "it's"]]), "zh")).toContain("dsh-med install 'it'\\''s' --profile medical");
   });
 
   it("drops malformed or duplicate stored items", () => {

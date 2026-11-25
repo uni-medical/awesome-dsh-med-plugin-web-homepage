@@ -357,3 +357,7 @@ html[data-motion="reduced"] .component-card:hover { transform: none; }
 .graph-terms small { color: var(--theme-muted, #8ea3c0); }
 .graph-examples ul { grid-template-columns: 1fr; }
 @media (max-width: 620px) { .relation-list li { grid-template-columns: minmax(0, 1fr); } }
+.plan-list .plan-hint { margin-bottom: 10px; color: var(--theme-text, #b7c6dd); }
+.plan-actions button:first-child { color: var(--theme-on-accent, #fff); border-color: transparent; background: var(--theme-action-bg, #1762a8); }
+.graph-detail-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; flex: 0 0 auto; }
+.overview-actions { flex-wrap: wrap; justify-content: flex-end; }

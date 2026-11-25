@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CandidateGraph, type GraphNode } from "../components/CandidateGraph";
 import { PlanToggle, RiskBadge } from "../components/ComponentCard";
 import { ComponentDetailDialog } from "../components/ComponentDetailDialog";
@@ -8,6 +8,9 @@ import { useComponentCopy, useEntryDialog } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
 
 type Tab = "related" | "overview";
+
+/** The component's profile in the ecosystem: its detail dialog over a list filtered to its name. */
+const profileLink = (component: { id: string; name: string }) => `/marketplace?q=${encodeURIComponent(component.name)}&entry=${encodeURIComponent(component.id)}`;
 type View = "graph" | "list";
 
 /** Two example tasks per market group, so every area of the catalogue has an entry point. */
@@ -57,7 +60,7 @@ function Overview({ group, onOpen }: { group: CandidateGroup; onOpen: (id: strin
     <h3>{c.members} · {group.members.length}</h3>
     <ul>{group.members.map(member => <li key={member.id}>
       <div><strong>{member.name}</strong><small>{types[member.type]} · {member.repo}</small><p>{member.description}</p></div>
-      <div className="overview-actions"><RiskBadge level={member.risk}/><button type="button" className="dialog-secondary" onClick={() => onOpen(member.id)}>{c.details}</button><PlanToggle component={member}/></div>
+      <div className="overview-actions"><RiskBadge level={member.risk}/><button type="button" className="dialog-secondary" onClick={() => onOpen(member.id)}>{c.details}</button><Link className="dialog-secondary" to={profileLink(member)}>{c.viewProfile} ↗</Link><PlanToggle component={member}/></div>
     </li>)}</ul>
   </div>;
 }
@@ -135,7 +138,12 @@ export function CapabilityGraphPage() {
         {selected ? <>
           <div className="graph-detail-head">
             <div><h2>{selected.name}</h2><p>{selected.members[0].description}</p></div>
-            {selected.members.length === 1 ? <PlanToggle component={selected.members[0]}/> : <button type="button" className="dialog-secondary" onClick={() => setTab("overview")}>{c.members} · {selected.members.length}</button>}
+            <div className="graph-detail-actions">
+              {selected.members.length === 1
+                ? <Link className="dialog-secondary" to={profileLink(selected.members[0])}>{c.viewProfile} ↗</Link>
+                : <Link className="dialog-secondary" to={`/marketplace?q=${encodeURIComponent(selected.name)}`}>{c.viewAllRecords} {selected.members.length} ↗</Link>}
+              {selected.members.length === 1 ? <PlanToggle component={selected.members[0]}/> : <button type="button" className="dialog-secondary" onClick={() => setTab("overview")}>{c.members} · {selected.members.length}</button>}
+            </div>
           </div>
           <div className="graph-tabs">
             <div role="tablist" aria-label={selected.name}>
@@ -159,6 +167,6 @@ export function CapabilityGraphPage() {
         </> : <p className="graph-empty">{query ? c.graphNoResults : c.graphHint}</p>}
       </section>
     </div>
-    <ComponentDetailDialog entryId={entryId} onClose={close} onOpen={open}/>
+    <ComponentDetailDialog entryId={entryId} onClose={close} onOpen={open} showMarketLink/>
   </div>;
 }

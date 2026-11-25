@@ -185,7 +185,7 @@ function DetailBody({ detail, byId, onOpen, copy }: { detail: ComponentDetail; b
   </div>;
 }
 
-export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = true }: { entryId: string | null; onClose: () => void; onOpen: (id: string) => void; showMapLink?: boolean }) {
+export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = true, showMarketLink = false }: { entryId: string | null; onClose: () => void; onOpen: (id: string) => void; showMapLink?: boolean; showMarketLink?: boolean }) {
   const copy = useComponentCopy();
   const { c, types } = copy;
   const { detail, loading, error, missing } = useComponentDetail(entryId);
@@ -210,6 +210,7 @@ export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = 
           {detail && <p><b>{types[detail.type]}</b> · {detail.repo}</p>}
         </div>
         <div className="component-dialog-actions">
+          {detail && showMarketLink && <Link className="dialog-secondary" to={`/marketplace?q=${encodeURIComponent(detail.name)}&entry=${encodeURIComponent(detail.id)}`}>{c.openInEcosystem} ↗</Link>}
           {detail && showMapLink && <Link className="dialog-secondary" to={`/graph?focus=${encodeURIComponent(detail.id)}`}>{c.openMap} ↗</Link>}
           {detail && <PlanToggle component={detail}/>}
           <button type="button" className="dialog-close" onClick={onClose} aria-label={c.close}>×</button>

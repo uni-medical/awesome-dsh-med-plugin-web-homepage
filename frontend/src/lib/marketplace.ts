@@ -47,13 +47,26 @@ export function filterComponents(indexed: readonly IndexedComponent[], params: U
   const types = new Set(read("type"));
   const risks = new Set(read("risk"));
   const [fn] = read("fn");
-  return indexed.filter(({ item, text }) => {
+  const matches = indexed.filter(({ item, text }) => {
     if (group && item.group !== group) return false;
     if (types.size && !types.has(item.type)) return false;
     if (risks.size && !risks.has(item.risk ?? NOT_EVALUATED)) return false;
     if (fn && item.functionPrimary !== fn) return false;
     return !compiled.length || matchesCompiled(text, compiled);
   }).map(({ item }) => item);
+  const query = (ignore.includes("q") ? "" : params.get("q") ?? "").trim().toLowerCase();
+  return query ? rankByName(matches, query) : matches;
+}
+
+/** Stable re-ordering: exact name, then names starting with the query, then names containing it, then the rest. */
+export function rankByName<T extends { name: string }>(items: readonly T[], query: string): T[] {
+  const rank = (name: string) => {
+    const lower = name.toLowerCase();
+    return lower === query ? 0 : lower.startsWith(query) ? 1 : lower.includes(query) ? 2 : 3;
+  };
+  return items.map((item, index) => ({ item, index, rank: rank(item.name) }))
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .map(({ item }) => item);
 }
 
 export function countBy<T>(items: readonly T[], key: (item: T) => string | null): Map<string, number> {

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { ComponentSummary } from "../src/lib/components";
 import { searchText } from "../src/lib/components";
-import { countBy, filterComponents, matchesQuery, toggleMultiValue } from "../src/lib/marketplace";
+import { countBy, filterComponents, matchesQuery, rankByName, toggleMultiValue } from "../src/lib/marketplace";
 
 const summary = (overrides: Partial<ComponentSummary>): ComponentSummary => ({
   id: "skill:o/r/x", name: "x", type: "skill", repo: "O/R", description: "", tags: [], group: "tools", domain: "general", tasks: [], risk: null, functionPrimary: null, functionLabels: [], ...overrides,
@@ -39,6 +39,11 @@ describe("component list filters", () => {
   it("can ignore one facet so its counts reflect the other filters", () => {
     expect(ids("group=omics&type=mcp", ["type"])).toEqual(["skill:b/scanpy/qc"]);
     expect(countBy(items, item => item.functionPrimary)).toEqual(new Map([["数据检索与查询", 1], ["分析流程", 1]]));
+  });
+
+  it("ranks exact and leading name matches first, keeping catalogue order otherwise", () => {
+    const named = ["Read FHIR resource", "FHIR read", "Bulk FHIR reader", "FHIR read tools"].map(name => ({ name }));
+    expect(rankByName(named, "fhir read").map(item => item.name)).toEqual(["FHIR read", "FHIR read tools", "Bulk FHIR reader", "Read FHIR resource"]);
   });
 
   it("toggles repeated query values without disturbing other filters", () => {
