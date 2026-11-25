@@ -12,9 +12,9 @@ type JourneyFrame = {
 
 const frames: JourneyFrame[] = [
   { index: "01", keyword: "DISCOVER", keywordZh: "发现", idea: "Begin with a medical or life-science domain, then locate the component families around it.", ideaZh: "从医学或生命科学领域开始，定位与研究问题相关的组件族。", image: "domains.jpg" },
-  { index: "02", keyword: "COMPARE", keywordZh: "比较", idea: "Read the public context together: type, description, tags, license, and observed signals.", ideaZh: "并列查看类型、描述、标签、许可证与观测信号等公开信息。", image: "metadata.jpg" },
-  { index: "03", keyword: "TRACE", keywordZh: "追溯", idea: "Follow each record back to its repository and inspect the source before reuse.", ideaZh: "沿着每条记录回到来源仓库，在复用前检查项目内容。", image: "sources.jpg" },
-  { index: "04", keyword: "COMPOSE", keywordZh: "组合", idea: "Bring compatible components into a medical AI research workflow as the catalogue grows.", ideaZh: "随着目录扩展，将兼容组件组合进医疗 AI 研究工作流。", image: "market.jpg" },
+  { index: "02", keyword: "COMPARE", keywordZh: "比较", idea: "Read each evaluation card together: security risk, function, quality profile and medical content.", ideaZh: "并列查看每张评估卡：安全风险、功能、质量画像与医学相关内容。", image: "metadata.jpg" },
+  { index: "03", keyword: "TRACE", keywordZh: "追溯", idea: "Copy the install command or follow the record back to its repository before reuse.", ideaZh: "复制安装命令，或沿记录回到来源仓库，在复用前检查项目内容。", image: "sources.jpg" },
+  { index: "04", keyword: "COMPOSE", keywordZh: "组合", idea: "Use the capability map to find components that depend on, feed or replace each other, then add them to a plan.", ideaZh: "在能力星图中找到相互依赖、传递数据或可替代的组件，再加入方案。", image: "market.jpg" },
 ];
 
 export function ScrollJourney({ language }: { language: "en" | "zh" }) {

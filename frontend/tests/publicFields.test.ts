@@ -53,7 +53,7 @@ describe("summary and detail records", () => {
   it("summarises an evaluated entry for the list", () => {
     expect(toComponentSummary(entry, "O/R", toPublicCard(card, undefined))).toEqual({
       id: "cli:o/r/a", name: "A", type: "cli", repo: "O/R", description: "Searches PubMed.", tags: ["pubmed", "search"],
-      group: "literature", domain: "literature", tasks: ["search", "literature-search"], risk: "green", functionPrimary: "数据检索与查询",
+      group: "literature", domain: "literature", tasks: ["search", "literature-search"], risk: "green", functionPrimary: "数据检索与查询", functionLabels: ["文献检索与综述"],
     });
   });
 
@@ -61,6 +61,7 @@ describe("summary and detail records", () => {
     const summary = toComponentSummary(entry, "O/R", null);
     expect(summary.risk).toBeNull();
     expect(summary.functionPrimary).toBeNull();
+    expect(summary.functionLabels).toEqual([]);
     const detail = toComponentDetail(entry, record, "O/R", null, "unmatched");
     expect(detail.evaluation).toBeNull();
     expect(detail.link).toEqual({ status: "unmatched" });

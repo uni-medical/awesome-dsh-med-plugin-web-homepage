@@ -5,7 +5,7 @@ import { searchText } from "../src/lib/components";
 import { countBy, filterComponents, matchesQuery, toggleMultiValue } from "../src/lib/marketplace";
 
 const summary = (overrides: Partial<ComponentSummary>): ComponentSummary => ({
-  id: "skill:o/r/x", name: "x", type: "skill", repo: "O/R", description: "", tags: [], group: "tools", domain: "general", tasks: [], risk: null, functionPrimary: null, ...overrides,
+  id: "skill:o/r/x", name: "x", type: "skill", repo: "O/R", description: "", tags: [], group: "tools", domain: "general", tasks: [], risk: null, functionPrimary: null, functionLabels: [], ...overrides,
 });
 
 const items = [

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "frontendBaseCommit": "90acf9a511d1aadb78923f5f7fcdc777d9d45966",
+  "frontendBaseCommit": "a9be46bb4f353ead25e3722f5d6bf927e4c952bc",
   "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
   "upstream": {
     "entries": {
@@ -26,6 +26,12 @@
       "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
       "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/entry-table/entry-scores.tsv.gz",
       "committedAt": "2026-11-24T16:03:17+00:00"
+    },
+    "relations": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/capabilities/component-relations.json",
+      "committedAt": "2026-11-25T01:59:46-05:00"
     }
   },
   "counts": {
@@ -114,10 +120,33 @@
       "mcp:nickzren/monarch-mcp/get_variant_gene_associations"
     ]
   },
+  "relations": {
+    "source": "data/capabilities/component-relations.json",
+    "upstreamRelations": 15102,
+    "catalogueEdges": 2607,
+    "byType": {
+      "alternative_to": 595,
+      "data-flow": 270,
+      "declared-use": 1201,
+      "precedes": 4,
+      "requires": 527,
+      "shared-input": 9,
+      "wrapper": 1
+    },
+    "componentsWithRelations": 2817,
+    "skipped": {
+      "provides": 12400,
+      "unknownType": 0,
+      "outsideCatalogue": 45,
+      "selfLoop": 0,
+      "duplicate": 50
+    },
+    "componentsWithInstallHint": 10384
+  },
   "outputs": {
-    "indexBytes": 7126388,
+    "indexBytes": 7892731,
     "detailShards": 128,
-    "detailBytes": 37395397,
-    "largestShardBytes": 373401
+    "detailBytes": 41145395,
+    "largestShardBytes": 412912
   }
 }

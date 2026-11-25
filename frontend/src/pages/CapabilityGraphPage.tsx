@@ -1,19 +1,33 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CandidateGraph } from "../components/CandidateGraph";
+import { CandidateGraph, type GraphNode } from "../components/CandidateGraph";
 import { PlanToggle, RiskBadge } from "../components/ComponentCard";
 import { ComponentDetailDialog } from "../components/ComponentDetailDialog";
-import { neighbourLinks, neighbours, normaliseName, prepare, searchCandidates, type CandidateGroup } from "../lib/capabilitySearch";
+import { NEIGHBOUR_LIMIT, catalogueNeighbours, neighbourLinks, neighbours, normaliseName, prepare, queryTermGroups, searchCandidates, type CandidateGroup } from "../lib/capabilitySearch";
 import { useComponentCopy, useEntryDialog } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
 
-const CJK = /[㐀-鿿]/;
 type Tab = "related" | "overview";
 type View = "graph" | "list";
 
+/** Two example tasks per market group, so every area of the catalogue has an entry point. */
 const EXAMPLE_QUERIES = {
-  zh: ["检索神经肿瘤相关论文，读取摘要并追踪引用", "单细胞 RNA-seq 细胞类型注释", "药物靶点与不良反应查询", "医学影像分割"],
-  en: ["Search neuro-oncology papers, read abstracts and trace citations", "single-cell RNA-seq cell type annotation", "drug target and adverse event lookup", "medical image segmentation"],
+  zh: [
+    "检索神经肿瘤相关论文，读取摘要并追踪引用", "临床试验检索与证据综述",
+    "单细胞 RNA-seq 细胞类型注释", "基因变异注释与致病性查询",
+    "药物靶点与不良反应查询", "化合物相似性检索与分子对接",
+    "电子病历 FHIR 数据读取", "公共卫生与流行病统计分析",
+    "医学影像分割", "病理全切片图像分析",
+    "论文写作与引用管理", "生物信息工作流与数据可视化",
+  ],
+  en: [
+    "Search neuro-oncology papers, read abstracts and trace citations", "Clinical trial search and evidence review",
+    "Single-cell RNA-seq cell type annotation", "Variant annotation and pathogenicity lookup",
+    "Drug target and adverse event lookup", "Compound similarity search and molecular docking",
+    "Read EHR data through FHIR", "Public health and epidemiology statistics",
+    "Medical image segmentation", "Pathology whole slide image analysis",
+    "Paper writing and citation management", "Bioinformatics workflow and data visualization",
+  ],
 };
 
 function ExampleQueries({ onPick }: { onPick: (query: string) => void }) {
@@ -49,8 +63,8 @@ function Overview({ group, onOpen }: { group: CandidateGroup; onOpen: (id: strin
 }
 
 export function CapabilityGraphPage() {
-  const { components, byId, loading, error } = useComponents();
-  const { c, formatNumber } = useComponentCopy();
+  const { components, edges, byId, loading, error } = useComponents();
+  const { c, formatNumber, relations: relationLabels, e } = useComponentCopy();
   const [params, setParams] = useSearchParams();
   const { entryId, open, close } = useEntryDialog();
   const focus = params.get("focus");
@@ -67,8 +81,17 @@ export function CapabilityGraphPage() {
   const focusKey = focusComponent ? normaliseName(focusComponent.name) : undefined;
   const requested = params.get("node") ?? focusKey;
   const selected = result.groups.find(group => group.key === requested) ?? result.groups[0];
-  const related = useMemo(() => (selected ? neighbours(result.groups, selected) : []), [result.groups, selected]);
-  const links = useMemo(() => neighbourLinks(related), [related]);
+  const catalogue = useMemo(() => (selected ? catalogueNeighbours(selected, edges, byId) : []), [selected, edges, byId]);
+  const related = useMemo(() => {
+    const catalogueKeys = new Set(catalogue.map(item => item.key));
+    return selected ? neighbours(result.groups, selected, Number.POSITIVE_INFINITY).filter(item => !catalogueKeys.has(item.group.key)) : [];
+  }, [result.groups, selected, catalogue]);
+  const nodes = useMemo<GraphNode[]>(() => [
+    ...catalogue.map(item => ({ key: item.key, name: item.name, memberCount: item.members.length, kind: "catalogue" as const, relations: item.relations, sameRepository: [], shared: [], similarity: 1 })),
+    ...related.slice(0, NEIGHBOUR_LIMIT).map(item => ({ key: item.group.key, name: item.group.name, memberCount: item.group.members.length, kind: "retrieval" as const, relations: [], sameRepository: item.sameRepository, shared: item.shared, similarity: item.similarity })),
+  ], [catalogue, related]);
+  const links = useMemo(() => neighbourLinks(related.slice(0, NEIGHBOUR_LIMIT)), [related]);
+  const termGroups = useMemo(() => queryTermGroups(query), [query]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -77,6 +100,13 @@ export function CapabilityGraphPage() {
   function search(text: string) {
     setDraft(text);
     setParams(() => new URLSearchParams({ q: text }));
+  }
+  function activate(node: GraphNode) {
+    if (result.groups.some(group => group.key === node.key)) select(node.key);
+    else {
+      const member = catalogue.find(item => item.key === node.key)?.members[0];
+      if (member) open(member.id);
+    }
   }
   function select(key: string) {
     setParams(current => { const next = new URLSearchParams(current); next.set("node", key); if (!next.get("q") && query) next.set("q", query); return next; }, { replace: true });
@@ -89,7 +119,10 @@ export function CapabilityGraphPage() {
         onKeyDown={event => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}/>
       <button type="submit" className="primary-button">{c.graphExplore}</button>
     </form>
-    {query && result.terms.length > 0 && <p className="graph-terms">{c.terms}：{result.terms.join(" · ")}{CJK.test(query) ? ` · ${c.chineseNote}` : ""}</p>}
+    {query && termGroups.length > 0 && <div className="graph-terms"><span>{c.terms}</span>
+      <ul>{termGroups.map(group => <li key={group.source ?? "latin"}>{group.source && <b lang="zh-CN">{group.source}</b>}{group.source && <i aria-hidden="true">→</i>}{group.terms.join(" · ")}</li>)}</ul>
+      {termGroups.some(group => group.source) && <small>{c.chineseNote}</small>}
+    </div>}
     <div className="graph-layout">
       <aside className="graph-candidates" aria-label={c.candidates}>
         <div className="graph-candidates-head"><h2>{c.candidates}</h2><span>{formatNumber(result.groups.length)}</span></div>
@@ -115,14 +148,17 @@ export function CapabilityGraphPage() {
             </div>}
           </div>
           {tab === "related" ? <>
-            <p className="graph-relation-note" role="status">{c.relationNote} · {related.length} / {formatNumber(result.groups.length)} {c.groups}</p>
-            {!related.length ? <p className="graph-empty">{c.noNeighbours}</p>
-              : view === "graph" ? <CandidateGraph selected={selected} related={related} links={links} onSelect={select}/>
-              : <table className="related-table"><thead><tr><th>{c.candidates}</th><th>{c.relation}</th><th>{c.sharedWords}</th><th>{c.members}</th><th>{c.similarity}</th></tr></thead><tbody>{related.map(({ group, similarity, shared, sameRepository }) => <tr key={group.key}><td><button type="button" className="text-button" onClick={() => select(group.key)}>{group.name}</button></td><td>{sameRepository.length ? `${c.sameRepository}：${sameRepository.join("、")}` : c.sharedWords}</td><td>{shared.join(" · ") || "—"}</td><td>{group.members.length}</td><td>{Math.round(similarity * 100)}%</td></tr>)}</tbody></table>}
+            <p className="graph-relation-note" role="status">{catalogue.length} {c.catalogueCount} · {Math.min(related.length, NEIGHBOUR_LIMIT)} / {formatNumber(result.groups.length)} {c.candidatesShown}</p>
+            {!nodes.length ? <p className="graph-empty">{c.noNeighbours}</p>
+              : view === "graph" ? <CandidateGraph selected={selected} nodes={nodes} links={links} onNode={activate}/>
+              : <table className="related-table"><thead><tr><th>{c.candidates}</th><th>{c.relation}</th><th>{c.sharedWords}</th><th>{c.members}</th><th>{c.similarity}</th></tr></thead><tbody>
+                {catalogue.map(item => <tr key={`c-${item.key}`} className="is-catalogue"><td><button type="button" className="text-button" onClick={() => activate({ key: item.key, name: item.name, memberCount: item.members.length, kind: "catalogue", relations: item.relations, sameRepository: [], shared: [], similarity: 1 })}>{item.name}</button></td><td>{c.catalogueRelation}: {item.relations.map(relation => relationLabels[relation.type][relation.direction]).join(" / ")}</td><td>—</td><td>{item.members.length}</td><td>—</td></tr>)}
+                {related.map(({ group, similarity, shared, sameRepository }) => <tr key={group.key}><td><button type="button" className="text-button" onClick={() => select(group.key)}>{group.name}</button></td><td>{sameRepository.length ? `${c.sameRepository}: ${sameRepository.join(", ")}` : c.sharedWords}</td><td>{shared.map(e).join(" · ") || "—"}</td><td>{group.members.length}</td><td>{Math.round(similarity * 100)}%</td></tr>)}
+              </tbody></table>}
           </> : <Overview group={selected} onOpen={open}/>}
         </> : <p className="graph-empty">{query ? c.graphNoResults : c.graphHint}</p>}
       </section>
     </div>
-    <ComponentDetailDialog entryId={entryId} onClose={close}/>
+    <ComponentDetailDialog entryId={entryId} onClose={close} onOpen={open}/>
   </div>;
 }

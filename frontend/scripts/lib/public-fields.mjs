@@ -95,6 +95,7 @@ export function toComponentSummary(entry, repo, publicCard) {
     tasks,
     risk: publicCard ? publicCard.risk.level : null,
     functionPrimary: publicCard ? publicCard.function.primary : null,
+    functionLabels: publicCard ? publicCard.function.subLabels : [],
   };
 }
 

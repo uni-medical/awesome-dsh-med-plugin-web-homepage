@@ -16,6 +16,7 @@ describe("component index parsing", () => {
     const index = parseComponentIndex({ schemaVersion: "2", components: [summary, { ...summary }, { ...summary, id: "x", type: "plugin" }, null] });
     expect(index.components.map(item => item.id)).toEqual(["cli:o/r/a"]);
     expect(index.skipped).toBe(3);
+    expect(index.components[0].functionLabels).toEqual([]);
   });
 
   it("rejects an index from an unsupported schema", () => {

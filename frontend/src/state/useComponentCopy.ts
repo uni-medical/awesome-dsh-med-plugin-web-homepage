@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { GROUP_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
+import { GROUP_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
+import { evaluationText } from "../lib/evaluationText";
 import { useUiLanguage } from "./useUiLanguage";
 
 export function useComponentCopy() {
   const { locale, formatNumber } = useUiLanguage();
-  return { locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], risks: RISK_LABELS[locale] };
+  return { locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
 }
 
 /**

@@ -22,6 +22,11 @@
       "branch": "user-card-taxonomy-20261112",
       "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
       "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/entry-table/entry-scores.tsv.gz"
+    },
+    "relations": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/capabilities/component-relations.json"
     }
   }
 }

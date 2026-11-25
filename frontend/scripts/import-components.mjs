@@ -8,7 +8,8 @@
 //   public/data/components/index.json         list/search records (fetched at runtime)
 //   public/data/components/detail/NNN.json    detail records, sharded by id
 //   src/data/componentSummary.json            counts bundled into the app
-//   ../data/component-import-report.json      provenance and link coverage
+//   ../data/component-import-report.json      provenance, link coverage and relation counts
+//   ../data/evaluation-vocabulary.json        closed card vocabularies (checked against the English glossary)
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -19,6 +20,8 @@ import { gunzipSync } from "node:zlib";
 import { linkEntriesToRows, pairIndexRecords, entryRepository } from "./lib/link-cards.mjs";
 import { toComponentDetail, toComponentSummary, toPublicCard } from "./lib/public-fields.mjs";
 import { shardOf } from "./lib/shard.mjs";
+import { RELATION_TYPES, catalogueRelations, compactEdges, indexToCatalogueIds, installHint, relationsByComponent, requirementsIndex } from "./lib/relations.mjs";
+import { collectVocabulary } from "./lib/vocabulary.mjs";
 
 const SHARD_COUNT = 128;
 const frontendDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -80,12 +83,17 @@ function main() {
   const indexRecords = JSON.parse(readSource(dir, lock.sources.entryIndex)).entries;
   const cards = jsonLines(readSource(dir, lock.sources.cards));
   const rows = parseTsv(readSource(dir, lock.sources.entryTable));
+  const relationSource = JSON.parse(readSource(dir, lock.sources.relations));
   const commitDate = (commit) => git(dir, ["show", "-s", "--format=%cI", commit]).trim();
 
   const cardsByUnit = new Map(cards.map(card => [card.unit_id, card]));
   if (cardsByUnit.size !== cards.length) throw new Error("duplicate card unit_id values");
   const records = pairIndexRecords(entries, indexRecords);
   const { links, status, stats } = linkEntriesToRows(entries, records, rows);
+  const { edges, skipped: relationsSkipped } = catalogueRelations(relationSource.relations, indexToCatalogueIds(records));
+  const relationsById = relationsByComponent(edges);
+  const requirements = requirementsIndex(relationSource.externalRequirements);
+  const publicCards = [];
 
   const summaries = [];
   const shards = Array.from({ length: SHARD_COUNT }, () => ({}));
@@ -95,15 +103,20 @@ function main() {
     const card = row ? cardsByUnit.get(row.card_unit_id) : undefined;
     if (row && !card) missingCard += 1;
     const publicCard = card ? toPublicCard(card, row) : null;
+    if (publicCard) publicCards.push(publicCard);
     const repo = row?.repository || entryRepository(entry, records.get(entry.id));
     summaries.push(toComponentSummary(entry, repo, publicCard));
-    shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = toComponentDetail(entry, records.get(entry.id), repo, publicCard, status.get(entry.id));
+    const detail = toComponentDetail(entry, records.get(entry.id), repo, publicCard, status.get(entry.id));
+    shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = { ...detail, install: installHint(records.get(entry.id), requirements), relations: relationsById.get(entry.id) ?? [] };
   }
 
   const upstream = Object.fromEntries(Object.entries(lock.sources).map(([name, source]) => [name, { ...source, committedAt: commitDate(source.commit) }]));
   const outputDir = join(frontendDir, "public/data/components");
   rmSync(outputDir, { recursive: true, force: true });
-  const indexBytes = writeJson(join(outputDir, "index.json"), { schemaVersion: "2", repository: lock.repository, upstream, components: summaries });
+  const positionById = new Map(summaries.map((item, position) => [item.id, position]));
+  const relations = { types: RELATION_TYPES, edges: compactEdges(edges, positionById) };
+  const indexBytes = writeJson(join(outputDir, "index.json"), { schemaVersion: "2", repository: lock.repository, upstream, components: summaries, relations });
+  writeFileSync(join(repoRoot, "data/evaluation-vocabulary.json"), `${JSON.stringify(collectVocabulary(publicCards), null, 2)}\n`);
   let detailBytes = 0;
   let largestShard = 0;
   shards.forEach((shard, index) => {
@@ -151,6 +164,15 @@ function main() {
       ambiguousEntryIds: idsWith("ambiguous"),
       unmatchedEntrySamples: idsWith("unmatched").slice(0, 40),
     },
+    relations: {
+      source: lock.sources.relations.path,
+      upstreamRelations: relationSource.relations.length,
+      catalogueEdges: edges.length,
+      byType: count(edges.map(edge => edge.type)),
+      componentsWithRelations: relationsById.size,
+      skipped: relationsSkipped,
+      componentsWithInstallHint: [...records.keys()].filter(id => installHint(records.get(id), requirements)).length,
+    },
     outputs: {
       indexBytes,
       detailShards: SHARD_COUNT,
@@ -162,6 +184,7 @@ function main() {
   writeFileSync(join(repoRoot, "data/component-import-report.json"), `${JSON.stringify(report, null, 2)}\n`);
 
   console.log(`entries ${entries.length} · cards ${cards.length} · linked ${stats.unique} (${(report.link.coverage * 100).toFixed(1)}%) · ambiguous ${stats.ambiguous} · unmatched ${stats.unmatched}`);
+  console.log(`relations ${edges.length} edges across ${relationsById.size} components`);
   console.log(`index ${(indexBytes / 1e6).toFixed(2)} MB · details ${(detailBytes / 1e6).toFixed(2)} MB in ${SHARD_COUNT} shards (largest ${(largestShard / 1e3).toFixed(0)} KB)`);
 }
 

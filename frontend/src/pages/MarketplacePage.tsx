@@ -28,7 +28,7 @@ function SearchField({ value, onChange }: { value: string; onChange: (value: str
 }
 
 function FilterMenu({ indexed, params, onToggle, onSet }: { indexed: ReturnType<typeof useComponents>["indexed"]; params: URLSearchParams; onToggle: (key: string, value: string) => void; onSet: (key: string, value: string) => void }) {
-  const { c, types, risks, formatNumber } = useComponentCopy();
+  const { c, types, risks, formatNumber, e } = useComponentCopy();
   const typeCounts = useMemo(() => countBy(filterComponents(indexed, params, ["type"]), item => item.type), [indexed, params]);
   const riskCounts = useMemo(() => countBy(filterComponents(indexed, params, ["risk"]), item => item.risk ?? NOT_EVALUATED), [indexed, params]);
   const functionCounts = useMemo(() => [...countBy(indexed.map(entry => entry.item), item => item.functionPrimary)].sort((a, b) => b[1] - a[1]), [indexed]);
@@ -38,7 +38,7 @@ function FilterMenu({ indexed, params, onToggle, onSet }: { indexed: ReturnType<
     <div className="filter-popover">
       <fieldset><legend>{c.filterType}</legend>{COMPONENT_TYPES.map(type => <label key={type}><input type="checkbox" checked={params.getAll("type").includes(type)} onChange={() => onToggle("type", type)}/><span>{types[type]}</span><b>{formatNumber(typeCounts.get(type) ?? 0)}</b></label>)}</fieldset>
       <fieldset><legend>{c.filterRisk}</legend>{RISK_FILTERS.map(risk => <label key={risk}><input type="checkbox" checked={params.getAll("risk").includes(risk)} onChange={() => onToggle("risk", risk)}/><span>{risks[risk]}</span><b>{formatNumber(riskCounts.get(risk) ?? 0)}</b></label>)}</fieldset>
-      <label className="filter-select">{c.filterFunction}<select value={params.get("fn") ?? ""} onChange={event => onSet("fn", event.target.value)}><option value="">{c.all}</option>{functionCounts.map(([value, total]) => <option key={value} value={value}>{value} ({formatNumber(total)})</option>)}</select></label>
+      <label className="filter-select">{c.filterFunction}<select value={params.get("fn") ?? ""} onChange={event => onSet("fn", event.target.value)}><option value="">{c.all}</option>{functionCounts.map(([value, total]) => <option key={value} value={value}>{e(value)} ({formatNumber(total)})</option>)}</select></label>
     </div>
   </details>;
 }
@@ -96,6 +96,6 @@ export function MarketplacePage() {
       <div className="results-head"><h2>{c.explore}</h2><p role="status">{loading ? c.loading : error ? c.loadError : `${formatNumber(shown.length)} ${c.componentsCount}`}</p></div>
       {!loading && !error && !shown.length ? <div className="workbench-empty"><h2>{c.noMatches}</h2><p>{c.noMatchesHint}</p></div> : <ResultGrid items={shown} onOpen={open}/>}
     </div>
-    <ComponentDetailDialog entryId={entryId} onClose={close}/>
+    <ComponentDetailDialog entryId={entryId} onClose={close} onOpen={open}/>
   </div>;
 }

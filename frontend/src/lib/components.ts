@@ -23,6 +23,8 @@ export interface ComponentSummary {
   /** null when no verified evaluation card is attached. */
   risk: RiskLevel | null;
   functionPrimary: string | null;
+  /** Canonical function subcategories from the evaluation card; empty when not evaluated. */
+  functionLabels: string[];
 }
 
 export interface QualityAxis {
@@ -68,6 +70,18 @@ export interface ComponentCapability { domain: string; subdomain: string; task: 
 
 export type LinkStatus = "unique" | "ambiguous" | "unmatched";
 
+/** Catalogue relation types from component-relations.json, in display order. */
+export const RELATION_TYPES = ["requires", "declared-use", "data-flow", "precedes", "shared-input", "wrapper", "composes_with", "contains", "alternative_to"] as const;
+export type RelationType = (typeof RELATION_TYPES)[number];
+
+export interface ComponentRelation { direction: "out" | "in"; type: RelationType; otherId: string; condition: string | null; }
+
+/** Upstream install hint: the entry-index id used by `dsh-med inspect/install`. */
+export interface InstallHint { entryId: string; installability: string; verification: string; trust: string; requires: string[]; }
+
+/** Directed catalogue edge between two components (ids). */
+export interface CatalogueEdge { from: string; to: string; type: RelationType; }
+
 export interface ComponentDetail {
   id: string;
   name: string;
@@ -85,6 +99,8 @@ export interface ComponentDetail {
   capabilities: ComponentCapability[];
   evaluation: EvaluationCard | null;
   link: { status: LinkStatus; cardUnitId?: string };
+  install: InstallHint | null;
+  relations: ComponentRelation[];
 }
 
 export interface UpstreamSource { branch: string; commit: string; path?: string; committedAt: string; }
@@ -94,6 +110,7 @@ export interface ComponentIndex {
   repository: string;
   upstream: Record<string, UpstreamSource>;
   components: ComponentSummary[];
+  edges: CatalogueEdge[];
   skipped: number;
 }
 
@@ -102,14 +119,15 @@ const isString = (value: unknown): value is string => typeof value === "string";
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every(isString);
 const oneOf = <T extends string>(values: readonly T[], value: unknown): value is T => values.includes(value as T);
 
-export function isComponentSummary(value: unknown): value is ComponentSummary {
+export function isComponentSummary(value: unknown): value is Omit<ComponentSummary, "functionLabels"> & { functionLabels?: string[] } {
   if (!isRecord(value)) return false;
   return isString(value.id) && value.id.length > 0
     && isString(value.name) && oneOf(COMPONENT_TYPES, value.type) && isString(value.repo)
     && isString(value.description) && isStringArray(value.tags) && oneOf(DOMAIN_GROUPS, value.group)
     && isString(value.domain) && isStringArray(value.tasks)
     && (value.risk === null || oneOf(RISK_LEVELS, value.risk))
-    && (value.functionPrimary === null || isString(value.functionPrimary));
+    && (value.functionPrimary === null || isString(value.functionPrimary))
+    && (value.functionLabels === undefined || isStringArray(value.functionLabels));
 }
 
 export function parseComponentIndex(raw: unknown): ComponentIndex {
@@ -120,9 +138,23 @@ export function parseComponentIndex(raw: unknown): ComponentIndex {
   for (const item of raw.components) {
     if (!isComponentSummary(item) || seen.has(item.id)) { skipped += 1; continue; }
     seen.add(item.id);
-    components.push(item);
+    components.push({ ...item, functionLabels: item.functionLabels ?? [] });
   }
-  return { schemaVersion: "2", repository: isString(raw.repository) ? raw.repository : "", upstream: isRecord(raw.upstream) ? raw.upstream as Record<string, UpstreamSource> : {}, components, skipped };
+  return { schemaVersion: "2", repository: isString(raw.repository) ? raw.repository : "", upstream: isRecord(raw.upstream) ? raw.upstream as Record<string, UpstreamSource> : {}, components, edges: parseEdges(raw.relations, raw.components), skipped };
+}
+
+/** Edges are stored as [fromPosition, toPosition, typeIndex] against the raw components array. */
+function parseEdges(raw: unknown, rawComponents: unknown[]): CatalogueEdge[] {
+  if (!isRecord(raw) || !isStringArray(raw.types) || !Array.isArray(raw.edges)) return [];
+  const types = raw.types;
+  const idAt = (position: unknown) => (typeof position === "number" && isRecord(rawComponents[position]) && isString(rawComponents[position].id) ? rawComponents[position].id as string : undefined);
+  return raw.edges.flatMap(edge => {
+    if (!Array.isArray(edge) || edge.length !== 3) return [];
+    const from = idAt(edge[0]);
+    const to = idAt(edge[1]);
+    const type = typeof edge[2] === "number" ? types[edge[2]] : undefined;
+    return from && to && oneOf(RELATION_TYPES, type) ? [{ from, to, type }] : [];
+  });
 }
 
 function isEvaluationCard(value: unknown): value is EvaluationCard {
@@ -148,6 +180,17 @@ export function parseComponentDetail(value: unknown): ComponentDetail | undefine
     inputs: isStringArray(item.inputs) ? item.inputs : [], outputs: isStringArray(item.outputs) ? item.outputs : [], databases: isStringArray(item.databases) ? item.databases : [],
   })) : [];
   const evaluation = isEvaluationCard(value.evaluation) ? value.evaluation : null;
+  const install = isRecord(value.install) && isString(value.install.entryId) ? {
+    entryId: value.install.entryId,
+    installability: isString(value.install.installability) ? value.install.installability : "unknown",
+    verification: isString(value.install.verification) ? value.install.verification : "unknown",
+    trust: isString(value.install.trust) ? value.install.trust : "unknown",
+    requires: isStringArray(value.install.requires) ? value.install.requires : [],
+  } : null;
+  const relations: ComponentRelation[] = Array.isArray(value.relations) ? value.relations.filter(isRecord).flatMap((item): ComponentRelation[] => (
+    (item.direction === "out" || item.direction === "in") && oneOf(RELATION_TYPES, item.type) && isString(item.otherId)
+      ? [{ direction: item.direction, type: item.type, otherId: item.otherId, condition: isString(item.condition) ? item.condition : null }]
+      : [])) : [];
   const link = isRecord(value.link) && oneOf(["unique", "ambiguous", "unmatched"] as const, value.link.status) ? value.link.status : "unmatched";
   return {
     id: value.id, name: value.name, type: value.type, repo: value.repo,
@@ -163,6 +206,8 @@ export function parseComponentDetail(value: unknown): ComponentDetail | undefine
     capabilities,
     evaluation,
     link: evaluation && link === "unique" ? { status: "unique", cardUnitId: evaluation.unitId } : { status: link === "unique" ? "unmatched" : link },
+    install,
+    relations,
   };
 }
 
@@ -178,5 +223,5 @@ export function parseComponentDetailShard(raw: unknown): Map<string, ComponentDe
 
 /** Lower-cased text used by list search; built once per record. */
 export function searchText(item: ComponentSummary): string {
-  return [item.name, item.id, item.repo, item.description, item.domain, item.functionPrimary ?? "", ...item.tags, ...item.tasks].join(" ").toLowerCase();
+  return [item.name, item.id, item.repo, item.description, item.domain, item.functionPrimary ?? "", ...item.functionLabels, ...item.tags, ...item.tasks].join(" ").toLowerCase();
 }

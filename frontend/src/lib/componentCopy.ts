@@ -1,7 +1,7 @@
 // Interface copy for the component ecosystem, detail dialog, plan and capability map.
 // Evaluation text (verdicts, labels, medical items) is shown as published upstream.
 
-import type { ComponentType, DomainGroup, RiskLevel } from "./components";
+import type { ComponentType, DomainGroup, RelationType, RiskLevel } from "./components";
 
 const en = {
   navEcosystem: "Component ecosystem",
@@ -103,6 +103,29 @@ const en = {
   legendSize: "Node size: number of source records",
   relation: "Relation",
   examples: "Try",
+  relatedComponents: "Related components",
+  relationsSource: "From the upstream component-relation data (model-extracted and reviewed; not verified by running). Conditions are shown as published, in Chinese.",
+  relationsMore: "more",
+  install: "Install",
+  installNote: "Requires the dsh-med CLI and the pinned DSH. Copy the commands into a terminal.",
+  installGuide: "Setup guide",
+  entryId: "Entry ID",
+  copy: "Copy",
+  installNotReady: "Upstream marks this entry as not ready to install.",
+  installCandidate: "Candidate entry: not yet formally admitted.",
+  installUnavailable: "No upstream install entry for this component. Use the source repository.",
+  requiresConfiguration: "Needs configuration (for example an API key or environment variable)",
+  requiresRuntime: "Needs a runtime dependency",
+  requiresResource: "Needs an external resource or data",
+  sourceJudge: "AI review",
+  sourceRule: "Rule",
+  originalChinese: "Item descriptions are shown in the original Chinese.",
+  upstreamEnglish: "",
+  termsFrom: "from",
+  catalogueRelation: "Catalogue relation",
+  catalogueCount: "catalogue relations",
+  candidatesShown: "search candidates shown",
+  legendCatalogue: "Coloured arrow: catalogue relation (requires, uses, data flow, alternative)",
   notEvaluatedShort: "No evaluation",
 };
 
@@ -208,6 +231,29 @@ const zh: ComponentCopy = {
   legendSize: "节点大小：来源记录数",
   relation: "关系",
   examples: "试试",
+  relatedComponents: "关联组件",
+  relationsSource: "来自上游组件关系数据（模型抽取并复核，未做运行验证）。",
+  relationsMore: "条更多",
+  install: "安装",
+  installNote: "需要先安装 dsh-med CLI 和固定版本 DSH，把下面的命令复制到终端运行。",
+  installGuide: "安装指南",
+  entryId: "Entry ID",
+  copy: "复制",
+  installNotReady: "上游标记该条目暂不可直接安装。",
+  installCandidate: "候选条目：尚未正式准入。",
+  installUnavailable: "上游没有该组件的安装条目，请从来源仓库获取。",
+  requiresConfiguration: "需要配置（如 API 密钥或环境变量）",
+  requiresRuntime: "需要运行环境依赖",
+  requiresResource: "需要外部资源或数据",
+  sourceJudge: "AI 评审",
+  sourceRule: "规则",
+  originalChinese: "",
+  upstreamEnglish: "组件描述、标签与能力字段来自上游目录，保留英文原文。",
+  termsFrom: "来自",
+  catalogueRelation: "目录关系",
+  catalogueCount: "条目录关系",
+  candidatesShown: "个同次检索候选",
+  legendCatalogue: "彩色箭头：目录关系（依赖、调用、数据流、替代）",
   notEvaluatedShort: "暂无评估",
 };
 
@@ -227,4 +273,30 @@ export const GROUP_LABELS: Record<"en" | "zh", Record<DomainGroup, string>> = {
 export const RISK_LABELS: Record<"en" | "zh", Record<RiskLevel | "none", string>> = {
   en: { green: "No risk found in this review", amber: "Needs confirmation", red: "Not recommended", grey: "Not yet assessed", none: "No evaluation" },
   zh: { green: "暂未发现风险", amber: "需确认", red: "不建议安装", grey: "尚未评估", none: "暂无评估" },
+};
+
+/** Relation label from the viewpoint of the component being shown (out: it → other, in: other → it). */
+export const RELATION_LABELS: Record<"en" | "zh", Record<RelationType, { out: string; in: string }>> = {
+  en: {
+    requires: { out: "Requires", in: "Required by" },
+    "declared-use": { out: "Uses", in: "Used by" },
+    "data-flow": { out: "Passes data to", in: "Receives data from" },
+    precedes: { out: "Runs before", in: "Runs after" },
+    "shared-input": { out: "Shares input with", in: "Shares input with" },
+    wrapper: { out: "Wraps", in: "Wrapped by" },
+    composes_with: { out: "Works with", in: "Works with" },
+    contains: { out: "Contains", in: "Part of" },
+    alternative_to: { out: "Can be replaced by", in: "Alternative to" },
+  },
+  zh: {
+    requires: { out: "依赖", in: "被依赖" },
+    "declared-use": { out: "调用", in: "被调用" },
+    "data-flow": { out: "输出数据给", in: "接收数据自" },
+    precedes: { out: "先于", in: "后于" },
+    "shared-input": { out: "共享输入", in: "共享输入" },
+    wrapper: { out: "封装", in: "被封装" },
+    composes_with: { out: "协作", in: "协作" },
+    contains: { out: "包含", in: "属于" },
+    alternative_to: { out: "可替换为", in: "可替代" },
+  },
 };

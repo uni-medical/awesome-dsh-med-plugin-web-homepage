@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { aliasesFor } from "../src/data/queryAliases";
-import { neighbourLinks, neighbours, prepare, queryTerms, searchCandidates, sharedRepositories, sharedWords } from "../src/lib/capabilitySearch";
+import { neighbourLinks, neighbours, prepare, queryTerms, searchCandidates, sharedRepositories, sharedWords, similarity } from "../src/lib/capabilitySearch";
 import type { ComponentSummary } from "../src/lib/components";
 import { formatPlan, parsePlan, removePlanItem, serialisePlan, togglePlanItem } from "../src/lib/plan";
 import { radarPoint, radarPolygon, ringPositions, wrapLabel } from "../src/lib/radar";
 
 const summary = (id: string, name: string, overrides: Partial<ComponentSummary> = {}): ComponentSummary => ({
-  id, name, type: "mcp", repo: `${id}/repo`, description: "", tags: [], group: "literature", domain: "literature", tasks: [], risk: null, functionPrimary: null, ...overrides,
+  id, name, type: "mcp", repo: `${id}/repo`, description: "", tags: [], group: "literature", domain: "literature", tasks: [], risk: null, functionPrimary: null, functionLabels: [], ...overrides,
 });
 
 const catalogue = [
@@ -109,7 +109,7 @@ describe("capability map relations", () => {
   });
 
   it("explains shared vocabulary and repositories", () => {
-    expect(sharedWords(group("PubMed search"), group("PubMed abstracts"))).toEqual(["literature", "pubmed", "search"]);
+    expect(sharedWords(group("PubMed search"), group("PubMed abstracts"))).toEqual(["search", "pubmed"]);
     expect(sharedRepositories(group("PubMed fetch"), group("PubMed search"))).toEqual([]);
   });
 
@@ -125,5 +125,28 @@ describe("capability map relations", () => {
     expect(wrapLabel("PubMed search")).toEqual(["PubMed search"]);
     expect(wrapLabel("Europe PMC get full text from articles")).toEqual(["Europe PMC get", "full text from…"]);
     expect(wrapLabel("averyveryverylongsinglewordname")).toHaveLength(2);
+  });
+});
+
+describe("relation weighting", () => {
+  const items = [
+    summary("g1", "Glioma subtype classifier", { tags: ["glioma", "data"], repo: "a/1" }),
+    summary("g2", "Glioma survival model", { tags: ["glioma", "survival"], repo: "b/2" }),
+    summary("d1", "Data loader", { tags: ["data"], repo: "c/3" }),
+    summary("d2", "Data cleaner", { tags: ["data"], repo: "d/4" }),
+    summary("d3", "Data exporter", { tags: ["data"], repo: "e/5" }),
+    summary("f1", "Cell annotator", { functionLabels: ["单细胞与空间组学分析"], repo: "f/6" }),
+    summary("f2", "Cluster labeller", { functionLabels: ["单细胞与空间组学分析"], repo: "g/7" }),
+  ];
+  const result = searchCandidates(prepare(items), "glioma data cell cluster classifier loader labeller annotator survival cleaner exporter");
+  const group = (name: string) => result.groups.find(item => item.name === name)!;
+
+  it("links rare shared terms more strongly than common ones", () => {
+    expect(similarity(group("Glioma subtype classifier"), group("Glioma survival model"))).toBeGreaterThan(similarity(group("Glioma subtype classifier"), group("Data loader")));
+  });
+
+  it("relates components through a shared canonical function subcategory", () => {
+    expect(similarity(group("Cell annotator"), group("Cluster labeller"))).toBeGreaterThan(0.3);
+    expect(sharedWords(group("Cell annotator"), group("Cluster labeller"))).toEqual(["单细胞与空间组学分析"]);
   });
 });

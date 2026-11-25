@@ -308,3 +308,52 @@ html[data-motion="reduced"] .component-card:hover { transform: none; }
   html:not([data-motion="full"]) .component-card:hover { transform: none; }
 }
 .graph-node text, .graph-centre text { paint-order: stroke; stroke: var(--theme-page-bg, #0a1626); stroke-width: 4px; stroke-linejoin: round; }
+
+/* Copyable command blocks */
+.copy-block { position: relative; display: flex; align-items: flex-start; gap: 8px; margin: 8px 0; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--theme-control-bg, rgba(183, 219, 255, .06)); }
+.copy-block pre { flex: 1; min-width: 0; margin: 0; overflow-x: auto; color: var(--theme-heading, #e7efff); font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
+.copy-block button { flex: 0 0 auto; padding: 4px 10px; border: 1px solid var(--card-border); border-radius: 6px; color: var(--theme-accent-text, #cfe2ff); background: var(--theme-raised-bg, transparent); font-size: 12px; cursor: pointer; }
+.copy-block button:hover { border-color: var(--theme-splitter-grip-border, #3f6eb4); }
+.copy-block.is-inline { margin: 0; padding: 5px 8px; }
+.copy-block:not(.is-inline) pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.copy-block.is-inline pre { white-space: nowrap; }
+.install-panel .panel-field { grid-template-columns: 72px minmax(0, 1fr); align-items: center; }
+
+/* Catalogue relations: one colour per family */
+.marketplace-workbench {
+  --relation-depend: #c77d2e;
+  --relation-use: var(--theme-accent, #6ab2ff);
+  --relation-flow: #3f9b6e;
+  --relation-alternative: #8b6cc7;
+}
+.relation-list { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 10px; }
+.relation-list li { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.relation-list small { display: block; color: var(--theme-muted, #8ea3c0); font-size: 12px; overflow-wrap: anywhere; }
+.relation-list p { margin: 4px 0 0; color: var(--theme-text, #b7c6dd); font-size: 12px; line-height: 1.5; }
+.relation-list .text-button { padding: 0; font-size: 14px; text-align: left; overflow-wrap: anywhere; }
+.relation-type { padding: 3px 8px; border-radius: 4px; color: #fff; background: var(--relation-use); font-size: 12px; text-align: center; }
+.relation-type.relation-requires { background: var(--relation-depend); }
+.relation-type:is(.relation-data-flow, .relation-precedes, .relation-shared-input) { background: var(--relation-flow); }
+.relation-type.relation-alternative_to { background: var(--relation-alternative); }
+.graph-edge.is-catalogue { stroke: var(--relation-use); stroke-width: 2.5; stroke-dasharray: none; opacity: .9; }
+.graph-edge.is-catalogue.relation-requires { stroke: var(--relation-depend); }
+.graph-edge.is-catalogue:is(.relation-data-flow, .relation-precedes, .relation-shared-input) { stroke: var(--relation-flow); }
+.graph-edge.is-catalogue.relation-alternative_to { stroke: var(--relation-alternative); }
+.graph-arrow { fill: var(--theme-heading, #eef4ff); }
+.graph-node.is-catalogue circle { fill: var(--relation-use); stroke: var(--theme-page-bg, #0a1626); stroke-width: 2; }
+.graph-node.is-catalogue.relation-requires circle { fill: var(--relation-depend); }
+.graph-node.is-catalogue:is(.relation-data-flow, .relation-precedes, .relation-shared-input) circle { fill: var(--relation-flow); }
+.graph-node.is-catalogue.relation-alternative_to circle { fill: var(--relation-alternative); }
+.graph-legend .legend-catalogue { border-top: 3px solid var(--relation-depend); position: relative; }
+.related-table tr.is-catalogue td:nth-child(2) { color: var(--theme-heading, #eef4ff); font-weight: 600; }
+
+/* Search terms grouped by the phrase they came from */
+.graph-terms { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.graph-terms > span { color: var(--theme-muted, #8ea3c0); }
+.graph-terms ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.graph-terms li { padding: 3px 9px; border: 1px solid var(--card-border); border-radius: 999px; color: var(--theme-text, #b7c6dd); background: var(--card-bg); }
+.graph-terms li b { color: var(--theme-heading, #eef4ff); font-weight: 600; }
+.graph-terms li i { margin: 0 5px; color: var(--theme-muted, #8ea3c0); font-style: normal; }
+.graph-terms small { color: var(--theme-muted, #8ea3c0); }
+.graph-examples ul { grid-template-columns: 1fr; }
+@media (max-width: 620px) { .relation-list li { grid-template-columns: minmax(0, 1fr); } }
