@@ -1,32 +1,11 @@
-export const MARKETPLACE_VIEWS = ["cards", "table", "gallery"] as const;
+import type { ComponentSummary } from "./components";
+import { expandQueryTerms } from "./capabilitySearch";
 
-export type MarketplaceView = (typeof MARKETPLACE_VIEWS)[number];
-
-export const DEFAULT_SPLIT_RATIO = 56;
-export const MIN_SPLIT_RATIO = 40;
-export const MAX_SPLIT_RATIO = 70;
-
-export function parseMarketplaceView(value: string | null): MarketplaceView {
-  return MARKETPLACE_VIEWS.includes(value as MarketplaceView)
-    ? (value as MarketplaceView)
-    : "cards";
-}
-export function clampSplitRatio(value: number, min = MIN_SPLIT_RATIO, max = MAX_SPLIT_RATIO): number {
-  if (!Number.isFinite(value)) return Math.min(max, Math.max(min, DEFAULT_SPLIT_RATIO));
-  return Math.min(max, Math.max(min, value));
-}
-
-export function getResponsiveSplitBounds(width: number): { min: number; max: number } {
-  if (!Number.isFinite(width) || width <= 900) return { min: MIN_SPLIT_RATIO, max: MAX_SPLIT_RATIO };
-  const min = Math.max(MIN_SPLIT_RATIO, Math.ceil((520 / width) * 100));
-  const max = Math.min(MAX_SPLIT_RATIO, Math.floor(((width - 372) / width) * 100));
-  return min < max ? { min, max } : { min: MIN_SPLIT_RATIO, max: MAX_SPLIT_RATIO };
-}
-
-export function resolveSelectedEntry<T extends { id: string }>(entries: readonly T[], selectedId: string | null): T | undefined {
-  if (!selectedId) return undefined;
-  return entries.find(entry => entry.id === selectedId);
-}
+/** URL parameters owned by the component list filters. */
+export const FILTER_KEYS = ["q", "group", "type", "risk", "fn"] as const;
+/** Value of the `risk` filter for components without a verified evaluation. */
+export const NOT_EVALUATED = "none";
+export const PAGE_SIZE = 60;
 
 export function toggleMultiValue(params: URLSearchParams, key: string, value: string): URLSearchParams {
   const next = new URLSearchParams(params);
@@ -38,4 +17,50 @@ export function toggleMultiValue(params: URLSearchParams, key: string, value: st
     [...values, value].forEach(item => next.append(key, item));
   }
   return next;
+}
+
+export interface IndexedComponent { item: ComponentSummary; text: string; }
+
+/** Variants per whitespace-separated term; a Chinese term also matches its English aliases. */
+export function compileQuery(query: string): string[][] {
+  return query.trim().toLowerCase().split(/\s+/).filter(Boolean).map(expandQueryTerms);
+}
+
+const matchesCompiled = (text: string, compiled: string[][]) => compiled.every(variants => variants.some(variant => text.includes(variant)));
+
+/** Each term must match. */
+export function matchesQuery(text: string, query: string): boolean {
+  return matchesCompiled(text, compileQuery(query));
+}
+
+/** Only the list-filter parameters, so unrelated changes (such as `entry`) keep the same result. */
+export function filterQueryString(params: URLSearchParams): string {
+  const next = new URLSearchParams();
+  FILTER_KEYS.forEach(key => params.getAll(key).forEach(value => next.append(key, value)));
+  return next.toString();
+}
+
+export function filterComponents(indexed: readonly IndexedComponent[], params: URLSearchParams, ignore: string[] = []): ComponentSummary[] {
+  const read = (key: string) => (ignore.includes(key) ? [] : params.getAll(key).filter(Boolean));
+  const compiled = compileQuery(ignore.includes("q") ? "" : params.get("q") ?? "");
+  const [group] = read("group");
+  const types = new Set(read("type"));
+  const risks = new Set(read("risk"));
+  const [fn] = read("fn");
+  return indexed.filter(({ item, text }) => {
+    if (group && item.group !== group) return false;
+    if (types.size && !types.has(item.type)) return false;
+    if (risks.size && !risks.has(item.risk ?? NOT_EVALUATED)) return false;
+    if (fn && item.functionPrimary !== fn) return false;
+    return !compiled.length || matchesCompiled(text, compiled);
+  }).map(({ item }) => item);
+}
+
+export function countBy<T>(items: readonly T[], key: (item: T) => string | null): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const item of items) {
+    const value = key(item);
+    if (value !== null) counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
 }

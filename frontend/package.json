@@ -10,8 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json",
     "test": "vitest run",
-    "visuals:sync": "node scripts/fetch-repository-visuals.mjs",
-    "visuals:generate-neutral": "node scripts/generate-neutral-visuals.mjs",
+    "data:import": "node scripts/import-components.mjs",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
