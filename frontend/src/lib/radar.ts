@@ -25,3 +25,19 @@ export function ringPositions(count: number, radius: number, center: RadarPoint)
     return { x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius };
   });
 }
+
+const LINE_LENGTH = 16;
+
+/** Up to two lines at word boundaries; the full name stays in the node's tooltip. */
+export function wrapLabel(text: string, width = LINE_LENGTH): string[] {
+  if (text.length <= width) return [text];
+  const words = text.split(/(?<=[\s_-])/);
+  let first = "";
+  for (const word of words) {
+    if ((first + word).length > width && first) break;
+    first += word;
+  }
+  if (first.length > width) first = text.slice(0, width);
+  const rest = text.slice(first.length).trim();
+  return [first.trim(), rest.length > width ? `${rest.slice(0, width - 1).trimEnd()}…` : rest].filter(Boolean);
+}

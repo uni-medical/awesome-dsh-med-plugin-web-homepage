@@ -11,7 +11,7 @@ const CJK = /[㐀-鿿]/;
 const STOPWORDS = new Set(["a", "an", "and", "the", "of", "for", "to", "in", "on", "with", "by", "or", "from", "into", "via", "using", "use", "find", "get", "tool", "tools"]);
 
 export const CANDIDATE_LIMIT = 40;
-export const NEIGHBOUR_LIMIT = 9;
+export const NEIGHBOUR_LIMIT = 14;
 
 /** Variants a single list-search term may match. */
 export function expandQueryTerms(term: string): string[] {
@@ -93,11 +93,55 @@ export function similarity(a: CandidateGroup, b: CandidateGroup): number {
   return union ? shared / union + sameDomain : sameDomain;
 }
 
-/** Other candidates from the same query, most similar first. */
-export function neighbours(groups: readonly CandidateGroup[], selected: CandidateGroup, limit = NEIGHBOUR_LIMIT): { group: CandidateGroup; similarity: number }[] {
+const repositories = (group: CandidateGroup) => new Set(group.members.map(member => member.repo.toLowerCase()));
+
+/** Words two candidate groups share, longest first, for explaining an edge. */
+export function sharedWords(a: CandidateGroup, b: CandidateGroup, limit = 4): string[] {
+  return [...a.vocabulary].filter(word => b.vocabulary.has(word)).sort((x, y) => y.length - x.length || x.localeCompare(y)).slice(0, limit);
+}
+
+/** Repositories both groups come from: a catalogue relation (same source repository), not a retrieval guess. */
+export function sharedRepositories(a: CandidateGroup, b: CandidateGroup): string[] {
+  const other = repositories(b);
+  return [...new Set(a.members.map(member => member.repo))].filter(repo => other.has(repo.toLowerCase()));
+}
+
+export interface Neighbour { group: CandidateGroup; similarity: number; shared: string[]; sameRepository: string[]; }
+
+export const REPOSITORY_BONUS = 0.15;
+const rank = (item: Neighbour) => item.similarity + (item.sameRepository.length ? REPOSITORY_BONUS : 0);
+
+/**
+ * Other candidates from the same query. A neighbour either comes from the same
+ * repository as the selected group (catalogue relation) or shares task/tag
+ * vocabulary with it (retrieval relation). Sharing a repository adds a small
+ * ranking bonus only: large merged groups span many repositories, so it must not
+ * crowd out vocabulary similarity.
+ */
+export function neighbours(groups: readonly CandidateGroup[], selected: CandidateGroup, limit = NEIGHBOUR_LIMIT): Neighbour[] {
   return groups.filter(group => group.key !== selected.key)
-    .map(group => ({ group, similarity: similarity(selected, group) }))
-    .filter(entry => entry.similarity > 0)
-    .sort((a, b) => b.similarity - a.similarity || b.group.score - a.group.score)
+    .map(group => ({ group, similarity: similarity(selected, group), shared: sharedWords(selected, group), sameRepository: sharedRepositories(selected, group) }))
+    .filter(entry => entry.sameRepository.length > 0 || entry.similarity > 0)
+    .sort((a, b) => rank(b) - rank(a) || b.group.score - a.group.score)
     .slice(0, limit);
+}
+
+export interface NeighbourLink { from: string; to: string; sameRepository: boolean; }
+
+export const LINK_THRESHOLD = 0.3;
+export const LINK_LIMIT = 12;
+
+/** Links among similar neighbours, so the map shows clusters rather than a bare star. Same-repository pairs are flagged for styling. */
+export function neighbourLinks(items: readonly Neighbour[], threshold = LINK_THRESHOLD, limit = LINK_LIMIT): NeighbourLink[] {
+  const links: (NeighbourLink & { weight: number })[] = [];
+  for (let i = 0; i < items.length; i += 1) {
+    for (let j = i + 1; j < items.length; j += 1) {
+      const a = items[i].group;
+      const b = items[j].group;
+      const sameRepository = sharedRepositories(a, b).length > 0;
+      const weight = similarity(a, b);
+      if (weight >= threshold) links.push({ from: a.key, to: b.key, sameRepository, weight });
+    }
+  }
+  return links.sort((x, y) => y.weight - x.weight).slice(0, limit).map(({ from, to, sameRepository }) => ({ from, to, sameRepository }));
 }

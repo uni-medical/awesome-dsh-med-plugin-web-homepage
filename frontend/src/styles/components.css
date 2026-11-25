@@ -264,3 +264,47 @@ html[data-motion="reduced"] .component-dialog[open] { animation: none; }
   .overview-actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
   .plan-bar-row { flex-wrap: wrap; }
 }
+
+/* Capability map: relation styles, legend, hover explanation, examples */
+.candidate-graph-wrap { display: grid; gap: 8px; }
+.candidate-graph { max-height: 66vh; }
+.graph-ring { fill: none; stroke: var(--card-border); stroke-dasharray: 2 6; }
+.graph-edge, .graph-link { transition: opacity .15s ease, stroke-width .15s ease; }
+.graph-edge { stroke-dasharray: 5 5; opacity: .7; }
+.graph-edge.is-repository { stroke: var(--theme-accent, #6ab2ff); stroke-dasharray: none; opacity: .9; }
+.graph-link { stroke: var(--theme-splitter-grip-border, #3f6eb4); stroke-width: 1; stroke-dasharray: 2 5; opacity: .45; }
+.graph-link.is-repository { stroke: var(--theme-accent, #6ab2ff); stroke-dasharray: none; opacity: .55; }
+.graph-edge.is-active, .graph-link.is-active { opacity: 1; stroke-width: 3; }
+.graph-edge.is-dimmed, .graph-link.is-dimmed, .graph-node.is-dimmed { opacity: .25; }
+.graph-node { transition: opacity .15s ease; }
+.graph-node.is-repository circle { fill: var(--theme-accent, #6ab2ff); }
+.graph-node:hover text:not(.graph-node-sub), .graph-node:focus-visible text:not(.graph-node-sub) { fill: var(--theme-heading, #eef4ff); font-weight: 600; }
+.graph-footer { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 24px; }
+.graph-explain { flex: 1 1 320px; min-height: 22px; margin: 0; color: var(--theme-text, #b7c6dd); font-size: 13px; }
+.graph-explain b { color: var(--theme-heading, #eef4ff); }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; color: var(--theme-muted, #8ea3c0); font-size: 12px; }
+.graph-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.graph-legend i { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--theme-accent, #6ab2ff); }
+.graph-legend .legend-shared { border-top-style: dashed; border-top-color: var(--theme-splitter-grip-border, #3f6eb4); }
+.graph-legend .legend-size { width: 12px; height: 12px; border: 1px solid var(--theme-accent, #6ab2ff); border-radius: 50%; }
+.graph-examples { display: grid; gap: 8px; }
+.graph-examples > span { color: var(--theme-muted, #8ea3c0); font-size: 12px; }
+.graph-examples ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.graph-examples button { width: 100%; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 8px; color: var(--theme-heading, #e7efff); background: var(--card-bg); font-size: 13px; line-height: 1.5; text-align: left; cursor: pointer; }
+.graph-examples button:hover { border-color: var(--theme-splitter-grip-border, #3f6eb4); }
+
+/* Settings: density and motion across the new views */
+html[data-density="compact"] .component-grid { gap: 10px; }
+html[data-density="compact"] .component-description { -webkit-line-clamp: 1; line-clamp: 1; }
+html[data-density="compact"] .group-tabs button { padding: 7px 12px; font-size: 14px; }
+html[data-density="compact"] .candidate-main { padding: 9px 8px; }
+html[data-density="compact"] .candidate-description { -webkit-line-clamp: 2; line-clamp: 2; }
+html[data-density="compact"] .detail-panel { padding: 16px 18px; }
+html[data-density="compact"] .detail-grid { gap: 12px; }
+html[data-motion="reduced"] :is(.component-card, .graph-edge, .graph-link, .graph-node) { transition: none; }
+html[data-motion="reduced"] .component-card:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) :is(.component-card, .graph-edge, .graph-link, .graph-node) { transition: none; }
+  html:not([data-motion="full"]) .component-card:hover { transform: none; }
+}
+.graph-node text, .graph-centre text { paint-order: stroke; stroke: var(--theme-page-bg, #0a1626); stroke-width: 4px; stroke-linejoin: round; }

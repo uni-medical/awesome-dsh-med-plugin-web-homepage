@@ -3,13 +3,23 @@ import { useSearchParams } from "react-router-dom";
 import { CandidateGraph } from "../components/CandidateGraph";
 import { PlanToggle, RiskBadge } from "../components/ComponentCard";
 import { ComponentDetailDialog } from "../components/ComponentDetailDialog";
-import { neighbours, normaliseName, prepare, searchCandidates, type CandidateGroup } from "../lib/capabilitySearch";
+import { neighbourLinks, neighbours, normaliseName, prepare, searchCandidates, type CandidateGroup } from "../lib/capabilitySearch";
 import { useComponentCopy, useEntryDialog } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
 
 const CJK = /[㐀-鿿]/;
 type Tab = "related" | "overview";
 type View = "graph" | "list";
+
+const EXAMPLE_QUERIES = {
+  zh: ["检索神经肿瘤相关论文，读取摘要并追踪引用", "单细胞 RNA-seq 细胞类型注释", "药物靶点与不良反应查询", "医学影像分割"],
+  en: ["Search neuro-oncology papers, read abstracts and trace citations", "single-cell RNA-seq cell type annotation", "drug target and adverse event lookup", "medical image segmentation"],
+};
+
+function ExampleQueries({ onPick }: { onPick: (query: string) => void }) {
+  const { c, locale } = useComponentCopy();
+  return <div className="graph-examples"><span>{c.examples}</span><ul>{EXAMPLE_QUERIES[locale].map(query => <li key={query}><button type="button" onClick={() => onPick(query)}>{query}</button></li>)}</ul></div>;
+}
 
 function CandidateList({ groups, selectedKey, onSelect }: { groups: CandidateGroup[]; selectedKey?: string; onSelect: (key: string) => void }) {
   const { c, types } = useComponentCopy();
@@ -58,10 +68,15 @@ export function CapabilityGraphPage() {
   const requested = params.get("node") ?? focusKey;
   const selected = result.groups.find(group => group.key === requested) ?? result.groups[0];
   const related = useMemo(() => (selected ? neighbours(result.groups, selected) : []), [result.groups, selected]);
+  const links = useMemo(() => neighbourLinks(related), [related]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
     setParams(current => { const next = new URLSearchParams(); const q = draft.trim(); if (q) next.set("q", q); if (current.get("entry")) next.set("entry", current.get("entry")!); return next; });
+  }
+  function search(text: string) {
+    setDraft(text);
+    setParams(() => new URLSearchParams({ q: text }));
   }
   function select(key: string) {
     setParams(current => { const next = new URLSearchParams(current); next.set("node", key); if (!next.get("q") && query) next.set("q", query); return next; }, { replace: true });
@@ -79,7 +94,7 @@ export function CapabilityGraphPage() {
       <aside className="graph-candidates" aria-label={c.candidates}>
         <div className="graph-candidates-head"><h2>{c.candidates}</h2><span>{formatNumber(result.groups.length)}</span></div>
         {loading ? <p className="graph-empty">{c.loading}</p> : error ? <p className="graph-empty">{c.loadError}</p>
-          : !query ? <p className="graph-empty">{c.graphHint}</p>
+          : !query ? <ExampleQueries onPick={search}/>
           : !result.groups.length ? <p className="graph-empty">{c.graphNoResults}</p>
           : <CandidateList groups={result.groups} selectedKey={selected?.key} onSelect={select}/>}
       </aside>
@@ -102,8 +117,8 @@ export function CapabilityGraphPage() {
           {tab === "related" ? <>
             <p className="graph-relation-note" role="status">{c.relationNote} · {related.length} / {formatNumber(result.groups.length)} {c.groups}</p>
             {!related.length ? <p className="graph-empty">{c.noNeighbours}</p>
-              : view === "graph" ? <CandidateGraph selected={selected} related={related} onSelect={select}/>
-              : <table className="related-table"><thead><tr><th>{c.candidates}</th><th>{c.members}</th><th>{c.similarity}</th></tr></thead><tbody>{related.map(({ group, similarity }) => <tr key={group.key}><td><button type="button" className="text-button" onClick={() => select(group.key)}>{group.name}</button></td><td>{group.members.length}</td><td>{Math.round(similarity * 100)}%</td></tr>)}</tbody></table>}
+              : view === "graph" ? <CandidateGraph selected={selected} related={related} links={links} onSelect={select}/>
+              : <table className="related-table"><thead><tr><th>{c.candidates}</th><th>{c.relation}</th><th>{c.sharedWords}</th><th>{c.members}</th><th>{c.similarity}</th></tr></thead><tbody>{related.map(({ group, similarity, shared, sameRepository }) => <tr key={group.key}><td><button type="button" className="text-button" onClick={() => select(group.key)}>{group.name}</button></td><td>{sameRepository.length ? `${c.sameRepository}：${sameRepository.join("、")}` : c.sharedWords}</td><td>{shared.join(" · ") || "—"}</td><td>{group.members.length}</td><td>{Math.round(similarity * 100)}%</td></tr>)}</tbody></table>}
           </> : <Overview group={selected} onOpen={open}/>}
         </> : <p className="graph-empty">{query ? c.graphNoResults : c.graphHint}</p>}
       </section>

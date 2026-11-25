@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { aliasesFor } from "../src/data/queryAliases";
-import { neighbours, prepare, queryTerms, searchCandidates } from "../src/lib/capabilitySearch";
+import { neighbourLinks, neighbours, prepare, queryTerms, searchCandidates, sharedRepositories, sharedWords } from "../src/lib/capabilitySearch";
 import type { ComponentSummary } from "../src/lib/components";
 import { formatPlan, parsePlan, removePlanItem, serialisePlan, togglePlanItem } from "../src/lib/plan";
-import { radarPoint, radarPolygon, ringPositions } from "../src/lib/radar";
+import { radarPoint, radarPolygon, ringPositions, wrapLabel } from "../src/lib/radar";
 
 const summary = (id: string, name: string, overrides: Partial<ComponentSummary> = {}): ComponentSummary => ({
   id, name, type: "mcp", repo: `${id}/repo`, description: "", tags: [], group: "literature", domain: "literature", tasks: [], risk: null, functionPrimary: null, ...overrides,
@@ -87,5 +87,43 @@ describe("radar geometry", () => {
     const points = ringPositions(4, 10, { x: 0, y: 0 });
     expect(points[0].y).toBeCloseTo(-10);
     expect(points[2].y).toBeCloseTo(10);
+  });
+});
+
+describe("capability map relations", () => {
+  const items = [
+    summary("p1", "PubMed fetch", { repo: "Lab/Toolkit", tags: ["pubmed", "fetch"] }),
+    summary("p2", "Citation export", { repo: "lab/toolkit", tags: ["citation", "export"] }),
+    summary("p3", "PubMed search", { repo: "Other/Repo", tags: ["pubmed", "search"] }),
+    summary("p4", "PubMed abstracts", { repo: "Third/Repo", tags: ["pubmed", "search", "abstracts"] }),
+  ];
+  const result = searchCandidates(prepare(items), "pubmed citation");
+  const group = (name: string) => result.groups.find(item => item.name === name)!;
+
+  it("marks same-repository candidates as catalogue relations", () => {
+    const related = neighbours(result.groups, group("PubMed fetch"));
+    expect(related.find(item => item.group.name === "Citation export")).toMatchObject({ sameRepository: ["Lab/Toolkit"] });
+    const other = related.find(item => item.group.name === "PubMed search")!;
+    expect(other.sameRepository).toEqual([]);
+    expect(other.shared).toContain("pubmed");
+  });
+
+  it("explains shared vocabulary and repositories", () => {
+    expect(sharedWords(group("PubMed search"), group("PubMed abstracts"))).toEqual(["literature", "pubmed", "search"]);
+    expect(sharedRepositories(group("PubMed fetch"), group("PubMed search"))).toEqual([]);
+  });
+
+  it("links neighbours to each other when they are similar or share a repository", () => {
+    const related = neighbours(result.groups, group("PubMed fetch"));
+    const links = neighbourLinks(related, 0.3);
+    expect(links.length).toBeGreaterThan(0);
+    expect(links.every(link => link.from !== link.to)).toBe(true);
+    expect(neighbourLinks(related, 2)).toEqual([]);
+  });
+
+  it("wraps long node labels onto at most two lines", () => {
+    expect(wrapLabel("PubMed search")).toEqual(["PubMed search"]);
+    expect(wrapLabel("Europe PMC get full text from articles")).toEqual(["Europe PMC get", "full text from…"]);
+    expect(wrapLabel("averyveryverylongsinglewordname")).toHaveLength(2);
   });
 });
