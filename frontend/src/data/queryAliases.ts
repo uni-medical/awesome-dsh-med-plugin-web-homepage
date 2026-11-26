@@ -110,9 +110,26 @@ export const QUERY_ALIASES: Record<string, string[]> = {
   "流程": ["pipeline", "workflow"],
   "追踪": ["track", "trace", "citation"],
   "读取": ["read", "fetch", "parse"],
+  // Agent mechanisms (paper mechanism plugins are described in Chinese and tagged in English).
+  "智能体": ["agent"],
+  "上下文": ["context"],
+  "记忆": ["memory"],
+  "历史摘要": ["history", "summary"],
+  "编排": ["orchestration", "orchestrat"],
+  "评价反馈": ["evaluation feedback", "evaluation", "feedback"],
+  "评测": ["evaluation", "benchmark"],
+  "反馈": ["feedback"],
+  "权限": ["permission"],
+  "治理": ["governance", "permission"],
+  "工具调用": ["tool call", "tool-call"],
 };
 
 const KEYS_BY_LENGTH = Object.keys(QUERY_ALIASES).sort((a, b) => b.length - a.length);
+
+/** Table keys contained in the given Chinese text, longest first. */
+export function aliasKeysIn(text: string): string[] {
+  return KEYS_BY_LENGTH.filter(key => text.includes(key));
+}
 
 /** Aliases for every table key contained in the given Chinese text. */
 export function aliasesFor(text: string): string[] {

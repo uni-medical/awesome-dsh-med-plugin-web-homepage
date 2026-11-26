@@ -12,6 +12,8 @@ type Copy = ReturnType<typeof useComponentCopy>;
 
 const SETUP_GUIDE_URL = "https://github.com/uni-medical/awesome-dsh-med-plugin/blob/integrate/README.metaharness.zh.md";
 const RELATION_PREVIEW = 8;
+/** Where the receiver keeps the copied formal-inventory directory (README.metaharness §8.5). */
+const FORMAL_INVENTORY_PLACEHOLDER = "/your/data/formal-inventory";
 
 function Panel({ title, className = "", children }: { title: string; className?: string; children: ReactNode }) {
   return <section className={`detail-panel ${className}`}><h3>{title}</h3>{children}</section>;
@@ -25,9 +27,12 @@ function InfoPanel({ detail, copy }: { detail: ComponentDetail; copy: Copy }) {
   const { c } = copy;
   return <Panel title={c.info} className="info-panel">
     <p className="info-description">{detail.description}</p>
-    <div className="panel-field"><span>{c.source}</span><p><a href={detail.repositoryUrl} target="_blank" rel="noopener noreferrer">{detail.repo} ↗</a></p></div>
+    {detail.paper ? <>
+      <div className="panel-field"><span>{c.paperSource}</span><p>{detail.paper.url ? <a href={detail.paper.url} target="_blank" rel="noopener noreferrer">{detail.paper.title || detail.paper.label} ↗</a> : detail.paper.title || detail.paper.label}</p></div>
+      <div className="panel-field"><span>{c.sourceCode}</span><p><a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer">{detail.sourceName || detail.repo} ↗</a></p></div>
+    </> : <div className="panel-field"><span>{c.source}</span><p><a href={detail.repositoryUrl} target="_blank" rel="noopener noreferrer">{detail.repo} ↗</a></p></div>}
     <Chips values={detail.tags}/>
-    {c.upstreamEnglish && <p className="panel-note">{c.upstreamEnglish}</p>}
+    {c.upstreamEnglish && !detail.paper && <p className="panel-note">{c.upstreamEnglish}</p>}
   </Panel>;
 }
 
@@ -37,14 +42,15 @@ function InstallPanel({ detail, copy }: { detail: ComponentDetail; copy: Copy })
   const requirementLabels: Record<string, string> = { configuration: c.requiresConfiguration, runtime: c.requiresRuntime, resource: c.requiresResource };
   return <Panel title={c.install} className="install-panel">
     {install ? <>
-      <CopyBlock label={c.install} text={`dsh-med inspect ${shellQuote(install.entryId)}\ndsh-med install ${shellQuote(install.entryId)} --profile medical`}/>
+      {install.formalInventory && <p className="panel-note">{c.formalInstallNote}</p>}
+      <CopyBlock label={c.install} text={`${install.formalInventory ? `export DSH_MED_FORMAL_INVENTORY=${shellQuote(FORMAL_INVENTORY_PLACEHOLDER)}\n` : ""}dsh-med inspect ${shellQuote(install.entryId)}\ndsh-med install ${shellQuote(install.entryId)} --profile medical`}/>
       <div className="panel-field"><span>{c.entryId}</span><CopyBlock label={c.entryId} text={install.entryId} inline/></div>
       {install.installability !== "ready" && <p className="panel-warning">{c.installNotReady}</p>}
       {install.trust === "candidate" && <p className="panel-warning">{c.installCandidate}</p>}
       {install.requires.length > 0 && <ul className="panel-lines">{install.requires.map(kind => <li key={kind}>{requirementLabels[kind] ?? kind}</li>)}</ul>}
       <p className="panel-note">{c.installNote} <a href={SETUP_GUIDE_URL} target="_blank" rel="noopener noreferrer">{c.installGuide} ↗</a></p>
     </> : <p className="panel-note">{c.installUnavailable}</p>}
-    <div className="panel-field"><span>{c.source}</span><CopyBlock label={c.source} text={`git clone ${shellQuote(`${detail.repositoryUrl}.git`)}`} inline/></div>
+    {!install?.formalInventory && <div className="panel-field"><span>{c.source}</span><CopyBlock label={c.source} text={`git clone ${shellQuote(`${detail.repositoryUrl}.git`)}`} inline/></div>}
   </Panel>;
 }
 
@@ -95,7 +101,7 @@ function QualityPanel({ card, copy }: { card: EvaluationCard; copy: Copy }) {
 }
 
 function RelationsPanel({ relations, byId, onOpen, copy }: { relations: ComponentRelation[]; byId: Map<string, ComponentSummary>; onOpen: (id: string) => void; copy: Copy }) {
-  const { c, types, relations: labels } = copy;
+  const { c, kindOf, sourceOf, relations: labels } = copy;
   const [expanded, setExpanded] = useState(false);
   const shown = expanded ? relations : relations.slice(0, RELATION_PREVIEW);
   return <Panel title={`${c.relatedComponents} · ${relations.length}`} className="relations-panel">
@@ -105,7 +111,7 @@ function RelationsPanel({ relations, byId, onOpen, copy }: { relations: Componen
         <span className={`relation-type relation-${relation.type}`}>{labels[relation.type][relation.direction]}</span>
         <div>
           <button type="button" className="text-button" onClick={() => onOpen(relation.otherId)}>{other?.name ?? relation.otherId}</button>
-          {other && <small>{types[other.type]} · {other.repo}</small>}
+          {other && <small>{kindOf(other)} · {sourceOf(other)}</small>}
           {relation.condition && <p lang="zh-CN">{relation.condition}</p>}
         </div>
         {other && <RiskBadge level={other.risk}/>}
@@ -187,7 +193,7 @@ function DetailBody({ detail, byId, onOpen, copy }: { detail: ComponentDetail; b
 
 export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = true, showMarketLink = false }: { entryId: string | null; onClose: () => void; onOpen: (id: string) => void; showMapLink?: boolean; showMarketLink?: boolean }) {
   const copy = useComponentCopy();
-  const { c, types } = copy;
+  const { c, types, mechanisms } = copy;
   const { detail, loading, error, missing } = useComponentDetail(entryId);
   const { byId } = useComponents();
   const ref = useRef<HTMLDialogElement>(null);
@@ -207,7 +213,7 @@ export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = 
       <div className="component-dialog-header">
         <div>
           <h2 id="component-dialog-title">{detail?.name ?? (loading ? c.detailLoading : entryId)}</h2>
-          {detail && <p><b>{types[detail.type]}</b> · {detail.repo}</p>}
+          {detail && (detail.mechanism ? <p><b>{c.mechanismPlugin} · {mechanisms[detail.mechanism]}</b> · {detail.paper?.label ?? detail.repo}</p> : <p><b>{types[detail.type]}</b> · {detail.repo}</p>)}
         </div>
         <div className="component-dialog-actions">
           {detail && showMarketLink && <Link className="dialog-secondary" to={`/marketplace?q=${encodeURIComponent(detail.name)}&entry=${encodeURIComponent(detail.id)}`}>{c.openInEcosystem} ↗</Link>}

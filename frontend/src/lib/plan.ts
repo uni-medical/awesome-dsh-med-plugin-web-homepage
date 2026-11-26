@@ -43,8 +43,8 @@ export function formatPlan(items: readonly PlanItem[]): string {
 const SETUP_GUIDE_URL = "https://github.com/uni-medical/awesome-dsh-med-plugin/blob/integrate/README.metaharness.zh.md";
 
 const SCRIPT_COPY = {
-  en: { header: (count: number) => `Plan: ${count} components (Medical Component Market)`, setup: `Requires the dsh-med CLI and the pinned DSH: ${SETUP_GUIDE_URL}`, missing: (name: string, repo: string) => `${name}: no upstream install entry; get it from https://github.com/${repo}` },
-  zh: { header: (count: number) => `方案：${count} 个组件（Medical Component Market）`, setup: `需要先安装 dsh-med CLI 与固定版本 DSH：${SETUP_GUIDE_URL}`, missing: (name: string, repo: string) => `${name}：上游没有安装条目，请从来源仓库获取 https://github.com/${repo}` },
+  en: { header: (count: number) => `Plan: ${count} components (Medical Component Market)`, setup: `Requires the dsh-med CLI and the pinned DSH: ${SETUP_GUIDE_URL}`, missing: (name: string, repo: string) => `${name}: no upstream install entry; get it from https://github.com/${repo}`, formal: "Mechanism plugins install from the formal inventory: copy the complete formal-inventory directory and export DSH_MED_FORMAL_INVENTORY=<its path> first" },
+  zh: { header: (count: number) => `方案：${count} 个组件（Medical Component Market）`, setup: `需要先安装 dsh-med CLI 与固定版本 DSH：${SETUP_GUIDE_URL}`, missing: (name: string, repo: string) => `${name}：上游没有安装条目，请从来源仓库获取 https://github.com/${repo}`, formal: "机制插件从正式集合安装：先复制完整的 formal-inventory 目录，并 export DSH_MED_FORMAL_INVENTORY=<该目录路径>" },
 };
 
 /**
@@ -53,14 +53,16 @@ const SCRIPT_COPY = {
  * Every line is either a quoted dsh-med command or a quoted `:` no-op note, so
  * pasting it into bash or zsh never executes upstream text.
  */
-export function formatInstallScript(items: readonly PlanItem[], installIds: ReadonlyMap<string, string | null>, locale: "en" | "zh"): string {
+/** `formalIds`: items installed from the formal inventory (mechanism plugins); they add one setup note. */
+export function formatInstallScript(items: readonly PlanItem[], installIds: ReadonlyMap<string, string | null>, locale: "en" | "zh", formalIds: ReadonlySet<string> = new Set()): string {
   const copy = SCRIPT_COPY[locale];
   const lines = items.flatMap(item => {
     const entryId = installIds.get(item.id);
     if (!entryId) return [shellNote(copy.missing(item.name, REPO_PATH.test(item.repo) ? item.repo : ""))];
     return [shellNote(item.name), `dsh-med install ${shellQuote(entryId)} --profile medical`];
   });
-  return [shellNote(copy.header(items.length)), shellNote(copy.setup), ...lines].join("\n");
+  const formal = items.some(item => formalIds.has(item.id)) ? [shellNote(copy.formal)] : [];
+  return [shellNote(copy.header(items.length)), shellNote(copy.setup), ...formal, ...lines].join("\n");
 }
 
 // ---- Moving a plan between browsers: share links and files ----

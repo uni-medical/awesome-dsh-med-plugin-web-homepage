@@ -1,7 +1,7 @@
 // Interface copy for the component ecosystem, detail dialog, plan and capability map.
 // Evaluation text (verdicts, labels, medical items) is shown as published upstream.
 
-import type { ComponentType, DomainGroup, RelationType, RiskLevel } from "./components";
+import type { ComponentType, DomainGroup, MechanismRole, RelationType, RiskLevel } from "./components";
 
 const en = {
   navEcosystem: "Component ecosystem",
@@ -28,6 +28,16 @@ const en = {
   addToPlan: "Add to plan",
   removeFromPlan: "Remove from plan",
   inPlan: "In plan",
+  filterMechanism: "Runtime mechanism",
+  mechanismPlugin: "Mechanism plugin",
+  coverageTitle: "Harness coverage",
+  coverageTools: "Capability environment",
+  coverageToolsText: "Skill loading, MCP access, CLI execution and native medical tools",
+  coverageMechanisms: "Runtime mechanisms",
+  coverageHint: "The capability environment supplies the tools, data, knowledge and skills medical tasks need. Runtime mechanisms fall into four classes, generated from papers.",
+  paperSource: "Source paper",
+  sourceCode: "Source code",
+  formalInstallNote: "Installed from the formal inventory: get the complete formal-inventory directory, set DSH_MED_FORMAL_INVENTORY to its path, then run the commands.",
   close: "Close",
   openMap: "Map",
   detailLoading: "Loading component details…",
@@ -175,6 +185,16 @@ const zh: ComponentCopy = {
   addToPlan: "加入方案",
   removeFromPlan: "移出方案",
   inPlan: "已在方案",
+  filterMechanism: "运行机制",
+  mechanismPlugin: "机制插件",
+  coverageTitle: "Harness 覆盖范围",
+  coverageTools: "能力环境",
+  coverageToolsText: "Skill 加载、MCP 接入、CLI 执行及医学原生工具",
+  coverageMechanisms: "运行机制",
+  coverageHint: "能力环境提供医学任务所需的工具、数据、知识和技能；运行机制归并为四类，插件由论文生成。",
+  paperSource: "来源论文",
+  sourceCode: "源码",
+  formalInstallNote: "从正式集合安装：先获取完整的 formal-inventory 目录，把 DSH_MED_FORMAL_INVENTORY 设为它的路径，再运行下面的命令。",
   close: "关闭",
   openMap: "星图",
   detailLoading: "正在加载组件详情…",
@@ -303,9 +323,34 @@ export const TYPE_LABELS: Record<"en" | "zh", Record<ComponentType, string>> = {
 };
 
 export const GROUP_LABELS: Record<"en" | "zh", Record<DomainGroup, string>> = {
-  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "Research tools" },
-  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "科研工具" },
+  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "Research tools", mechanisms: "Runtime mechanisms" },
+  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "科研工具", mechanisms: "运行机制" },
 };
+
+/** The four runtime mechanism classes, named as in the project's harness overview. */
+export const MECHANISM_LABELS: Record<"en" | "zh", Record<MechanismRole, string>> = {
+  en: { orchestration: "Orchestration", contextMemory: "Context and Memory", evaluationFeedback: "Evaluation and Feedback", permissions: "Permissions and Governance" },
+  zh: { orchestration: "执行编排", contextMemory: "上下文与记忆", evaluationFeedback: "评价反馈", permissions: "权限治理" },
+};
+
+/** What each mechanism class covers (harness overview, 覆盖内容). */
+export const MECHANISM_COVERAGE: Record<"en" | "zh", Record<MechanismRole, string>> = {
+  en: {
+    orchestration: "Control logic, tool scheduling, multi-agent collaboration, stop conditions, budgets and failure recovery",
+    contextMemory: "Instruction and information organisation, context compression, memory reads and writes, state saving",
+    permissions: "Access control, authorisation and approval, execution isolation and constraint checks",
+    evaluationFeedback: "Trajectory observation, result verification, cost accounting and feedback output",
+  },
+  zh: {
+    orchestration: "控制逻辑、工具调度、多 Agent 协作、停止条件、预算与失败恢复",
+    contextMemory: "指令与信息组织、上下文压缩、记忆读写、状态保存",
+    permissions: "访问控制、授权审批、执行隔离与约束检查",
+    evaluationFeedback: "轨迹观测、结果验证、成本统计与反馈输出",
+  },
+};
+
+/** Display order of the mechanism classes (harness overview). */
+export const MECHANISM_ORDER: readonly MechanismRole[] = ["orchestration", "contextMemory", "permissions", "evaluationFeedback"];
 
 /** Labels for risk levels; the Chinese wording matches the upstream verdicts. */
 export const RISK_LABELS: Record<"en" | "zh", Record<RiskLevel | "none", string>> = {

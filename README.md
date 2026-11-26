@@ -1,6 +1,6 @@
 # Medical Component Market Homepage
 
-Public homepage and component catalogue for medical AI research components: skills, MCP tools, CLIs and DSH plugins from [`uni-medical/awesome-dsh-med-plugin`](https://github.com/uni-medical/awesome-dsh-med-plugin), with per-component evaluation cards. It is a static Vite + React site; search, filters and the capability map run in the browser.
+Public homepage and component catalogue for medical AI research from [`uni-medical/awesome-dsh-med-plugin`](https://github.com/uni-medical/awesome-dsh-med-plugin). It covers the capability environment (skills, MCP tools, CLIs and DSH plugins) and the four runtime mechanism classes of the harness (orchestration, context and memory, permissions and governance, evaluation and feedback), with per-component evaluation cards. It is a static Vite + React site; search, filters and the capability map run in the browser.
 
 ## Routes
 

@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { GROUP_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
+import { GROUP_LABELS, MECHANISM_COVERAGE, MECHANISM_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
 import { evaluationText } from "../lib/evaluationText";
 import { useUiLanguage } from "./useUiLanguage";
+import type { ComponentSummary } from "../lib/components";
+
+type Labelled = Pick<ComponentSummary, "type" | "repo"> & Partial<Pick<ComponentSummary, "mechanism" | "paper">>;
 
 export function useComponentCopy() {
   const { locale, formatNumber } = useUiLanguage();
-  return { locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
+  const c = componentCopy[locale];
+  const types = TYPE_LABELS[locale];
+  const mechanisms = MECHANISM_LABELS[locale];
+  return {
+    /** "Mechanism plugin · Context and Memory" for mechanism plugins, the component type otherwise. */
+    kindOf: (item: Labelled) => (item.mechanism ? `${c.mechanismPlugin} · ${mechanisms[item.mechanism]}` : types[item.type]),
+    /** Source paper of a mechanism plugin, the repository otherwise. */
+    sourceOf: (item: Labelled) => item.paper ?? item.repo, locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], mechanisms: MECHANISM_LABELS[locale], mechanismCoverage: MECHANISM_COVERAGE[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
 }
 
 /**

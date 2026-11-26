@@ -65,7 +65,8 @@ export function PlanBar() {
       }
       if (kind === "install") {
         const details = await Promise.all(plan.map(item => componentClient.getDetail(item.id)));
-        text = formatInstallScript(plan, new Map(plan.map((item, index) => [item.id, details[index]?.install?.entryId ?? null])), locale);
+        const formalIds = new Set(plan.filter((_, index) => details[index]?.install?.formalInventory).map(item => item.id));
+        text = formatInstallScript(plan, new Map(plan.map((item, index) => [item.id, details[index]?.install?.entryId ?? null])), locale, formalIds);
       }
       await navigator.clipboard.writeText(text);
       finish(kind);

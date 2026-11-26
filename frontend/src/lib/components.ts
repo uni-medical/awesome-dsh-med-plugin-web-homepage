@@ -6,11 +6,18 @@ import { REPO_PATH } from "./shell";
 export const COMPONENT_TYPES = ["skill", "mcp", "cli", "dsh-plugin"] as const;
 export type ComponentType = (typeof COMPONENT_TYPES)[number];
 
-export const DOMAIN_GROUPS = ["literature", "omics", "drug", "clinical", "imaging", "tools"] as const;
+export const DOMAIN_GROUPS = ["literature", "omics", "drug", "clinical", "imaging", "tools", "mechanisms"] as const;
 export type DomainGroup = (typeof DOMAIN_GROUPS)[number];
 
 export const RISK_LEVELS = ["green", "amber", "red", "grey"] as const;
 export type RiskLevel = (typeof RISK_LEVELS)[number];
+
+/** Harness roles of agent-mechanism plugins (orchestration, context and memory, evaluation feedback, permissions). */
+export const MECHANISM_ROLES = ["orchestration", "contextMemory", "evaluationFeedback", "permissions"] as const;
+export type MechanismRole = (typeof MECHANISM_ROLES)[number];
+
+/** Paper a mechanism plugin was generated from; `url` is null unless it is an https link. */
+export interface PaperSource { label: string; title: string; url: string | null; }
 
 export interface ComponentSummary {
   id: string;
@@ -27,6 +34,10 @@ export interface ComponentSummary {
   functionPrimary: string | null;
   /** Canonical function subcategories from the evaluation card; empty when not evaluated. */
   functionLabels: string[];
+  /** Harness role of an agent-mechanism plugin; absent or null for tools. */
+  mechanism?: MechanismRole | null;
+  /** Short label of the source paper of a mechanism plugin. */
+  paper?: string | null;
 }
 
 export interface QualityAxis {
@@ -79,7 +90,8 @@ export type RelationType = (typeof RELATION_TYPES)[number];
 export interface ComponentRelation { direction: "out" | "in"; type: RelationType; otherId: string; condition: string | null; }
 
 /** Upstream install hint: the entry-index id used by `dsh-med inspect/install`. */
-export interface InstallHint { entryId: string; installability: string; verification: string; trust: string; requires: string[]; }
+/** `formalInventory`: installed from the shipped formal-inventory directory (DSH_MED_FORMAL_INVENTORY). */
+export interface InstallHint { entryId: string; installability: string; verification: string; trust: string; requires: string[]; formalInventory?: boolean; }
 
 /** Directed catalogue edge between two components (ids). */
 export interface CatalogueEdge { from: string; to: string; type: RelationType; }
@@ -103,6 +115,8 @@ export interface ComponentDetail {
   link: { status: LinkStatus; cardUnitId?: string };
   install: InstallHint | null;
   relations: ComponentRelation[];
+  mechanism?: MechanismRole | null;
+  paper?: PaperSource | null;
 }
 
 export interface UpstreamSource { branch: string; commit: string; path?: string; committedAt: string; }
@@ -120,6 +134,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 const isString = (value: unknown): value is string => typeof value === "string";
 const isStringArray = (value: unknown): value is string[] => Array.isArray(value) && value.every(isString);
 const oneOf = <T extends string>(values: readonly T[], value: unknown): value is T => values.includes(value as T);
+
+const mechanismOf = (value: unknown): MechanismRole | null => (oneOf(MECHANISM_ROLES, value) ? value : null);
+const HTTPS_URL = /^https:\/\//i;
+
+function paperOf(value: unknown): PaperSource | null {
+  if (!isRecord(value) || !isString(value.label)) return null;
+  return { label: value.label, title: isString(value.title) ? value.title : "", url: isString(value.url) && HTTPS_URL.test(value.url) ? value.url : null };
+}
 
 export function isComponentSummary(value: unknown): value is Omit<ComponentSummary, "functionLabels"> & { functionLabels?: string[] } {
   if (!isRecord(value)) return false;
@@ -140,7 +162,7 @@ export function parseComponentIndex(raw: unknown): ComponentIndex {
   for (const item of raw.components) {
     if (!isComponentSummary(item) || seen.has(item.id)) { skipped += 1; continue; }
     seen.add(item.id);
-    components.push({ ...item, functionLabels: item.functionLabels ?? [] });
+    components.push({ ...item, functionLabels: item.functionLabels ?? [], mechanism: mechanismOf(item.mechanism), paper: isString(item.paper) && item.paper ? item.paper : null });
   }
   return { schemaVersion: "2", repository: isString(raw.repository) ? raw.repository : "", upstream: isRecord(raw.upstream) ? raw.upstream as Record<string, UpstreamSource> : {}, components, edges: parseEdges(raw.relations, raw.components), skipped };
 }
@@ -188,6 +210,7 @@ export function parseComponentDetail(value: unknown): ComponentDetail | undefine
     verification: isString(value.install.verification) ? value.install.verification : "unknown",
     trust: isString(value.install.trust) ? value.install.trust : "unknown",
     requires: isStringArray(value.install.requires) ? value.install.requires : [],
+    ...(value.install.formalInventory === true ? { formalInventory: true } : {}),
   } : null;
   const relations: ComponentRelation[] = Array.isArray(value.relations) ? value.relations.filter(isRecord).flatMap((item): ComponentRelation[] => (
     (item.direction === "out" || item.direction === "in") && oneOf(RELATION_TYPES, item.type) && isString(item.otherId)
@@ -211,6 +234,8 @@ export function parseComponentDetail(value: unknown): ComponentDetail | undefine
     link: evaluation && link === "unique" ? { status: "unique", cardUnitId: evaluation.unitId } : { status: link === "unique" ? "unmatched" : link },
     install,
     relations,
+    mechanism: mechanismOf(value.mechanism),
+    paper: paperOf(value.paper),
   };
 }
 
@@ -226,5 +251,5 @@ export function parseComponentDetailShard(raw: unknown): Map<string, ComponentDe
 
 /** Lower-cased text used by list search; built once per record. */
 export function searchText(item: ComponentSummary): string {
-  return [item.name, item.id, item.repo, item.description, item.domain, item.functionPrimary ?? "", ...item.functionLabels, ...item.tags, ...item.tasks].join(" ").toLowerCase();
+  return [item.name, item.id, item.repo, item.paper ?? "", item.description, item.domain, item.functionPrimary ?? "", ...item.functionLabels, ...item.tags, ...item.tasks].join(" ").toLowerCase();
 }

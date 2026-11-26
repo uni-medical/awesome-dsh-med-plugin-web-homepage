@@ -21,15 +21,15 @@ export function PlanToggle({ component, compact = false }: { component: Pick<Com
 
 /** The title button opens the detail; its ::after stretches over the card so the whole card is clickable. */
 export function ComponentCard({ component, onOpen }: { component: ComponentSummary; onOpen: (id: string) => void }) {
-  const { types } = useComponentCopy();
-  const tag = component.tasks[0] ?? component.tags[0];
+  const { mechanisms, kindOf, sourceOf } = useComponentCopy();
+  const tag = component.mechanism ? mechanisms[component.mechanism] : component.tasks[0] ?? component.tags[0];
   return <article className="component-card">
     <div className="component-card-head">
       <h2><button type="button" className="component-open" data-entry-id={component.id} onClick={() => onOpen(component.id)}>{component.name}</button></h2>
       <PlanToggle component={component} compact/>
     </div>
-    <p className="component-source"><b>{types[component.type]}</b> · {component.repo}</p>
+    <p className="component-source"><b>{kindOf(component)}</b> · {sourceOf(component)}</p>
     <p className="component-description">{component.description}</p>
-    <div className="component-card-foot">{tag ? <span className="component-tag">{tag}</span> : <span/>}<RiskBadge level={component.risk}/></div>
+    <div className="component-card-foot">{tag ? <span className={`component-tag${component.mechanism ? " is-mechanism" : ""}`}>{tag}</span> : <span/>}<RiskBadge level={component.risk}/></div>
   </article>;
 }

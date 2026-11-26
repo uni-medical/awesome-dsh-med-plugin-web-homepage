@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "frontendBaseCommit": "e36e5249712b15fc22a0088d3c0ae482e79774d5",
+  "frontendBaseCommit": "7a35c12401e854c16b83f399111ba54a0b7ab40b",
   "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
   "upstream": {
     "entries": {
@@ -17,21 +17,39 @@
     },
     "cards": {
       "branch": "user-card-taxonomy-20261112",
-      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
       "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/cards/cards.jsonl.gz",
-      "committedAt": "2026-11-24T16:03:17+00:00"
+      "committedAt": "2026-11-25T08:58:14+00:00"
     },
     "entryTable": {
       "branch": "user-card-taxonomy-20261112",
-      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
       "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/entry-table/entry-scores.tsv.gz",
-      "committedAt": "2026-11-24T16:03:17+00:00"
+      "committedAt": "2026-11-25T08:58:14+00:00"
     },
     "relations": {
       "branch": "integrate",
       "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
       "path": "data/capabilities/component-relations.json",
       "committedAt": "2026-11-25T01:59:46-05:00"
+    },
+    "paperPlugins": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/paper-plugin-inventory.json",
+      "committedAt": "2026-11-25T01:59:46-05:00"
+    },
+    "paperCards": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
+      "path": "security/results/v2/paper-plugin-qc-20261125/cards/cards.jsonl.gz",
+      "committedAt": "2026-11-25T08:58:14+00:00"
+    },
+    "paperEntryTable": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
+      "path": "security/results/v2/paper-plugin-qc-20261125/entry-table/entry-scores.tsv.gz",
+      "committedAt": "2026-11-25T08:58:14+00:00"
     }
   },
   "counts": {
@@ -40,8 +58,8 @@
     "entriesPairedWithIndex": 10384,
     "cards": 10432,
     "entryTableRows": 10432,
-    "exported": 10425,
-    "evaluatedExported": 10074,
+    "exported": 10857,
+    "evaluatedExported": 10506,
     "linkedRowWithoutCard": 0,
     "skippedInvalidRepository": 0
   },
@@ -144,10 +162,26 @@
     },
     "componentsWithInstallHint": 10384
   },
+  "paperPlugins": {
+    "source": "data/paper-plugin-inventory.json",
+    "cards": "security/results/v2/paper-plugin-qc-20261125/cards/cards.jsonl.gz",
+    "rule": "inventory id dsh-plugin:user/added/<suffix> = card unit id install:paper-plugin/<suffix>:dsh-plugin:. = entry-table repository paper-plugin/<suffix>; a suffix on more than one card links nothing.",
+    "entries": 432,
+    "linked": 432,
+    "unmatched": 0,
+    "duplicateCards": 0,
+    "byRole": {
+      "contextMemory": 130,
+      "evaluationFeedback": 128,
+      "orchestration": 145,
+      "permissions": 29
+    },
+    "papers": 150
+  },
   "outputs": {
-    "indexBytes": 7892731,
+    "indexBytes": 8275893,
     "detailShards": 128,
-    "detailBytes": 41145395,
-    "largestShardBytes": 412912
+    "detailBytes": 42846102,
+    "largestShardBytes": 419786
   }
 }

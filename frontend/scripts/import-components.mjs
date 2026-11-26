@@ -10,6 +10,10 @@
 //   src/data/componentSummary.json            counts bundled into the app
 //   ../data/component-import-report.json      provenance, link coverage and relation counts
 //   ../data/evaluation-vocabulary.json        closed card vocabularies (checked against the English glossary)
+//
+// Two catalogues are merged: tools (entries.jsonl, linked to cards through the
+// entry table) and paper mechanism plugins (paper-plugin-inventory.json, linked
+// to their own QC cards by id suffix).
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -22,6 +26,7 @@ import { toComponentDetail, toComponentSummary, toPublicCard } from "./lib/publi
 import { shardOf } from "./lib/shard.mjs";
 import { RELATION_TYPES, catalogueRelations, compactEdges, indexToCatalogueIds, installHint, relationsByComponent, requirementsIndex } from "./lib/relations.mjs";
 import { collectVocabulary } from "./lib/vocabulary.mjs";
+import { MECHANISM_ROLES, linkPaperCards, toPaperPluginDetail, toPaperPluginSummary } from "./lib/paper-plugins.mjs";
 
 const SHARD_COUNT = 128;
 /** Repositories are rendered as links and copied into `git clone`; anything else is dropped. */
@@ -86,6 +91,9 @@ function main() {
   const cards = jsonLines(readSource(dir, lock.sources.cards));
   const rows = parseTsv(readSource(dir, lock.sources.entryTable));
   const relationSource = JSON.parse(readSource(dir, lock.sources.relations));
+  const paperEntries = JSON.parse(readSource(dir, lock.sources.paperPlugins)).entries;
+  const paperCards = jsonLines(readSource(dir, lock.sources.paperCards));
+  const paperRows = parseTsv(readSource(dir, lock.sources.paperEntryTable));
   const commitDate = (commit) => git(dir, ["show", "-s", "--format=%cI", commit]).trim();
 
   const cardsByUnit = new Map(cards.map(card => [card.unit_id, card]));
@@ -115,6 +123,20 @@ function main() {
     shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = { ...detail, install: installHint(records.get(entry.id), requirements), relations: relationsById.get(entry.id) ?? [] };
   }
 
+  // Paper mechanism plugins: their own cards, linked by id suffix.
+  const entryIds = new Set(entries.map(entry => entry.id));
+  const collisions = paperEntries.filter(entry => entryIds.has(entry.id)).map(entry => entry.id);
+  if (collisions.length) throw new Error(`paper plugin ids collide with catalogue ids: ${collisions.slice(0, 5).join(", ")}`);
+  const { links: paperLinks, stats: paperStats } = linkPaperCards(paperEntries, paperCards, paperRows);
+  const paperUpstream = { repository: lock.repository, commit: lock.sources.paperPlugins.commit };
+  for (const entry of [...paperEntries].sort((a, b) => a.id.localeCompare(b.id))) {
+    const link = paperLinks.get(entry.id);
+    const publicCard = link ? toPublicCard(link.card, link.row) : null;
+    if (publicCard) publicCards.push(publicCard);
+    summaries.push(toPaperPluginSummary(entry, lock.repository, publicCard));
+    shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = toPaperPluginDetail(entry, paperUpstream, publicCard);
+  }
+
   const upstream = Object.fromEntries(Object.entries(lock.sources).map(([name, source]) => [name, { ...source, committedAt: commitDate(source.commit) }]));
   const outputDir = join(frontendDir, "public/data/components");
   rmSync(outputDir, { recursive: true, force: true });
@@ -138,6 +160,8 @@ function main() {
     byType: count(summaries.map(item => item.type)),
     byGroup: count(summaries.map(item => item.group)),
     byRisk: count(evaluated.map(item => item.risk)),
+    byMechanism: count(summaries.filter(item => item.mechanism).map(item => item.mechanism)),
+    papers: new Set(summaries.map(item => item.paper).filter(Boolean)).size,
     upstream: Object.fromEntries(Object.entries(upstream).map(([name, source]) => [name, { branch: source.branch, commit: source.commit, committedAt: source.committedAt }])),
   };
   writeJson(join(frontendDir, "src/data/componentSummary.json"), summary);
@@ -179,6 +203,14 @@ function main() {
       skipped: relationsSkipped,
       componentsWithInstallHint: [...records.keys()].filter(id => installHint(records.get(id), requirements)).length,
     },
+    paperPlugins: {
+      source: lock.sources.paperPlugins.path,
+      cards: lock.sources.paperCards.path,
+      rule: "inventory id dsh-plugin:user/added/<suffix> = card unit id install:paper-plugin/<suffix>:dsh-plugin:. = entry-table repository paper-plugin/<suffix>; a suffix on more than one card links nothing.",
+      ...paperStats,
+      byRole: count(paperEntries.map(entry => (MECHANISM_ROLES.includes(entry.details?.harness?.role) ? entry.details.harness.role : "unknown"))),
+      papers: new Set(paperEntries.map(entry => entry.source?.label).filter(Boolean)).size,
+    },
     outputs: {
       indexBytes,
       detailShards: SHARD_COUNT,
@@ -190,6 +222,7 @@ function main() {
   writeFileSync(join(repoRoot, "data/component-import-report.json"), `${JSON.stringify(report, null, 2)}\n`);
 
   console.log(`entries ${entries.length} · cards ${cards.length} · linked ${stats.unique} (${(report.link.coverage * 100).toFixed(1)}%) · ambiguous ${stats.ambiguous} · unmatched ${stats.unmatched}`);
+  console.log(`paper plugins ${paperEntries.length} · cards ${paperCards.length} · linked ${paperStats.linked} · duplicate cards ${paperStats.duplicateCards}`);
   console.log(`relations ${edges.length} edges across ${relationsById.size} components`);
   console.log(`index ${(indexBytes / 1e6).toFixed(2)} MB · details ${(detailBytes / 1e6).toFixed(2)} MB in ${SHARD_COUNT} shards (largest ${(largestShard / 1e3).toFixed(0)} KB)`);
 }
