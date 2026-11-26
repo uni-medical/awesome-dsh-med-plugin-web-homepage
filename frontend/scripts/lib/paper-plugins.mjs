@@ -11,7 +11,35 @@ import { catalogueRelations } from "./relations.mjs";
 
 /** Harness roles from details.harness.role, in display order. */
 export const MECHANISM_ROLES = ["orchestration", "contextMemory", "evaluationFeedback", "permissions"];
-export const MECHANISM_GROUP = "mechanisms";
+// Domain group (literature | omics | drug | clinical | imaging | tools) of a
+// mechanism plugin, so the same domain tabs work for tools and mechanisms.
+// The source paper's title decides first (whole English words; specific
+// domains before general ones), then the card's function subcategories.
+const PAPER_DOMAIN_RULES = [
+  ["imaging", /\b(imag\w*|radiolog\w*|patholog\w*|histopatholog\w*|x-ray|cxr|slides?|whole[- ]slide|segmentation|vision|visual|ultrasound|mri|dermatolog\w*|ophthalm\w*|retina\w*)\b/i],
+  ["drug", /\b(drugs?|chem\w*|molecul\w*|compounds?|pharma\w*|toxic\w*|enzym\w*|pharmacogenom\w*|pgx)\b/i],
+  ["omics", /\b(single[- ]cell|genom\w*|genes?|genetic\w*|omics?|transcriptom\w*|proteom\w*|protein\w*|crispr|sequenc\w*|bioinformatic\w*|cells?|cellular|dna|rna|biolog\w*|biotech|perturb\w*)\b/i],
+  ["clinical", /\b(clinic\w*|patients?|ehr|fhir|diagnos\w*|hospital\w*|medical|medicine|health\w*|epidemi\w*|care|icd|oncolog\w*|diseases?|therap\w*|nurs\w*|surg\w*|fracture|epilep\w*|autism|asd|alzheimer\w*|cancer|psychiatr\w*|mental)\b/i],
+  ["literature", /\b(literature|citations?|reviews?|evidence|papers?|scientific writing|survey|systematic)\b/i],
+];
+// MRI and CT are matched case-sensitively so "context" or "orchestration" never count as CT.
+const IMAGING_ACRONYM = /\b(CT|MRI|PET)\b/;
+const SUBLABEL_DOMAINS = {
+  文献检索与综述: "literature", 科研写作与成果: "literature", 文献与证据综述: "literature", 研究证据与临床语义检索: "literature",
+  实验与组学分析: "omics", 基因与变异检索: "omics", 蛋白质互作与网络分析: "omics",
+  药物发现与分子筛选: "drug", 药代动力学与模拟: "drug",
+  临床与健康管理: "clinical", 临床数据与文本治理: "clinical", 临床统计与结局分析: "clinical", 临床指南与医学术语: "clinical", 临床数据标准与迁移: "clinical",
+  医学影像处理与分割: "imaging", 临床记录与影像数据: "imaging",
+};
+
+export function paperDomainGroup(entry, publicCard) {
+  const title = `${entry.source?.title ?? ""} ${entry.source?.label ?? ""}`;
+  if (IMAGING_ACRONYM.test(title)) return "imaging";
+  const byTitle = PAPER_DOMAIN_RULES.find(([, pattern]) => pattern.test(title));
+  if (byTitle) return byTitle[0];
+  const byLabel = (publicCard?.function?.subLabels ?? []).map(label => SUBLABEL_DOMAINS[label]).find(Boolean);
+  return byLabel ?? "tools";
+}
 export const MECHANISM_DOMAIN = "agent-mechanism";
 /** English tags per role, so English queries and similarity features reach the Chinese-described plugins. */
 const ROLE_TAGS = { orchestration: ["orchestration"], contextMemory: ["context memory"], evaluationFeedback: ["evaluation feedback"], permissions: ["permissions"] };
@@ -85,7 +113,7 @@ export function toPaperPluginSummary(entry, repo, publicCard) {
     repo,
     description: truncate(String(entry.description ?? entry.name ?? ""), MAX_DESCRIPTION),
     tags: ["agent mechanism", ...(ROLE_TAGS[roleOf(entry)] ?? [])],
-    group: MECHANISM_GROUP,
+    group: paperDomainGroup(entry, publicCard),
     domain: MECHANISM_DOMAIN,
     tasks: [],
     risk: publicCard ? publicCard.risk.level : null,
@@ -166,7 +194,7 @@ export function nativeMechanismRecords(nativeTargets, relations, rolesById) {
     const revision = REVISION.test(String(target.revision ?? "")) ? target.revision : null;
     const summary = {
       id: target.id, name, type: "dsh-plugin", repo, description: "", tags: ["agent mechanism", "native"],
-      group: MECHANISM_GROUP, domain: MECHANISM_DOMAIN, tasks: [], risk: null, functionPrimary: null, functionLabels: [],
+      group: "tools", domain: MECHANISM_DOMAIN, tasks: [], risk: null, functionPrimary: null, functionLabels: [],
       mechanism: MECHANISM_ROLES.includes(role) ? role : null, paper: null, native: true,
     };
     const detail = {

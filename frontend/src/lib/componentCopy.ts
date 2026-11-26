@@ -335,8 +335,8 @@ export const TYPE_LABELS: Record<"en" | "zh", Record<ComponentType, string>> = {
 };
 
 export const GROUP_LABELS: Record<"en" | "zh", Record<DomainGroup, string>> = {
-  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "Research tools", mechanisms: "Runtime mechanisms" },
-  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "科研工具", mechanisms: "运行机制" },
+  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "General & research tools" },
+  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "通用与科研工具" },
 };
 
 /** The four runtime mechanism classes, named as in the project's harness overview. */

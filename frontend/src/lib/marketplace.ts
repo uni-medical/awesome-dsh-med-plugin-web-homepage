@@ -2,7 +2,11 @@ import type { ComponentSummary } from "./components";
 import { expandQueryTerms } from "./capabilitySearch";
 
 /** URL parameters owned by the component list filters. */
-export const FILTER_KEYS = ["q", "group", "type", "risk", "fn", "mech"] as const;
+export const FILTER_KEYS = ["q", "layer", "group", "type", "risk", "fn", "mech"] as const;
+/** `layer=capability`: the capability environment (tools), without runtime mechanisms. */
+export const CAPABILITY_LAYER = "capability";
+/** Former group for mechanism plugins; kept so old links still list them. */
+const LEGACY_MECHANISM_GROUP = "mechanisms";
 /** Value of the `risk` filter for components without a verified evaluation. */
 export const NOT_EVALUATED = "none";
 export const PAGE_SIZE = 60;
@@ -48,8 +52,10 @@ export function filterComponents(indexed: readonly IndexedComponent[], params: U
   const risks = new Set(read("risk"));
   const [fn] = read("fn");
   const [mechanism] = read("mech");
+  const [layer] = read("layer");
   const matches = indexed.filter(({ item, text }) => {
-    if (group && item.group !== group) return false;
+    if (group === LEGACY_MECHANISM_GROUP ? !item.mechanism : group && item.group !== group) return false;
+    if (layer === CAPABILITY_LAYER && (item.mechanism || item.native)) return false;
     if (types.size && !types.has(item.type)) return false;
     if (risks.size && !risks.has(item.risk ?? NOT_EVALUATED)) return false;
     if (fn && item.functionPrimary !== fn) return false;

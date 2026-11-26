@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ComponentCard } from "../components/ComponentCard";
 import { ComponentDetailDialog } from "../components/ComponentDetailDialog";
-import { COMPONENT_TYPES, DOMAIN_GROUPS, type ComponentSummary, type MechanismRole } from "../lib/components";
-import { HARNESS_LAYERS, MECHANISM_ORDER } from "../lib/componentCopy";
-import { FILTER_KEYS, NOT_EVALUATED, PAGE_SIZE, countBy, filterComponents, filterQueryString, toggleMultiValue } from "../lib/marketplace";
+import { COMPONENT_TYPES, DOMAIN_GROUPS, type ComponentSummary } from "../lib/components";
+import { HARNESS_LAYERS, MECHANISM_ORDER, type HarnessLayer } from "../lib/componentCopy";
+import { CAPABILITY_LAYER, FILTER_KEYS, NOT_EVALUATED, PAGE_SIZE, countBy, filterComponents, filterQueryString, toggleMultiValue } from "../lib/marketplace";
 import { useComponentCopy, useEntryDialog } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
 
@@ -47,33 +47,40 @@ function FilterMenu({ indexed, params, onToggle, onSet }: { indexed: ReturnType<
 }
 
 /** Capability environment plus the four runtime mechanism classes, so the catalogue reads as more than a tool list. */
-function HarnessCoverage({ indexed, active, onPick }: { indexed: ReturnType<typeof useComponents>["indexed"]; active: string; onPick: (role: MechanismRole) => void }) {
+function HarnessCoverage({ indexed, params, active, onPick }: { indexed: ReturnType<typeof useComponents>["indexed"]; params: URLSearchParams; active: HarnessLayer | ""; onPick: (layer: HarnessLayer) => void }) {
   const { c, mechanisms, mechanismCoverage, adaptation, formatNumber } = useComponentCopy();
   const [showAdaptation, setShowAdaptation] = useState(false);
-  // Paper plugins per class; native DSH mechanisms are listed but not counted as plugins.
-  const counts = useMemo(() => countBy(indexed.map(entry => entry.item), item => (item.native ? null : item.mechanism ?? null)), [indexed]);
-  const capabilityTotal = useMemo(() => indexed.filter(entry => !entry.item.mechanism && !entry.item.native).length, [indexed]);
-  const mechanismTotal = [...counts.values()].reduce((sum, value) => sum + value, 0);
-  if (!mechanismTotal) return null;
+  // Counts follow the other filters (search, domain, type…) and match the list a click produces.
+  const counts = useMemo(() => countBy(filterComponents(indexed, params, ["mech", "layer"]), item => item.mechanism ?? (item.native ? null : "capability")), [indexed, params]);
+  const hasMechanisms = useMemo(() => indexed.some(entry => entry.item.mechanism), [indexed]);
+  if (!hasMechanisms) return null;
+  const label = (layer: HarnessLayer) => (layer === "capability" ? c.coverageTools : mechanisms[layer]);
+  const coverage = (layer: HarnessLayer) => (layer === "capability" ? adaptation.capability.provides : mechanismCoverage[layer]);
   return <section className="harness-coverage" aria-label={c.coverageTitle}>
     <p className="harness-coverage-title"><b>{c.coverageTitle}</b><span>{c.coverageHint}</span></p>
     <div className="harness-coverage-grid">
-      <div className="harness-cell is-capability"><span>{c.coverageTools}</span><strong>{formatNumber(capabilityTotal)}</strong><p>{adaptation.capability.provides}</p></div>
-      {MECHANISM_ORDER.map(role => <button key={role} type="button" className="harness-cell" aria-pressed={active === role} onClick={() => onPick(role)}>
-        <span>{mechanisms[role]}</span><strong>{formatNumber(counts.get(role) ?? 0)}</strong><p>{mechanismCoverage[role]}</p>
+      {HARNESS_LAYERS.map(layer => <button key={layer} type="button" className="harness-cell" data-layer={layer} aria-pressed={active === layer} onClick={() => onPick(layer)}>
+        <span>{label(layer)}</span><strong>{formatNumber(counts.get(layer) ?? 0)}</strong><p>{coverage(layer)}</p>
       </button>)}
     </div>
     <button type="button" className="harness-adapt-toggle" aria-expanded={showAdaptation} aria-controls="harness-adaptation" onClick={() => setShowAdaptation(value => !value)}>
       {showAdaptation ? c.adaptHide : c.adaptToggle}<i aria-hidden="true">{showAdaptation ? "▴" : "▾"}</i>
     </button>
     {showAdaptation && <div className="harness-adapt-grid" id="harness-adaptation">
-      {HARNESS_LAYERS.map(layer => <dl key={layer} className={`harness-adapt-cell${active === layer ? " is-active" : ""}`}>
-        <dt className="harness-adapt-layer">{layer === "capability" ? c.coverageTools : mechanisms[layer]}</dt>
+      {HARNESS_LAYERS.map(layer => <dl key={layer} className={`harness-adapt-cell${active === layer ? " is-active" : ""}`} data-layer={layer}>
+        <dt className="harness-adapt-layer">{label(layer)}</dt>
         <dt>{c.adaptProvides}</dt><dd>{adaptation[layer].provides}</dd>
         <dt>{c.adaptSplit}</dt><dd>{adaptation[layer].split}</dd>
       </dl>)}
     </div>}
   </section>;
+}
+
+/** Selected harness layer from the URL: `layer=capability` or a mechanism class in `mech`. */
+function activeLayer(params: URLSearchParams): HarnessLayer | "" {
+  if (params.get("layer") === CAPABILITY_LAYER) return "capability";
+  const mechanism = params.get("mech");
+  return HARNESS_LAYERS.find(layer => layer === mechanism) ?? "";
 }
 
 function ResultGrid({ items, onOpen }: { items: ComponentSummary[]; onOpen: (id: string) => void }) {
@@ -121,9 +128,14 @@ export function MarketplacePage() {
       <SearchField value={filters.get("q") ?? ""} onChange={value => update("q", value, true)}/>
       <FilterMenu indexed={indexed} params={filters} onToggle={(key, value) => setParams(current => toggleMultiValue(current, key, value))} onSet={(key, value) => update(key, value)}/>
     </div>
-    <HarnessCoverage indexed={indexed} active={filters.get("mech") ?? ""} onPick={role => setParams(current => {
+    <HarnessCoverage indexed={indexed} params={filters} active={activeLayer(filters)} onPick={layer => setParams(current => {
+      // One layer at a time; clicking the selected layer clears it. The domain tab is kept, so counts stay comparable.
       const next = new URLSearchParams(current);
-      if (next.get("mech") === role) { next.delete("mech"); next.delete("group"); } else { next.set("group", "mechanisms"); next.set("mech", role); }
+      const selected = activeLayer(next) === layer;
+      next.delete("layer");
+      next.delete("mech");
+      if (next.get("group") === "mechanisms") next.delete("group");
+      if (!selected) { if (layer === "capability") next.set("layer", CAPABILITY_LAYER); else next.set("mech", layer); }
       return next;
     })}/>
     <div className="group-tabs" role="group" aria-label={c.filters}>

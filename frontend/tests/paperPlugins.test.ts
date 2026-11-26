@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MECHANISM_ROLES, linkPaperCards, nativeMechanismRecords, paperPluginSuffix, paperPluginTitle, paperRelationEdges, toPaperPluginDetail, toPaperPluginSummary } from "../scripts/lib/paper-plugins.mjs";
+import { MECHANISM_ROLES, linkPaperCards, nativeMechanismRecords, paperDomainGroup, paperPluginSuffix, paperPluginTitle, paperRelationEdges, toPaperPluginDetail, toPaperPluginSummary } from "../scripts/lib/paper-plugins.mjs";
 import { parseComponentDetail, parseComponentIndex } from "../src/lib/components";
 import type { ComponentSummary } from "../src/lib/components";
 import { searchText } from "../src/lib/components";
@@ -15,7 +15,7 @@ const entry = (overrides: Record<string, unknown> = {}) => ({
   name: "上下文预算监控与历史摘要扩展：注册唯一前缀 systemPrompt context 输出可读的上下文预算状态。局限：未验证临床效果。",
   description: "上下文预算监控与历史摘要扩展：注册唯一前缀 systemPrompt context 输出可读的上下文预算状态。局限：未验证临床效果。",
   trust: "formal",
-  source: { kind: "literature", number: 1, label: "MedicalHarness", title: "MedicalHarness: A Controlled Evaluation", url: "https://arxiv.org/abs/2610.05778", pdf_sha256: "af5c" },
+  source: { kind: "literature", number: 1, label: "MedicalHarness", title: "MedicalHarness: A Controlled Evaluation of LLMs and Agent Harnesses on Medical Tasks", url: "https://arxiv.org/abs/2610.05778", pdf_sha256: "af5c" },
   locator: { definition_file: "formal-inventory/plugins/cdcd7f9826fe4f5b657cecf6/84d7/index.mjs", manifest: "formal-inventory/plugins/cdcd7f9826fe4f5b657cecf6/84d7/manifest.json" },
   details: { harness: { role: "contextMemory" } },
   installation: { kind: "dsh-plugin", installability: "ready", requires_allow_unreviewed: true },
@@ -72,7 +72,7 @@ describe("paper mechanism plugins: public records", () => {
     const summary = toPaperPluginSummary(entry(), UPSTREAM.repository, publicCard);
     expect(summary).toMatchObject({
       id: entry().id, name: "上下文预算监控与历史摘要扩展", type: "dsh-plugin", repo: UPSTREAM.repository,
-      group: "mechanisms", domain: "agent-mechanism", mechanism: "contextMemory", paper: "MedicalHarness",
+      group: "clinical", domain: "agent-mechanism", mechanism: "contextMemory", paper: "MedicalHarness",
       risk: "green", functionPrimary: "智能体编排", functionLabels: ["智能体运行与评测编排"],
     });
     expect(summary.description.length).toBeLessThanOrEqual(320);
@@ -87,7 +87,7 @@ describe("paper mechanism plugins: public records", () => {
 
   it("builds a detail record with the paper, the pinned source file and a formal install hint", () => {
     const detail = toPaperPluginDetail(entry(), UPSTREAM, null);
-    expect(detail.paper).toEqual({ label: "MedicalHarness", title: "MedicalHarness: A Controlled Evaluation", url: "https://arxiv.org/abs/2610.05778" });
+    expect(detail.paper).toEqual({ label: "MedicalHarness", title: "MedicalHarness: A Controlled Evaluation of LLMs and Agent Harnesses on Medical Tasks", url: "https://arxiv.org/abs/2610.05778" });
     expect(detail.sourceUrl).toBe(`https://github.com/${UPSTREAM.repository}/blob/${UPSTREAM.commit}/data/formal-inventory/plugins/cdcd7f9826fe4f5b657cecf6/84d7/index.mjs`);
     expect(detail.install).toEqual({ entryId: entry().id, installability: "ready", verification: "passed", trust: "formal", requires: [], formalInventory: true });
     expect(detail.mechanism).toBe("contextMemory");
@@ -106,8 +106,8 @@ describe("paper mechanism plugins in the app", () => {
 
   it("keeps a valid role and paper and drops an invalid role", () => {
     const index = parseComponentIndex({ schemaVersion: "2", components: [
-      { ...base, id: "a", group: "mechanisms", mechanism: "permissions", paper: "GuardAgent" },
-      { ...base, id: "b", group: "mechanisms", mechanism: "bogus", paper: 3 },
+      { ...base, id: "a", group: "tools", mechanism: "permissions", paper: "GuardAgent" },
+      { ...base, id: "b", group: "tools", mechanism: "bogus", paper: 3 },
     ] });
     expect(index.components.map(item => [item.mechanism, item.paper])).toEqual([["permissions", "GuardAgent"], [null, null]]);
     expect(index.skipped).toBe(0);
@@ -115,8 +115,8 @@ describe("paper mechanism plugins in the app", () => {
 
   it("filters and counts by mechanism role, and searches the paper name", () => {
     const items: ComponentSummary[] = [
-      { ...base, id: "m1", group: "mechanisms", mechanism: "contextMemory", paper: "CellVoyager" } as ComponentSummary,
-      { ...base, id: "m2", group: "mechanisms", mechanism: "orchestration", paper: "AutoBA" } as ComponentSummary,
+      { ...base, id: "m1", group: "omics", mechanism: "contextMemory", paper: "CellVoyager" } as ComponentSummary,
+      { ...base, id: "m2", group: "clinical", mechanism: "orchestration", paper: "AutoBA" } as ComponentSummary,
       { ...base, id: "t1", type: "mcp", group: "tools" } as ComponentSummary,
     ];
     const indexed = items.map(item => ({ item, text: searchText(item) }));
@@ -144,7 +144,7 @@ describe("paper plugin relations", () => {
   it("builds a native mechanism record whose role follows the plugins that replace it", () => {
     const relations = [{ type: "alternative_to", from: NATIVE.id, to: plugin, condition: "仅当…" }];
     const [record] = nativeMechanismRecords([NATIVE], relations, roles);
-    expect(record.summary).toMatchObject({ id: NATIVE.id, name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", group: "mechanisms", mechanism: "orchestration", native: true, risk: null, paper: null });
+    expect(record.summary).toMatchObject({ id: NATIVE.id, name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", group: "tools", mechanism: "orchestration", native: true, risk: null, paper: null });
     expect(record.detail).toMatchObject({ id: NATIVE.id, native: true, install: null, sourceUrl: `https://github.com/deepseek-ai/deepseek-harness/tree/${NATIVE.revision}` });
   });
 
@@ -171,9 +171,29 @@ describe("paper plugin relations", () => {
 
 describe("native mechanisms in the app", () => {
   it("keeps the native flag on list and detail records", () => {
-    const base = { id: "n", name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", description: "", tags: [], group: "mechanisms", domain: "agent-mechanism", tasks: [], risk: null, functionPrimary: null, functionLabels: [], mechanism: "orchestration", native: true };
+    const base = { id: "n", name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", description: "", tags: [], group: "tools", domain: "agent-mechanism", tasks: [], risk: null, functionPrimary: null, functionLabels: [], mechanism: "orchestration", native: true };
     expect(parseComponentIndex({ schemaVersion: "2", components: [base] }).components[0].native).toBe(true);
     expect(parseComponentDetail({ ...base, native: true })?.native).toBe(true);
     expect(parseComponentDetail({ ...base, native: "yes" })?.native).toBe(false);
+  });
+});
+
+describe("domain groups of mechanism plugins", () => {
+  const withPaper = (title: string, overrides: Record<string, unknown> = {}) => entry({ source: { label: "X", title, url: "https://arxiv.org/abs/1" }, ...overrides });
+  const card = (subLabels: string[]) => ({ function: { subLabels } });
+
+  it("takes the domain from the source paper title, with whole-word matches", () => {
+    expect(paperDomainGroup(withPaper("PathAgent: whole slide pathology agent"), null)).toBe("imaging");
+    expect(paperDomainGroup(withPaper("ChemCrow: augmenting LLMs with chemistry tools"), null)).toBe("drug");
+    expect(paperDomainGroup(withPaper("CellVoyager: single-cell analysis agent"), null)).toBe("omics");
+    expect(paperDomainGroup(withPaper("Agent Hospital: a simulacrum of hospital"), null)).toBe("clinical");
+    expect(paperDomainGroup(withPaper("PaperQA2: literature synthesis"), null)).toBe("literature");
+    // "context" and "orchestration" must not count as CT.
+    expect(paperDomainGroup(withPaper("Context orchestration for agents"), null)).toBe("tools");
+  });
+
+  it("falls back to the card's function subcategories, then to general tools", () => {
+    expect(paperDomainGroup(withPaper("A generic agent"), card(["临床与健康管理"]))).toBe("clinical");
+    expect(paperDomainGroup(withPaper("A generic agent"), card(["智能体运行与评测编排"]))).toBe("tools");
   });
 });
