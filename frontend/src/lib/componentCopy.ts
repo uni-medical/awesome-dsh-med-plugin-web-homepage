@@ -35,7 +35,10 @@ const en = {
   nativeInstall: "Built into DSH and installed with the pinned DSH; no separate install.",
   coverageTitle: "Harness coverage",
   coverageTools: "Capability environment",
-  coverageToolsText: "Skill loading, MCP access, CLI execution and native medical tools",
+  adaptToggle: "How each layer plugs in",
+  adaptHide: "Hide how each layer plugs in",
+  adaptProvides: "Plugins provide",
+  adaptSplit: "Preset and profile",
   coverageMechanisms: "Runtime mechanisms",
   coverageHint: "The capability environment supplies the tools, data, knowledge and skills medical tasks need. Runtime mechanisms fall into four classes, generated from papers.",
   paperSource: "Source paper",
@@ -195,7 +198,10 @@ const zh: ComponentCopy = {
   nativeInstall: "DSH 内置，随固定版本的 DSH 一起安装，无需单独安装。",
   coverageTitle: "覆盖范围",
   coverageTools: "能力环境",
-  coverageToolsText: "Skill 加载、MCP 接入、CLI 执行及医学原生工具",
+  adaptToggle: "查看适配方式",
+  adaptHide: "收起适配方式",
+  adaptProvides: "插件提供",
+  adaptSplit: "Preset 与 Profile 分工",
   coverageMechanisms: "运行机制",
   coverageHint: "能力环境提供医学任务所需的工具、数据、知识和技能；运行机制归并为四类，插件由论文生成。",
   paperSource: "来源论文",
@@ -357,6 +363,28 @@ export const MECHANISM_COVERAGE: Record<"en" | "zh", Record<MechanismRole, strin
 
 /** Display order of the mechanism classes (harness overview). */
 export const MECHANISM_ORDER: readonly MechanismRole[] = ["orchestration", "contextMemory", "permissions", "evaluationFeedback"];
+
+/** Layers of the harness: the capability environment, then the mechanism classes. */
+export type HarnessLayer = "capability" | MechanismRole;
+export const HARNESS_LAYERS: readonly HarnessLayer[] = ["capability", ...MECHANISM_ORDER];
+
+/** What plugins provide in each layer and how the preset and profile split the work (harness adaptation table). */
+export const HARNESS_ADAPTATION: Record<"en" | "zh", Record<HarnessLayer, { provides: string; split: string }>> = {
+  en: {
+    capability: { provides: "Skill loading, MCP access, CLI execution and native medical tools", split: "The preset selects agent-facing capabilities; the profile configures the shared services they depend on" },
+    orchestration: { provides: "Drivers, tool scheduling, sub-agents and flow control", split: "Local rules go in the preset; the profile assembles shared drivers and sub-agent backends" },
+    contextMemory: { provides: "Prompt assembly, compression, memory policies and persistence", split: "Local prompt and information policies go in the preset; the profile assembles shared storage" },
+    permissions: { provides: "Check rules, authorisation and isolation mechanisms", split: "The preset can mount local constraints; the profile configures the shared services that enforce them" },
+    evaluationFeedback: { provides: "Trajectory capture, checkers and feedback interfaces", split: "The preset mounts task checks; the profile assembles shared logging and telemetry services" },
+  },
+  zh: {
+    capability: { provides: "Skill 加载、MCP 接入、CLI 执行及医学原生工具", split: "Preset 选择面向智能体的能力，Profile 配置其依赖的共享服务" },
+    orchestration: { provides: "驱动、工具调度、子智能体与流程控制", split: "局部规则放 Preset，共享驱动与子智能体后端由 Profile 装配" },
+    contextMemory: { provides: "提示组装、压缩、记忆策略与持久化", split: "局部提示与信息策略放 Preset，共享存储由 Profile 装配" },
+    permissions: { provides: "检查规则、授权与隔离机制", split: "Preset 可挂载局部约束，Profile 配置实际执行约束的共享服务" },
+    evaluationFeedback: { provides: "轨迹采集、检查器与反馈接口", split: "Preset 挂载任务检查，Profile 装配共享记录与遥测服务" },
+  },
+};
 
 /** Labels for risk levels; the Chinese wording matches the upstream verdicts. */
 export const RISK_LABELS: Record<"en" | "zh", Record<RiskLevel | "none", string>> = {

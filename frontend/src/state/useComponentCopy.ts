@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { GROUP_LABELS, MECHANISM_COVERAGE, MECHANISM_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
+import { GROUP_LABELS, HARNESS_ADAPTATION, MECHANISM_COVERAGE, MECHANISM_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
 import { evaluationText } from "../lib/evaluationText";
 import { useUiLanguage } from "./useUiLanguage";
 import type { ComponentSummary, PaperSource } from "../lib/components";
@@ -21,7 +21,7 @@ export function useComponentCopy() {
     /** Native DSH mechanisms carry no upstream description; they get a short explanation. */
     descriptionOf: (item: Labelled) => item.description || (item.native ? c.nativeDescription : ""),
     /** Source paper of a mechanism plugin, the repository otherwise. */
-    sourceOf: (item: Labelled) => (typeof item.paper === "string" ? item.paper : item.paper?.label) ?? item.repo, locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], mechanisms: MECHANISM_LABELS[locale], mechanismCoverage: MECHANISM_COVERAGE[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
+    sourceOf: (item: Labelled) => (typeof item.paper === "string" ? item.paper : item.paper?.label) ?? item.repo, locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], mechanisms: MECHANISM_LABELS[locale], mechanismCoverage: MECHANISM_COVERAGE[locale], adaptation: HARNESS_ADAPTATION[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
 }
 
 /**

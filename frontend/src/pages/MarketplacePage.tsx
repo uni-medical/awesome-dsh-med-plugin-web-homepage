@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { ComponentCard } from "../components/ComponentCard";
 import { ComponentDetailDialog } from "../components/ComponentDetailDialog";
 import { COMPONENT_TYPES, DOMAIN_GROUPS, type ComponentSummary, type MechanismRole } from "../lib/components";
-import { MECHANISM_ORDER } from "../lib/componentCopy";
+import { HARNESS_LAYERS, MECHANISM_ORDER } from "../lib/componentCopy";
 import { FILTER_KEYS, NOT_EVALUATED, PAGE_SIZE, countBy, filterComponents, filterQueryString, toggleMultiValue } from "../lib/marketplace";
 import { useComponentCopy, useEntryDialog } from "../state/useComponentCopy";
 import { useComponents } from "../state/useComponents";
@@ -48,7 +48,8 @@ function FilterMenu({ indexed, params, onToggle, onSet }: { indexed: ReturnType<
 
 /** Capability environment plus the four runtime mechanism classes, so the catalogue reads as more than a tool list. */
 function HarnessCoverage({ indexed, active, onPick }: { indexed: ReturnType<typeof useComponents>["indexed"]; active: string; onPick: (role: MechanismRole) => void }) {
-  const { c, mechanisms, mechanismCoverage, formatNumber } = useComponentCopy();
+  const { c, mechanisms, mechanismCoverage, adaptation, formatNumber } = useComponentCopy();
+  const [showAdaptation, setShowAdaptation] = useState(false);
   // Paper plugins per class; native DSH mechanisms are listed but not counted as plugins.
   const counts = useMemo(() => countBy(indexed.map(entry => entry.item), item => (item.native ? null : item.mechanism ?? null)), [indexed]);
   const capabilityTotal = useMemo(() => indexed.filter(entry => !entry.item.mechanism && !entry.item.native).length, [indexed]);
@@ -57,11 +58,21 @@ function HarnessCoverage({ indexed, active, onPick }: { indexed: ReturnType<type
   return <section className="harness-coverage" aria-label={c.coverageTitle}>
     <p className="harness-coverage-title"><b>{c.coverageTitle}</b><span>{c.coverageHint}</span></p>
     <div className="harness-coverage-grid">
-      <div className="harness-cell is-capability"><span>{c.coverageTools}</span><strong>{formatNumber(capabilityTotal)}</strong><p>{c.coverageToolsText}</p></div>
+      <div className="harness-cell is-capability"><span>{c.coverageTools}</span><strong>{formatNumber(capabilityTotal)}</strong><p>{adaptation.capability.provides}</p></div>
       {MECHANISM_ORDER.map(role => <button key={role} type="button" className="harness-cell" aria-pressed={active === role} onClick={() => onPick(role)}>
         <span>{mechanisms[role]}</span><strong>{formatNumber(counts.get(role) ?? 0)}</strong><p>{mechanismCoverage[role]}</p>
       </button>)}
     </div>
+    <button type="button" className="harness-adapt-toggle" aria-expanded={showAdaptation} aria-controls="harness-adaptation" onClick={() => setShowAdaptation(value => !value)}>
+      {showAdaptation ? c.adaptHide : c.adaptToggle}<i aria-hidden="true">{showAdaptation ? "▴" : "▾"}</i>
+    </button>
+    {showAdaptation && <div className="harness-adapt-grid" id="harness-adaptation">
+      {HARNESS_LAYERS.map(layer => <dl key={layer} className={`harness-adapt-cell${active === layer ? " is-active" : ""}`}>
+        <dt className="harness-adapt-layer">{layer === "capability" ? c.coverageTools : mechanisms[layer]}</dt>
+        <dt>{c.adaptProvides}</dt><dd>{adaptation[layer].provides}</dd>
+        <dt>{c.adaptSplit}</dt><dd>{adaptation[layer].split}</dd>
+      </dl>)}
+    </div>}
   </section>;
 }
 

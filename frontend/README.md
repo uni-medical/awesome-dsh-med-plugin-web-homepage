@@ -30,7 +30,7 @@ Only public card fields are exported (see `scripts/lib/public-fields.mjs`). Eval
 
 `integrate:data/paper-plugin-inventory.json` lists formal DSH plugins generated from papers. Each has a harness role (`details.harness.role`): orchestration, context and memory, permissions and governance, or evaluation and feedback. They are imported as their own list group (`mechanisms`), keep their source paper, and link the source file pinned under `data/formal-inventory/plugins/`. Their QC cards (`user-card-taxonomy-20261112:security/results/v2/paper-plugin-qc-20261125/cards/cards.jsonl.gz`) link by the 24-hex id suffix shared by the inventory id (`dsh-plugin:user/added/<suffix>`), the card unit id and the entry-table repository; a suffix on more than one card links nothing. They install from a copy of the complete `formal-inventory/` directory (`DSH_MED_FORMAL_INVENTORY`), which the detail dialog and the plan's install script state.
 
-The component ecosystem shows a coverage panel (capability environment plus the four mechanism classes, each with what it covers); a mechanism class filters the list.
+The component ecosystem shows a coverage panel (capability environment plus the four mechanism classes, each with what it covers); a mechanism class filters the list. "How each layer plugs in" expands a second row with what plugins provide in each layer and how the DSH preset and profile split the work (`HARNESS_ADAPTATION` in `src/lib/componentCopy.ts`).
 
 ### Capability map
 
