@@ -6,7 +6,7 @@ import { REPO_PATH } from "./shell";
 export const COMPONENT_TYPES = ["skill", "mcp", "cli", "dsh-plugin"] as const;
 export type ComponentType = (typeof COMPONENT_TYPES)[number];
 
-export const DOMAIN_GROUPS = ["literature", "omics", "drug", "clinical", "imaging", "tools", "mechanisms"] as const;
+export const DOMAIN_GROUPS = ["literature", "omics", "drug", "clinical", "imaging", "tools"] as const;
 export type DomainGroup = (typeof DOMAIN_GROUPS)[number];
 
 export const RISK_LEVELS = ["green", "amber", "red", "grey"] as const;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "frontendBaseCommit": "652bfaefc68279ac4dc316326ff13052359ec871",
+  "frontendBaseCommit": "a1ad9f757451f9d4a96134b5d3efabf3b8671ca9",
   "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
   "upstream": {
     "entries": {
@@ -203,7 +203,7 @@
     }
   },
   "outputs": {
-    "indexBytes": 8277577,
+    "indexBytes": 8276132,
     "detailShards": 128,
     "detailBytes": 42870698,
     "largestShardBytes": 419786

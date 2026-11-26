@@ -36,6 +36,20 @@ describe("component list filters", () => {
     expect(ids(`fn=${encodeURIComponent("分析流程")}`)).toEqual(["skill:b/scanpy/qc"]);
   });
 
+  it("separates the capability environment from runtime mechanisms", () => {
+    const layered = [
+      { item: summary({ id: "t", name: "Tool", group: "clinical" }), text: "tool" },
+      { item: summary({ id: "m", name: "Memory", type: "dsh-plugin", group: "clinical", mechanism: "contextMemory" }), text: "memory" },
+      { item: summary({ id: "n", name: "Native", type: "dsh-plugin", group: "tools", mechanism: "orchestration", native: true }), text: "native" },
+    ];
+    const pick = (query: string) => filterComponents(layered, new URLSearchParams(query)).map(item => item.id);
+    expect(pick("layer=capability")).toEqual(["t"]);
+    expect(pick("mech=contextMemory&group=clinical")).toEqual(["m"]);
+    expect(pick("group=clinical")).toEqual(["t", "m"]);
+    // Old links that used the former "mechanisms" group still list mechanisms.
+    expect(pick("group=mechanisms")).toEqual(["m", "n"]);
+  });
+
   it("can ignore one facet so its counts reflect the other filters", () => {
     expect(ids("group=omics&type=mcp", ["type"])).toEqual(["skill:b/scanpy/qc"]);
     expect(countBy(items, item => item.functionPrimary)).toEqual(new Map([["数据检索与查询", 1], ["分析流程", 1]]));
