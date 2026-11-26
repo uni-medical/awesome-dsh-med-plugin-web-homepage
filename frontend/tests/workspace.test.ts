@@ -1,23 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { CatalogEntry } from "../src/lib/catalog";
-import {
-  DEFAULT_PREFERENCES,
-  addEntryToCollection,
-  buildSmartCollections,
-  createCollection,
-  parseCollections,
-  parsePreferences,
-  removeEntryFromCollection,
-  resolveComparisonEntries,
-  toggleComparison,
-} from "../src/lib/workspace";
+import { DEFAULT_PREFERENCES, clampSplitRatio, parsePreferences } from "../src/lib/workspace";
 import { translate } from "../src/lib/i18n";
-
-const entries = [
-  { id: "a/medical", primaryCategory: "Plugin", domains: ["medical"], tier: "stable" },
-  { id: "b/general", primaryCategory: "Tool", domains: ["general"], tier: "candidate" },
-  { id: "c/both", primaryCategory: "Plugin", domains: ["medical", "general"], tier: "candidate" },
-] as CatalogEntry[];
 
 describe("workspace preferences", () => {
   it("keeps dark as the default for existing browsers without a theme", () => {
@@ -50,55 +33,14 @@ describe("workspace preferences", () => {
   });
 
   it("provides stable English and Chinese interface copy", () => {
-    expect(translate("en", "marketplace.title")).toBe("Repository");
-    expect(translate("zh", "marketplace.title")).toBe("组件目录");
-    expect(translate("zh", "details.identity")).toBe("基本信息");
-  });
-});
-
-describe("workspace collections", () => {
-  it("retains valid stored memberships and drops malformed records", () => {
-    const stored = { version: 1, collections: [null, {}, { id: "one", name: "Review", entryIds: ["a/medical", 1] }] };
-    expect(parseCollections(JSON.stringify(stored))).toEqual([{ id: "one", name: "Review", entryIds: ["a/medical"] }]);
+    expect(translate("en", "nav.marketplace")).toBe("Component ecosystem");
+    expect(translate("zh", "nav.marketplace")).toBe("组件生态");
+    expect(translate("zh", "nav.graph")).toBe("能力星图");
   });
 
-  it("ignores a blank collection name", () => {
-    expect(createCollection([], "   ", "one")).toEqual([]);
-  });
-
-  it("preserves other collections when removing a saved component", () => {
-    const one = createCollection([], "Review", "one");
-    const two = createCollection(one, "Clinical", "two");
-    const saved = addEntryToCollection(addEntryToCollection(two, "one", "a/medical"), "two", "a/medical");
-    expect(addEntryToCollection(saved, "one", "a/medical")[0].entryIds).toEqual(["a/medical"]);
-    const removed = removeEntryFromCollection(saved, "one", "a/medical");
-    expect(removed[0].entryIds).toEqual([]);
-    expect(removed[1].entryIds).toEqual(["a/medical"]);
-  });
-
-  it("builds live smart collections from catalog metadata", () => {
-    const smart = buildSmartCollections(entries);
-    expect(smart.find(item => item.id === "medical")?.entryIds).toEqual(["a/medical", "c/both"]);
-    expect(smart.find(item => item.id === "type-plugin")?.entryIds).toEqual(["a/medical", "c/both"]);
-  });
-
-  it("creates named collections and permits membership in multiple collections", () => {
-    const first = createCollection([], "Review later", "one");
-    const second = createCollection(first, "Clinical", "two");
-    const updated = addEntryToCollection(addEntryToCollection(second, "one", "a/medical"), "two", "a/medical");
-    expect(updated.every(item => item.entryIds.includes("a/medical"))).toBe(true);
-  });
-
-  it("falls back when stored collection data is damaged", () => {
-    expect(parseCollections("{}" )).toEqual([]);
-    expect(parseCollections("not-json")).toEqual([]);
-  });
-});
-
-describe("research comparison", () => {
-  it("keeps two to four unique ids and ignores missing entries", () => {
-    expect(toggleComparison(["a", "b", "c", "d"], "e")).toEqual(["a", "b", "c", "d"]);
-    expect(toggleComparison(["a", "b"], "a")).toEqual(["b"]);
-    expect(resolveComparisonEntries(entries, ["a/medical", "missing", "b/general"]).map(entry => entry.id)).toEqual(["a/medical", "b/general"]);
+  it("clamps legacy split ratios kept for preference compatibility", () => {
+    expect(clampSplitRatio(10)).toBe(40);
+    expect(clampSplitRatio(95)).toBe(70);
+    expect(clampSplitRatio(Number.NaN)).toBe(56);
   });
 });

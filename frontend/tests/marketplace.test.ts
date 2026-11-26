@@ -1,89 +1,76 @@
-import { describe, expect, it } from "vitest";
-import {
-  clampSplitRatio,
-  DEFAULT_SPLIT_RATIO,
-  MAX_SPLIT_RATIO,
-  MIN_SPLIT_RATIO,
-  parseMarketplaceView,
-  getResponsiveSplitBounds,
-  resolveSelectedEntry,
-  toggleMultiValue,
-} from "../src/lib/marketplace";
 import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import type { ComponentSummary } from "../src/lib/components";
+import { searchText } from "../src/lib/components";
+import { countBy, filterComponents, matchesQuery, rankByName, toggleMultiValue } from "../src/lib/marketplace";
 
-describe("marketplace workbench state", () => {
-  it("generates static entry points for every workspace route", () => {
-    const script = readFileSync(new URL("../scripts/generate-routes.mjs", import.meta.url), "utf8");
-    for (const route of ["marketplace", "collections", "research", "settings"]) {
-      expect(script).toContain(`\"${route}\"`);
-    }
+const summary = (overrides: Partial<ComponentSummary>): ComponentSummary => ({
+  id: "skill:o/r/x", name: "x", type: "skill", repo: "O/R", description: "", tags: [], group: "tools", domain: "general", tasks: [], risk: null, functionPrimary: null, functionLabels: [], ...overrides,
+});
+
+const items = [
+  summary({ id: "mcp:a/pubmed/search", name: "PubMed Search", type: "mcp", group: "literature", domain: "literature", description: "Search PubMed abstracts", risk: "green", functionPrimary: "数据检索与查询" }),
+  summary({ id: "skill:b/scanpy/qc", name: "Single-cell QC", type: "skill", group: "omics", domain: "transcriptomics", tags: ["single-cell"], risk: "red", functionPrimary: "分析流程" }),
+  summary({ id: "cli:c/tool/x", name: "Citation tool", type: "cli", group: "literature", domain: "literature", tasks: ["citation-management"] }),
+];
+const indexed = items.map(item => ({ item, text: searchText(item) }));
+const ids = (params: string, ignore?: string[]) => filterComponents(indexed, new URLSearchParams(params), ignore).map(item => item.id);
+
+describe("component list filters", () => {
+  it("matches every search term, case-insensitively, across name, tags and tasks", () => {
+    expect(ids("q=pubmed")).toEqual(["mcp:a/pubmed/search"]);
+    expect(ids("q=SINGLE-CELL qc")).toEqual(["skill:b/scanpy/qc"]);
+    expect(ids("q=pubmed citation")).toEqual([]);
   });
 
-  it("keeps one shared navigation rail across workspace route changes", () => {
-    const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
-    const navigation = readFileSync(new URL("../src/components/MarketplaceNavRail.tsx", import.meta.url), "utf8");
-    expect(app).toContain("<WorkbenchLayout");
-    expect(app).toContain("<Route element={<WorkbenchLayout/>}>");
-    expect(navigation.match(/viewTransition/g)?.length).toBeGreaterThanOrEqual(5);
+  it("expands a Chinese term through the glossary", () => {
+    expect(matchesQuery("search pubmed abstracts", "摘要")).toBe(true);
+    expect(ids("q=引用")).toEqual(["cli:c/tool/x"]);
   });
 
-  it("animates detail content swaps and keeps the search field intentionally compact", () => {
-    const detail = readFileSync(new URL("../src/components/EntryDetail.tsx", import.meta.url), "utf8");
-    const styles = readFileSync(new URL("../src/styles/marketplace.css", import.meta.url), "utf8");
-    expect(detail).toContain("displayedEntry");
-    expect(detail).toContain("pendingEntryRef");
-    expect(detail).toContain("is-switching-out");
-    expect(detail).toContain("is-switching-in");
-    expect(styles).toContain(".detail-content.is-switching-out");
-    expect(styles).toContain(".detail-content.is-switching-in");
-    expect(styles).toMatch(/\.workbench-search\s*\{[^}]*max-width:\s*720px/s);
+  it("combines group, type, risk and function filters", () => {
+    expect(ids("group=literature")).toEqual(["mcp:a/pubmed/search", "cli:c/tool/x"]);
+    expect(ids("type=skill&type=cli")).toEqual(["skill:b/scanpy/qc", "cli:c/tool/x"]);
+    expect(ids("risk=none")).toEqual(["cli:c/tool/x"]);
+    expect(ids("risk=green&risk=red&group=omics")).toEqual(["skill:b/scanpy/qc"]);
+    expect(ids(`fn=${encodeURIComponent("分析流程")}`)).toEqual(["skill:b/scanpy/qc"]);
   });
 
-  it("expands gallery results to three or four columns on wide repository panes", () => {
-    const styles = readFileSync(new URL("../src/styles/marketplace.css", import.meta.url), "utf8");
-    expect(styles).toMatch(/\.repository-gallery\s*\{[^}]*grid-template-columns:\s*repeat\(4,/s);
-    expect(styles).toMatch(/@container\s*\(max-width:\s*1200px\)[\s\S]*?\.repository-gallery\s*\{[^}]*repeat\(3,/s);
-    expect(styles).toMatch(/@container\s*\(max-width:\s*860px\)[\s\S]*?\.repository-gallery\s*\{[^}]*repeat\(2,/s);
-  });
-  it("accepts all supported view query values and defaults invalid values to cards", () => {
-    expect(parseMarketplaceView("cards")).toBe("cards");
-    expect(parseMarketplaceView("table")).toBe("table");
-    expect(parseMarketplaceView("gallery")).toBe("gallery");
-    expect(parseMarketplaceView(null)).toBe("cards");
-    expect(parseMarketplaceView("grid")).toBe("cards");
+  it("can ignore one facet so its counts reflect the other filters", () => {
+    expect(ids("group=omics&type=mcp", ["type"])).toEqual(["skill:b/scanpy/qc"]);
+    expect(countBy(items, item => item.functionPrimary)).toEqual(new Map([["数据检索与查询", 1], ["分析流程", 1]]));
   });
 
-  it("keeps the resizable split inside usable panel bounds", () => {
-    expect(clampSplitRatio(55)).toBe(55);
-    expect(clampSplitRatio(10)).toBe(MIN_SPLIT_RATIO);
-    expect(clampSplitRatio(95)).toBe(MAX_SPLIT_RATIO);
-    expect(clampSplitRatio(Number.NaN)).toBe(DEFAULT_SPLIT_RATIO);
-    expect(clampSplitRatio(Number.NaN, 57, 59)).toBe(57);
-  });
-
-  it("protects readable pane widths when the desktop workbench narrows", () => {
-    expect(getResponsiveSplitBounds(1600)).toEqual({ min: 40, max: 70 });
-    expect(getResponsiveSplitBounds(1000)).toEqual({ min: 52, max: 62 });
-    const compact = getResponsiveSplitBounds(920);
-    expect(compact.min).toBeGreaterThanOrEqual(56);
-    expect(compact.max).toBeGreaterThan(compact.min);
-  });
-
-  it("keeps details closed until a repository id is explicitly selected", () => {
-    const entries = [{ id: "owner/one" }, { id: "owner/two" }];
-    expect(resolveSelectedEntry(entries, null)).toBeUndefined();
-    expect(resolveSelectedEntry(entries, "owner/two")).toEqual({ id: "owner/two" });
-    expect(resolveSelectedEntry(entries, "missing/repository")).toBeUndefined();
+  it("ranks exact and leading name matches first, keeping catalogue order otherwise", () => {
+    const named = ["Read FHIR resource", "FHIR read", "Bulk FHIR reader", "FHIR read tools"].map(name => ({ name }));
+    expect(rankByName(named, "fhir read").map(item => item.name)).toEqual(["FHIR read", "FHIR read tools", "Bulk FHIR reader", "Read FHIR resource"]);
   });
 
   it("toggles repeated query values without disturbing other filters", () => {
-    const params = new URLSearchParams("view=gallery&type=Plugin&type=Skill&domain=medical");
-    const removed = toggleMultiValue(params, "type", "Plugin");
-    expect(removed.getAll("type")).toEqual(["Skill"]);
-    expect(removed.get("view")).toBe("gallery");
-    expect(removed.get("domain")).toBe("medical");
+    const params = new URLSearchParams("group=omics&type=skill&type=mcp");
+    const removed = toggleMultiValue(params, "type", "skill");
+    expect(removed.getAll("type")).toEqual(["mcp"]);
+    expect(removed.get("group")).toBe("omics");
+    expect(toggleMultiValue(removed, "type", "cli").getAll("type")).toEqual(["mcp", "cli"]);
+  });
+});
 
-    const added = toggleMultiValue(removed, "type", "MCP Server");
-    expect(added.getAll("type")).toEqual(["Skill", "MCP Server"]);
+describe("workspace routes", () => {
+  it("generates static entry points for every workspace route, including redirects", () => {
+    const script = readFileSync(new URL("../scripts/generate-routes.mjs", import.meta.url), "utf8");
+    for (const route of ["marketplace", "graph", "settings", "collections", "research"]) {
+      expect(script).toContain(`"${route}"`);
+    }
+  });
+
+  it("keeps one shared navigation rail and plan bar across workspace routes", () => {
+    const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+    const layout = readFileSync(new URL("../src/components/WorkbenchLayout.tsx", import.meta.url), "utf8");
+    const navigation = readFileSync(new URL("../src/components/MarketplaceNavRail.tsx", import.meta.url), "utf8");
+    expect(app).toContain("<Route element={<WorkbenchLayout/>}>");
+    expect(app).toContain('path="/graph"');
+    expect(layout).toContain("<PlanBar/>");
+    expect(navigation).toContain('to="/graph"');
+    expect(navigation.match(/viewTransition/g)?.length).toBeGreaterThanOrEqual(4);
   });
 });

@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { Brand } from "./Brand";
 import { ThemeToggle } from "./ThemeToggle";
-import { catalog } from "../data/catalog";
+import summary from "../data/componentSummary.json";
+import { TYPE_LABELS } from "../lib/componentCopy";
 import { getLandingEvidence, landingCopy } from "../lib/landing";
 import { useUiLanguage } from "../state/useUiLanguage";
 
 const repositoryUrl = "https://github.com/uni-medical/awesome-dsh-med-plugin-web-homepage";
+const evidence = getLandingEvidence(summary);
 
 export function LandingHeader() {
   const { zh, toggleLocale } = useUiLanguage();
@@ -13,7 +15,7 @@ export function LandingHeader() {
     <Brand/>
     <div className="landing-nav-links">
       <a className="landing-path-link" href="#research-path">{zh ? "研究路径" : "Research path"}</a>
-      <Link viewTransition to="/marketplace">{zh ? "组件市场" : "Marketplace"}</Link>
+      <Link viewTransition to="/marketplace">{zh ? "组件生态" : "Components"}</Link>
       <button type="button" onClick={toggleLocale} aria-label={zh ? "Switch to English" : "切换中文"}>{zh ? "EN" : "中文"}</button>
       <ThemeToggle/>
       <a className="landing-github" href={repositoryUrl}>GitHub ↗</a>
@@ -28,7 +30,6 @@ export function LandingMotionLayer() {
 export function EvidenceCardGrid() {
   const { locale, formatDate, formatNumber } = useUiLanguage();
   const copy = landingCopy[locale];
-  const evidence = getLandingEvidence(catalog);
   return <section className="landing-evidence" aria-label={copy.snapshot}>
     <div className="evidence-caption"><span>{copy.snapshot}</span><span aria-hidden="true">↗</span></div>
     <div className="evidence-grid">
@@ -36,15 +37,15 @@ export function EvidenceCardGrid() {
         <div className="evidence-art" aria-hidden="true"><i/><i/><i/><i/></div>
         <span className="evidence-index">01 / {copy.records}</span><strong>{formatNumber(evidence.total)}</strong><p>{copy.recordsHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
       </Link>
-      <Link viewTransition to="/marketplace?domain=medical" className="evidence-card evidence-medical">
+      <Link viewTransition to="/marketplace?risk=green&risk=amber&risk=red" className="evidence-card evidence-medical">
         <div className="evidence-signal" aria-hidden="true"><svg viewBox="0 0 240 90"><path d="M0 48h50l15-12 16 28 20-49 21 60 18-27h100"/></svg></div>
-        <span className="evidence-index">02 / {copy.medical}</span><strong>{formatNumber(evidence.medical)}</strong><p>{copy.medicalHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
+        <span className="evidence-index">02 / {copy.medical}</span><strong>{formatNumber(evidence.evaluated)}</strong><p>{copy.medicalHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
       </Link>
       <Link viewTransition to="/marketplace" className="evidence-card evidence-types">
-        <span className="evidence-index">03 / {copy.types}</span><strong>{formatNumber(evidence.types.length)}</strong><div className="evidence-type-tags">{evidence.types.map(type => <span key={type}>{type}</span>)}</div><p>{copy.typesHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
+        <span className="evidence-index">03 / {copy.types}</span><strong>{formatNumber(evidence.types.length)}</strong><div className="evidence-type-tags">{evidence.types.map(type => <span key={type}>{TYPE_LABELS[locale][type]}</span>)}</div><p>{copy.typesHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
       </Link>
       <article className="evidence-card evidence-date">
-        <span className="evidence-index">04 / {copy.date}</span><span className="evidence-snapshot-mark" aria-hidden="true">⌘</span><time dateTime={evidence.generatedAt}>{formatDate(evidence.generatedAt)}</time><p>{copy.dateHint}</p>
+        <span className="evidence-index">04 / {copy.date}</span><span className="evidence-snapshot-mark" aria-hidden="true">⌘</span><time dateTime={evidence.snapshotAt}>{formatDate(evidence.snapshotAt)}</time><p>{copy.dateHint}</p>
       </article>
     </div>
   </section>;

@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "frontendBaseCommit": "e36e5249712b15fc22a0088d3c0ae482e79774d5",
+  "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
+  "upstream": {
+    "entries": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/standardization/entries.jsonl",
+      "committedAt": "2026-11-25T01:59:46-05:00"
+    },
+    "entryIndex": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/entry-index.json",
+      "committedAt": "2026-11-25T01:59:46-05:00"
+    },
+    "cards": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/cards/cards.jsonl.gz",
+      "committedAt": "2026-11-24T16:03:17+00:00"
+    },
+    "entryTable": {
+      "branch": "user-card-taxonomy-20261112",
+      "commit": "b327789ef8c5ff6e0185dd224305cae2ebd88365",
+      "path": "security/results/v2/static-audit-purity-sandboxed-20261102/user-card-per-entry-evaluation-20261120/entry-table/entry-scores.tsv.gz",
+      "committedAt": "2026-11-24T16:03:17+00:00"
+    },
+    "relations": {
+      "branch": "integrate",
+      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "path": "data/capabilities/component-relations.json",
+      "committedAt": "2026-11-25T01:59:46-05:00"
+    }
+  },
+  "counts": {
+    "entries": 10425,
+    "entryIndexRecords": 10425,
+    "entriesPairedWithIndex": 10384,
+    "cards": 10432,
+    "entryTableRows": 10432,
+    "exported": 10425,
+    "evaluatedExported": 10074,
+    "linkedRowWithoutCard": 0,
+    "skippedInvalidRepository": 0
+  },
+  "link": {
+    "rule": "repository (lower case) + type + component root path (case-sensitive) + name; skill root = SKILL.md directory, mcp = tool name (same-named tools narrowed by the provider's service suffix), cli = definition-file directory + name, dsh-plugin = cordis.patch.yml directory. A card is attached only when one row matches the entry and no other entry claims that row.",
+    "unique": 10074,
+    "ambiguous": 0,
+    "unmatched": 351,
+    "byType": {
+      "cli": {
+        "unique": 185,
+        "ambiguous": 0,
+        "unmatched": 0
+      },
+      "dsh-plugin": {
+        "unique": 8,
+        "ambiguous": 0,
+        "unmatched": 0
+      },
+      "mcp": {
+        "unique": 3959,
+        "ambiguous": 0,
+        "unmatched": 164
+      },
+      "skill": {
+        "unique": 5922,
+        "ambiguous": 0,
+        "unmatched": 187
+      }
+    },
+    "coverage": 0.9663,
+    "evaluationRowsWithoutEntry": {
+      "mcp-tool": 171,
+      "skill": 187
+    },
+    "ambiguousEntryIds": [],
+    "unmatchedEntrySamples": [
+      "mcp:nickzren/monarch-mcp/autocomplete",
+      "mcp:nickzren/monarch-mcp/compare_termsets",
+      "mcp:nickzren/monarch-mcp/find_similar_terms",
+      "mcp:nickzren/monarch-mcp/get_associations",
+      "mcp:nickzren/monarch-mcp/get_associations_advanced",
+      "mcp:nickzren/monarch-mcp/get_chemical_disease_associations",
+      "mcp:nickzren/monarch-mcp/get_chemical_info",
+      "mcp:nickzren/monarch-mcp/get_chemical_pathway_associations",
+      "mcp:nickzren/monarch-mcp/get_chemicals_for_disease",
+      "mcp:nickzren/monarch-mcp/get_disease_gene_associations",
+      "mcp:nickzren/monarch-mcp/get_disease_inheritance",
+      "mcp:nickzren/monarch-mcp/get_disease_phenotype_associations",
+      "mcp:nickzren/monarch-mcp/get_disease_treatments",
+      "mcp:nickzren/monarch-mcp/get_disease_variants",
+      "mcp:nickzren/monarch-mcp/get_diseases_by_gene",
+      "mcp:nickzren/monarch-mcp/get_diseases_treated_by_chemical",
+      "mcp:nickzren/monarch-mcp/get_diseases_with_phenotype",
+      "mcp:nickzren/monarch-mcp/get_entities_batch",
+      "mcp:nickzren/monarch-mcp/get_entity",
+      "mcp:nickzren/monarch-mcp/get_entity_associations_by_category",
+      "mcp:nickzren/monarch-mcp/get_gene_disease_associations",
+      "mcp:nickzren/monarch-mcp/get_gene_expression_associations",
+      "mcp:nickzren/monarch-mcp/get_gene_interactions",
+      "mcp:nickzren/monarch-mcp/get_gene_orthologs",
+      "mcp:nickzren/monarch-mcp/get_gene_pathways",
+      "mcp:nickzren/monarch-mcp/get_gene_phenotype_associations",
+      "mcp:nickzren/monarch-mcp/get_gene_variants",
+      "mcp:nickzren/monarch-mcp/get_genes_with_phenotype",
+      "mcp:nickzren/monarch-mcp/get_histopheno",
+      "mcp:nickzren/monarch-mcp/get_mappings",
+      "mcp:nickzren/monarch-mcp/get_phenotype_disease_associations",
+      "mcp:nickzren/monarch-mcp/get_phenotype_gene_associations",
+      "mcp:nickzren/monarch-mcp/get_protein_functions",
+      "mcp:nickzren/monarch-mcp/get_protein_info",
+      "mcp:nickzren/monarch-mcp/get_protein_interactions",
+      "mcp:nickzren/monarch-mcp/get_protein_locations",
+      "mcp:nickzren/monarch-mcp/get_protein_processes",
+      "mcp:nickzren/monarch-mcp/get_proteins_by_function",
+      "mcp:nickzren/monarch-mcp/get_variant_disease_associations",
+      "mcp:nickzren/monarch-mcp/get_variant_gene_associations"
+    ]
+  },
+  "relations": {
+    "source": "data/capabilities/component-relations.json",
+    "upstreamRelations": 15102,
+    "catalogueEdges": 2607,
+    "byType": {
+      "alternative_to": 595,
+      "data-flow": 270,
+      "declared-use": 1201,
+      "precedes": 4,
+      "requires": 527,
+      "shared-input": 9,
+      "wrapper": 1
+    },
+    "componentsWithRelations": 2817,
+    "skipped": {
+      "provides": 12400,
+      "unknownType": 0,
+      "outsideCatalogue": 45,
+      "selfLoop": 0,
+      "duplicate": 50
+    },
+    "componentsWithInstallHint": 10384
+  },
+  "outputs": {
+    "indexBytes": 7892731,
+    "detailShards": 128,
+    "detailBytes": 41145395,
+    "largestShardBytes": 412912
+  }
+}
