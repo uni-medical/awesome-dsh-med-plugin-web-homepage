@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "frontendBaseCommit": "7a35c12401e854c16b83f399111ba54a0b7ab40b",
+  "frontendBaseCommit": "652bfaefc68279ac4dc316326ff13052359ec871",
   "upstreamRepository": "uni-medical/awesome-dsh-med-plugin",
   "upstream": {
     "entries": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/standardization/entries.jsonl",
-      "committedAt": "2026-11-25T01:59:46-05:00"
+      "committedAt": "2026-11-26T00:53:54-05:00"
     },
     "entryIndex": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/entry-index.json",
-      "committedAt": "2026-11-25T01:59:46-05:00"
+      "committedAt": "2026-11-26T00:53:54-05:00"
     },
     "cards": {
       "branch": "user-card-taxonomy-20261112",
@@ -29,15 +29,15 @@
     },
     "relations": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/capabilities/component-relations.json",
-      "committedAt": "2026-11-25T01:59:46-05:00"
+      "committedAt": "2026-11-26T00:53:54-05:00"
     },
     "paperPlugins": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/paper-plugin-inventory.json",
-      "committedAt": "2026-11-25T01:59:46-05:00"
+      "committedAt": "2026-11-26T00:53:54-05:00"
     },
     "paperCards": {
       "branch": "user-card-taxonomy-20261112",
@@ -50,6 +50,18 @@
       "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
       "path": "security/results/v2/paper-plugin-qc-20261125/entry-table/entry-scores.tsv.gz",
       "committedAt": "2026-11-25T08:58:14+00:00"
+    },
+    "paperRelations": {
+      "branch": "integrate",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
+      "path": "data/capabilities/paper-plugin-relations.json",
+      "committedAt": "2026-11-26T00:53:54-05:00"
+    },
+    "paperModelRelations": {
+      "branch": "integrate",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
+      "path": "data/capabilities/paper-plugin-model-relations.json",
+      "committedAt": "2026-11-26T00:53:54-05:00"
     }
   },
   "counts": {
@@ -58,7 +70,7 @@
     "entriesPairedWithIndex": 10384,
     "cards": 10432,
     "entryTableRows": 10432,
-    "exported": 10857,
+    "exported": 10859,
     "evaluatedExported": 10506,
     "linkedRowWithoutCard": 0,
     "skippedInvalidRepository": 0
@@ -142,21 +154,21 @@
   "relations": {
     "source": "data/capabilities/component-relations.json",
     "upstreamRelations": 15102,
-    "catalogueEdges": 2607,
+    "catalogueEdges": 2640,
     "byType": {
-      "alternative_to": 595,
-      "data-flow": 270,
+      "alternative_to": 620,
+      "data-flow": 278,
       "declared-use": 1201,
       "precedes": 4,
       "requires": 527,
       "shared-input": 9,
       "wrapper": 1
     },
-    "componentsWithRelations": 2817,
+    "componentsWithRelations": 2861,
     "skipped": {
-      "provides": 12400,
+      "provides": 13312,
       "unknownType": 0,
-      "outsideCatalogue": 45,
+      "outsideCatalogue": 144,
       "selfLoop": 0,
       "duplicate": 50
     },
@@ -176,12 +188,24 @@
       "orchestration": 145,
       "permissions": 29
     },
-    "papers": 150
+    "papers": 150,
+    "relationSources": [
+      "data/capabilities/paper-plugin-relations.json",
+      "data/capabilities/paper-plugin-model-relations.json (graph.relations)"
+    ],
+    "nativeMechanisms": [
+      "dsh-plugin:deepseek-ai/deepseek-harness/dsh-agent-loop",
+      "dsh-plugin:deepseek-ai/deepseek-harness/dsh-sandbox-policy"
+    ],
+    "edgesTouchingPaperPlugins": {
+      "alternative_to": 25,
+      "data-flow": 8
+    }
   },
   "outputs": {
-    "indexBytes": 8275893,
+    "indexBytes": 8277577,
     "detailShards": 128,
-    "detailBytes": 42846102,
+    "detailBytes": 42870698,
     "largestShardBytes": 419786
   }
 }

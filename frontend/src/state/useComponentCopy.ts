@@ -3,9 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { GROUP_LABELS, MECHANISM_COVERAGE, MECHANISM_LABELS, RELATION_LABELS, RISK_LABELS, TYPE_LABELS, componentCopy } from "../lib/componentCopy";
 import { evaluationText } from "../lib/evaluationText";
 import { useUiLanguage } from "./useUiLanguage";
-import type { ComponentSummary } from "../lib/components";
+import type { ComponentSummary, PaperSource } from "../lib/components";
 
-type Labelled = Pick<ComponentSummary, "type" | "repo"> & Partial<Pick<ComponentSummary, "mechanism" | "paper">>;
+type Labelled = Pick<ComponentSummary, "type" | "repo"> & Partial<Pick<ComponentSummary, "mechanism" | "native" | "description">> & { paper?: string | PaperSource | null };
 
 export function useComponentCopy() {
   const { locale, formatNumber } = useUiLanguage();
@@ -14,9 +14,14 @@ export function useComponentCopy() {
   const mechanisms = MECHANISM_LABELS[locale];
   return {
     /** "Mechanism plugin · Context and Memory" for mechanism plugins, the component type otherwise. */
-    kindOf: (item: Labelled) => (item.mechanism ? `${c.mechanismPlugin} · ${mechanisms[item.mechanism]}` : types[item.type]),
+    kindOf: (item: Labelled) => {
+      const kind = item.native ? c.nativeMechanism : item.mechanism ? c.mechanismPlugin : types[item.type];
+      return item.mechanism ? `${kind} · ${mechanisms[item.mechanism]}` : kind;
+    },
+    /** Native DSH mechanisms carry no upstream description; they get a short explanation. */
+    descriptionOf: (item: Labelled) => item.description || (item.native ? c.nativeDescription : ""),
     /** Source paper of a mechanism plugin, the repository otherwise. */
-    sourceOf: (item: Labelled) => item.paper ?? item.repo, locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], mechanisms: MECHANISM_LABELS[locale], mechanismCoverage: MECHANISM_COVERAGE[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
+    sourceOf: (item: Labelled) => (typeof item.paper === "string" ? item.paper : item.paper?.label) ?? item.repo, locale, formatNumber, c: componentCopy[locale], types: TYPE_LABELS[locale], groups: GROUP_LABELS[locale], mechanisms: MECHANISM_LABELS[locale], mechanismCoverage: MECHANISM_COVERAGE[locale], risks: RISK_LABELS[locale], relations: RELATION_LABELS[locale], e: (text: string) => evaluationText(locale, text) };
 }
 
 /**

@@ -26,7 +26,7 @@ function Chips({ values }: { values: string[] }) {
 function InfoPanel({ detail, copy }: { detail: ComponentDetail; copy: Copy }) {
   const { c } = copy;
   return <Panel title={c.info} className="info-panel">
-    <p className="info-description">{detail.description}</p>
+    <p className="info-description">{detail.description || (detail.native ? c.nativeDescription : "")}</p>
     {detail.paper ? <>
       <div className="panel-field"><span>{c.paperSource}</span><p>{detail.paper.url ? <a href={detail.paper.url} target="_blank" rel="noopener noreferrer">{detail.paper.title || detail.paper.label} ↗</a> : detail.paper.title || detail.paper.label}</p></div>
       <div className="panel-field"><span>{c.sourceCode}</span><p><a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer">{detail.sourceName || detail.repo} ↗</a></p></div>
@@ -49,7 +49,7 @@ function InstallPanel({ detail, copy }: { detail: ComponentDetail; copy: Copy })
       {install.trust === "candidate" && <p className="panel-warning">{c.installCandidate}</p>}
       {install.requires.length > 0 && <ul className="panel-lines">{install.requires.map(kind => <li key={kind}>{requirementLabels[kind] ?? kind}</li>)}</ul>}
       <p className="panel-note">{c.installNote} <a href={SETUP_GUIDE_URL} target="_blank" rel="noopener noreferrer">{c.installGuide} ↗</a></p>
-    </> : <p className="panel-note">{c.installUnavailable}</p>}
+    </> : <p className="panel-note">{detail.native ? c.nativeInstall : c.installUnavailable}</p>}
     {!install?.formalInventory && <div className="panel-field"><span>{c.source}</span><CopyBlock label={c.source} text={`git clone ${shellQuote(`${detail.repositoryUrl}.git`)}`} inline/></div>}
   </Panel>;
 }
@@ -193,7 +193,7 @@ function DetailBody({ detail, byId, onOpen, copy }: { detail: ComponentDetail; b
 
 export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = true, showMarketLink = false }: { entryId: string | null; onClose: () => void; onOpen: (id: string) => void; showMapLink?: boolean; showMarketLink?: boolean }) {
   const copy = useComponentCopy();
-  const { c, types, mechanisms } = copy;
+  const { c, kindOf, sourceOf } = copy;
   const { detail, loading, error, missing } = useComponentDetail(entryId);
   const { byId } = useComponents();
   const ref = useRef<HTMLDialogElement>(null);
@@ -213,7 +213,7 @@ export function ComponentDetailDialog({ entryId, onClose, onOpen, showMapLink = 
       <div className="component-dialog-header">
         <div>
           <h2 id="component-dialog-title">{detail?.name ?? (loading ? c.detailLoading : entryId)}</h2>
-          {detail && (detail.mechanism ? <p><b>{c.mechanismPlugin} · {mechanisms[detail.mechanism]}</b> · {detail.paper?.label ?? detail.repo}</p> : <p><b>{types[detail.type]}</b> · {detail.repo}</p>)}
+          {detail && <p><b>{kindOf(detail)}</b> · {sourceOf(detail)}</p>}
         </div>
         <div className="component-dialog-actions">
           {detail && showMarketLink && <Link className="dialog-secondary" to={`/marketplace?q=${encodeURIComponent(detail.name)}&entry=${encodeURIComponent(detail.id)}`}>{c.openInEcosystem} ↗</Link>}

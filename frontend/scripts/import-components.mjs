@@ -24,9 +24,9 @@ import { gunzipSync } from "node:zlib";
 import { linkEntriesToRows, pairIndexRecords, entryRepository } from "./lib/link-cards.mjs";
 import { toComponentDetail, toComponentSummary, toPublicCard } from "./lib/public-fields.mjs";
 import { shardOf } from "./lib/shard.mjs";
-import { RELATION_TYPES, catalogueRelations, compactEdges, indexToCatalogueIds, installHint, relationsByComponent, requirementsIndex } from "./lib/relations.mjs";
+import { RELATION_TYPES, compactEdges, indexToCatalogueIds, installHint, relationsByComponent, requirementsIndex } from "./lib/relations.mjs";
 import { collectVocabulary } from "./lib/vocabulary.mjs";
-import { MECHANISM_ROLES, linkPaperCards, toPaperPluginDetail, toPaperPluginSummary } from "./lib/paper-plugins.mjs";
+import { MECHANISM_ROLES, linkPaperCards, nativeMechanismRecords, paperRelationEdges, toPaperPluginDetail, toPaperPluginSummary } from "./lib/paper-plugins.mjs";
 
 const SHARD_COUNT = 128;
 /** Repositories are rendered as links and copied into `git clone`; anything else is dropped. */
@@ -94,13 +94,23 @@ function main() {
   const paperEntries = JSON.parse(readSource(dir, lock.sources.paperPlugins)).entries;
   const paperCards = jsonLines(readSource(dir, lock.sources.paperCards));
   const paperRows = parseTsv(readSource(dir, lock.sources.paperEntryTable));
+  const paperRelationSource = JSON.parse(readSource(dir, lock.sources.paperRelations));
+  const paperModelRelations = JSON.parse(readSource(dir, lock.sources.paperModelRelations)).graph?.relations ?? [];
   const commitDate = (commit) => git(dir, ["show", "-s", "--format=%cI", commit]).trim();
 
   const cardsByUnit = new Map(cards.map(card => [card.unit_id, card]));
   if (cardsByUnit.size !== cards.length) throw new Error("duplicate card unit_id values");
   const records = pairIndexRecords(entries, indexRecords);
   const { links, status, stats } = linkEntriesToRows(entries, records, rows);
-  const { edges, skipped: relationsSkipped } = catalogueRelations(relationSource.relations, indexToCatalogueIds(records));
+  // Native DSH mechanisms that paper plugins may replace join the catalogue, so replacements can be drawn.
+  const paperRoles = new Map(paperEntries.map(entry => [entry.id, entry.details?.harness?.role]));
+  const natives = nativeMechanismRecords(paperRelationSource.nativeTargets ?? [], paperRelationSource.relations ?? [], paperRoles);
+  const paperCatalogueIds = [...paperEntries.map(entry => entry.id), ...natives.map(native => native.summary.id)];
+  const { edges, skipped: relationsSkipped } = paperRelationEdges(
+    [...relationSource.relations, ...(paperRelationSource.relations ?? []), ...paperModelRelations],
+    indexToCatalogueIds(records),
+    paperCatalogueIds,
+  );
   const relationsById = relationsByComponent(edges);
   const requirements = requirementsIndex(relationSource.externalRequirements);
   const publicCards = [];
@@ -134,7 +144,12 @@ function main() {
     const publicCard = link ? toPublicCard(link.card, link.row) : null;
     if (publicCard) publicCards.push(publicCard);
     summaries.push(toPaperPluginSummary(entry, lock.repository, publicCard));
-    shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = toPaperPluginDetail(entry, paperUpstream, publicCard);
+    shards[shardOf(entry.id, SHARD_COUNT)][entry.id] = { ...toPaperPluginDetail(entry, paperUpstream, publicCard), relations: relationsById.get(entry.id) ?? [] };
+  }
+  for (const native of natives) {
+    if (entryIds.has(native.summary.id)) throw new Error(`native mechanism id collides with a catalogue id: ${native.summary.id}`);
+    summaries.push(native.summary);
+    shards[shardOf(native.summary.id, SHARD_COUNT)][native.summary.id] = { ...native.detail, relations: relationsById.get(native.summary.id) ?? [] };
   }
 
   const upstream = Object.fromEntries(Object.entries(lock.sources).map(([name, source]) => [name, { ...source, committedAt: commitDate(source.commit) }]));
@@ -160,7 +175,7 @@ function main() {
     byType: count(summaries.map(item => item.type)),
     byGroup: count(summaries.map(item => item.group)),
     byRisk: count(evaluated.map(item => item.risk)),
-    byMechanism: count(summaries.filter(item => item.mechanism).map(item => item.mechanism)),
+    byMechanism: count(summaries.filter(item => item.mechanism && !item.native).map(item => item.mechanism)),
     papers: new Set(summaries.map(item => item.paper).filter(Boolean)).size,
     upstream: Object.fromEntries(Object.entries(upstream).map(([name, source]) => [name, { branch: source.branch, commit: source.commit, committedAt: source.committedAt }])),
   };
@@ -210,6 +225,9 @@ function main() {
       ...paperStats,
       byRole: count(paperEntries.map(entry => (MECHANISM_ROLES.includes(entry.details?.harness?.role) ? entry.details.harness.role : "unknown"))),
       papers: new Set(paperEntries.map(entry => entry.source?.label).filter(Boolean)).size,
+      relationSources: [lock.sources.paperRelations.path, `${lock.sources.paperModelRelations.path} (graph.relations)`],
+      nativeMechanisms: natives.map(native => native.summary.id),
+      edgesTouchingPaperPlugins: count(edges.filter(edge => paperCatalogueIds.includes(edge.from) || paperCatalogueIds.includes(edge.to)).map(edge => edge.type)),
     },
     outputs: {
       indexBytes,

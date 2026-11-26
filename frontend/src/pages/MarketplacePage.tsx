@@ -49,13 +49,15 @@ function FilterMenu({ indexed, params, onToggle, onSet }: { indexed: ReturnType<
 /** Capability environment plus the four runtime mechanism classes, so the catalogue reads as more than a tool list. */
 function HarnessCoverage({ indexed, active, onPick }: { indexed: ReturnType<typeof useComponents>["indexed"]; active: string; onPick: (role: MechanismRole) => void }) {
   const { c, mechanisms, mechanismCoverage, formatNumber } = useComponentCopy();
-  const counts = useMemo(() => countBy(indexed.map(entry => entry.item), item => item.mechanism ?? null), [indexed]);
+  // Paper plugins per class; native DSH mechanisms are listed but not counted as plugins.
+  const counts = useMemo(() => countBy(indexed.map(entry => entry.item), item => (item.native ? null : item.mechanism ?? null)), [indexed]);
+  const capabilityTotal = useMemo(() => indexed.filter(entry => !entry.item.mechanism && !entry.item.native).length, [indexed]);
   const mechanismTotal = [...counts.values()].reduce((sum, value) => sum + value, 0);
   if (!mechanismTotal) return null;
   return <section className="harness-coverage" aria-label={c.coverageTitle}>
     <p className="harness-coverage-title"><b>{c.coverageTitle}</b><span>{c.coverageHint}</span></p>
     <div className="harness-coverage-grid">
-      <div className="harness-cell is-capability"><span>{c.coverageTools}</span><strong>{formatNumber(indexed.length - mechanismTotal)}</strong><p>{c.coverageToolsText}</p></div>
+      <div className="harness-cell is-capability"><span>{c.coverageTools}</span><strong>{formatNumber(capabilityTotal)}</strong><p>{c.coverageToolsText}</p></div>
       {MECHANISM_ORDER.map(role => <button key={role} type="button" className="harness-cell" aria-pressed={active === role} onClick={() => onPick(role)}>
         <span>{mechanisms[role]}</span><strong>{formatNumber(counts.get(role) ?? 0)}</strong><p>{mechanismCoverage[role]}</p>
       </button>)}

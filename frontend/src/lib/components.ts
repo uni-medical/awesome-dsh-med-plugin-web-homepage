@@ -38,6 +38,8 @@ export interface ComponentSummary {
   mechanism?: MechanismRole | null;
   /** Short label of the source paper of a mechanism plugin. */
   paper?: string | null;
+  /** A native DSH mechanism that paper plugins may replace (not a paper plugin). */
+  native?: boolean;
 }
 
 export interface QualityAxis {
@@ -117,6 +119,7 @@ export interface ComponentDetail {
   relations: ComponentRelation[];
   mechanism?: MechanismRole | null;
   paper?: PaperSource | null;
+  native?: boolean;
 }
 
 export interface UpstreamSource { branch: string; commit: string; path?: string; committedAt: string; }
@@ -162,7 +165,7 @@ export function parseComponentIndex(raw: unknown): ComponentIndex {
   for (const item of raw.components) {
     if (!isComponentSummary(item) || seen.has(item.id)) { skipped += 1; continue; }
     seen.add(item.id);
-    components.push({ ...item, functionLabels: item.functionLabels ?? [], mechanism: mechanismOf(item.mechanism), paper: isString(item.paper) && item.paper ? item.paper : null });
+    components.push({ ...item, functionLabels: item.functionLabels ?? [], mechanism: mechanismOf(item.mechanism), paper: isString(item.paper) && item.paper ? item.paper : null, native: item.native === true });
   }
   return { schemaVersion: "2", repository: isString(raw.repository) ? raw.repository : "", upstream: isRecord(raw.upstream) ? raw.upstream as Record<string, UpstreamSource> : {}, components, edges: parseEdges(raw.relations, raw.components), skipped };
 }
@@ -236,6 +239,7 @@ export function parseComponentDetail(value: unknown): ComponentDetail | undefine
     relations,
     mechanism: mechanismOf(value.mechanism),
     paper: paperOf(value.paper),
+    native: value.native === true,
   };
 }
 

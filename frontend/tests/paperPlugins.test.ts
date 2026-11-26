@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MECHANISM_ROLES, linkPaperCards, paperPluginSuffix, paperPluginTitle, toPaperPluginDetail, toPaperPluginSummary } from "../scripts/lib/paper-plugins.mjs";
+import { MECHANISM_ROLES, linkPaperCards, nativeMechanismRecords, paperPluginSuffix, paperPluginTitle, paperRelationEdges, toPaperPluginDetail, toPaperPluginSummary } from "../scripts/lib/paper-plugins.mjs";
 import { parseComponentDetail, parseComponentIndex } from "../src/lib/components";
 import type { ComponentSummary } from "../src/lib/components";
 import { searchText } from "../src/lib/components";
@@ -132,5 +132,48 @@ describe("paper mechanism plugins in the app", () => {
     expect(detail?.paper).toEqual({ label: "AutoBA", title: "AutoBA paper", url: null });
     expect(detail?.mechanism).toBe("orchestration");
     expect(detail?.install?.formalInventory).toBe(true);
+  });
+});
+
+describe("paper plugin relations", () => {
+  const NATIVE = { id: "dsh-plugin:deepseek-ai/deepseek-harness/dsh-agent-loop", name: "@deepseek-ai/dsh-agent-loop", revision: "ddac96760b6edf8fa0fe17cbdcf0b512f4c12b2c" };
+  const plugin = "dsh-plugin:user/added/aaaaaaaaaaaaaaaaaaaaaaaa";
+  const other = "dsh-plugin:user/added/bbbbbbbbbbbbbbbbbbbbbbbb";
+  const roles = new Map([[plugin, "orchestration"], [other, "contextMemory"]]);
+
+  it("builds a native mechanism record whose role follows the plugins that replace it", () => {
+    const relations = [{ type: "alternative_to", from: NATIVE.id, to: plugin, condition: "仅当…" }];
+    const [record] = nativeMechanismRecords([NATIVE], relations, roles);
+    expect(record.summary).toMatchObject({ id: NATIVE.id, name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", group: "mechanisms", mechanism: "orchestration", native: true, risk: null, paper: null });
+    expect(record.detail).toMatchObject({ id: NATIVE.id, native: true, install: null, sourceUrl: `https://github.com/deepseek-ai/deepseek-harness/tree/${NATIVE.revision}` });
+  });
+
+  it("keeps component-to-component relations and maps entry-index ids to catalogue ids", () => {
+    const paper = [
+      { type: "provides", from: plugin, to: "cap:1" },
+      { type: "alternative_to", from: NATIVE.id, to: plugin, condition: "仅当…" },
+    ];
+    const model = [
+      { type: "composes_with", from: plugin, to: other, condition: "Directional" },
+      { type: "composes_with", from: "skill:o/r/x-1234abcd", to: plugin },
+      { type: "contains", from: plugin, to: "resource:ff" },
+    ];
+    const ids = new Map([["skill:o/r/x-1234abcd", "skill:o/r/x"]]);
+    const { edges, skipped } = paperRelationEdges([...paper, ...model], ids, [plugin, other, NATIVE.id]);
+    expect(edges).toEqual([
+      { from: NATIVE.id, to: plugin, type: "alternative_to", condition: "仅当…" },
+      { from: plugin, to: other, type: "composes_with", condition: "Directional" },
+      { from: "skill:o/r/x", to: plugin, type: "composes_with", condition: null },
+    ]);
+    expect(skipped).toMatchObject({ provides: 1, outsideCatalogue: 1 });
+  });
+});
+
+describe("native mechanisms in the app", () => {
+  it("keeps the native flag on list and detail records", () => {
+    const base = { id: "n", name: "@deepseek-ai/dsh-agent-loop", type: "dsh-plugin", repo: "deepseek-ai/deepseek-harness", description: "", tags: [], group: "mechanisms", domain: "agent-mechanism", tasks: [], risk: null, functionPrimary: null, functionLabels: [], mechanism: "orchestration", native: true };
+    expect(parseComponentIndex({ schemaVersion: "2", components: [base] }).components[0].native).toBe(true);
+    expect(parseComponentDetail({ ...base, native: true })?.native).toBe(true);
+    expect(parseComponentDetail({ ...base, native: "yes" })?.native).toBe(false);
   });
 });

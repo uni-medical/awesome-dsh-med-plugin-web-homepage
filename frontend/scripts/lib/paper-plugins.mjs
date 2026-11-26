@@ -7,6 +7,8 @@
 // and keep the paper they came from. Entry, card and entry-table row share the
 // 24-hex suffix of the entry id.
 
+import { catalogueRelations } from "./relations.mjs";
+
 /** Harness roles from details.harness.role, in display order. */
 export const MECHANISM_ROLES = ["orchestration", "contextMemory", "evaluationFeedback", "permissions"];
 export const MECHANISM_GROUP = "mechanisms";
@@ -127,4 +129,52 @@ export function toPaperPluginDetail(entry, upstream, publicCard) {
     mechanism: roleOf(entry),
     paper: paperOf(entry),
   };
+}
+
+// ---- Relations (integrate:data/capabilities/paper-plugin-relations.json and
+// paper-plugin-model-relations.json). `alternative_to` edges start at native
+// DSH mechanisms that a paper plugin may replace; those natives are added to
+// the catalogue so the capability map can show the replacement.
+
+/** Component-to-component edges; entry-index ids are mapped, catalogue ids pass through. */
+export function paperRelationEdges(relations, indexToCatalogue, catalogueIds) {
+  const ids = new Map(indexToCatalogue);
+  for (const id of catalogueIds) ids.set(id, id);
+  return catalogueRelations(relations, ids);
+}
+
+const NATIVE_ID = /^dsh-plugin:([\w.-]+)\/([\w.-]+)\/[\w.-]+$/;
+const REVISION = /^[0-9a-f]{7,40}$/;
+
+/**
+ * List and detail records for native DSH mechanisms named as replacement
+ * targets. The role is the most common role among the plugins replacing it.
+ */
+export function nativeMechanismRecords(nativeTargets, relations, rolesById) {
+  return nativeTargets.flatMap(target => {
+    const match = String(target.id ?? "").match(NATIVE_ID);
+    if (!match) return [];
+    const repo = `${match[1]}/${match[2]}`;
+    const roles = new Map();
+    for (const relation of relations) {
+      if (relation.type !== "alternative_to" || relation.from !== target.id) continue;
+      const role = rolesById.get(relation.to);
+      if (role) roles.set(role, (roles.get(role) ?? 0) + 1);
+    }
+    const role = [...roles].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const name = String(target.name ?? target.id);
+    const revision = REVISION.test(String(target.revision ?? "")) ? target.revision : null;
+    const summary = {
+      id: target.id, name, type: "dsh-plugin", repo, description: "", tags: ["agent mechanism", "native"],
+      group: MECHANISM_GROUP, domain: MECHANISM_DOMAIN, tasks: [], risk: null, functionPrimary: null, functionLabels: [],
+      mechanism: MECHANISM_ROLES.includes(role) ? role : null, paper: null, native: true,
+    };
+    const detail = {
+      id: target.id, name, type: "dsh-plugin", repo, provider: "dsh-native", sourceName: name,
+      sourceUrl: revision ? `https://github.com/${repo}/tree/${revision}` : `https://github.com/${repo}`,
+      repositoryUrl: `https://github.com/${repo}`, license: null, callable: false, aliases: [], description: "", tags: [], capabilities: [],
+      evaluation: null, link: { status: "unmatched" }, install: null, relations: [], mechanism: summary.mechanism, paper: null, native: true,
+    };
+    return [{ summary, detail }];
+  });
 }

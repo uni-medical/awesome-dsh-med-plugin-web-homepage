@@ -41,14 +41,14 @@ function ExampleQueries({ onPick }: { onPick: (query: string) => void }) {
 }
 
 function CandidateList({ groups, selectedKey, onSelect }: { groups: CandidateGroup[]; selectedKey?: string; onSelect: (key: string) => void }) {
-  const { c, kindOf, sourceOf } = useComponentCopy();
+  const { c, kindOf, sourceOf, descriptionOf } = useComponentCopy();
   return <ol className="candidate-list">{groups.map(group => {
     const lead = group.members[0];
     const repos = [...new Set(group.members.map(sourceOf))];
     return <li key={group.key} className={group.key === selectedKey ? "is-selected" : ""}>
       <button type="button" className="candidate-main" aria-pressed={group.key === selectedKey} onClick={() => onSelect(group.key)}>
         <strong>{group.name}{group.members.length > 1 && <small> ×{group.members.length}</small>}</strong>
-        <span className="candidate-description">{lead.description}</span>
+        <span className="candidate-description">{descriptionOf(lead)}</span>
         <span className="candidate-source">{kindOf(lead)} · {repos.slice(0, 2).join(" · ")}{repos.length > 2 ? ` +${repos.length - 2}` : ""}</span>
       </button>
       {group.members.length === 1 ? <PlanToggle component={lead} compact/> : <span className="candidate-count" title={c.members}>{group.members.length}</span>}
@@ -57,11 +57,11 @@ function CandidateList({ groups, selectedKey, onSelect }: { groups: CandidateGro
 }
 
 function Overview({ group, onOpen }: { group: CandidateGroup; onOpen: (id: string) => void }) {
-  const { c, kindOf, sourceOf } = useComponentCopy();
+  const { c, kindOf, sourceOf, descriptionOf } = useComponentCopy();
   return <div className="candidate-overview">
     <h3>{c.members} · {group.members.length}</h3>
     <ul>{group.members.map(member => <li key={member.id}>
-      <div><strong>{member.name}</strong><small>{kindOf(member)} · {sourceOf(member)}</small><p>{member.description}</p></div>
+      <div><strong>{member.name}</strong><small>{kindOf(member)} · {sourceOf(member)}</small><p>{descriptionOf(member)}</p></div>
       <div className="overview-actions"><RiskBadge level={member.risk}/><button type="button" className="dialog-secondary" onClick={() => onOpen(member.id)}>{c.details}</button><Link className="dialog-secondary" to={profileLink(member)}>{c.viewProfile} ↗</Link><PlanToggle component={member}/></div>
     </li>)}</ul>
   </div>;

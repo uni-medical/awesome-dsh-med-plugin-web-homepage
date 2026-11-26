@@ -5,12 +5,12 @@
   "sources": {
     "entries": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/standardization/entries.jsonl"
     },
     "entryIndex": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/entry-index.json"
     },
     "cards": {
@@ -25,12 +25,12 @@
     },
     "relations": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/capabilities/component-relations.json"
     },
     "paperPlugins": {
       "branch": "integrate",
-      "commit": "4026002899fb12a84c138d691a7ccca4632d77da",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
       "path": "data/paper-plugin-inventory.json"
     },
     "paperCards": {
@@ -42,6 +42,16 @@
       "branch": "user-card-taxonomy-20261112",
       "commit": "cf9572b2b63e7a6efd76bcedb3dd633af8253eb6",
       "path": "security/results/v2/paper-plugin-qc-20261125/entry-table/entry-scores.tsv.gz"
+    },
+    "paperRelations": {
+      "branch": "integrate",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
+      "path": "data/capabilities/paper-plugin-relations.json"
+    },
+    "paperModelRelations": {
+      "branch": "integrate",
+      "commit": "91cd5d033d215a40e8f1c55c751a6b67bc1a3f39",
+      "path": "data/capabilities/paper-plugin-model-relations.json"
     }
   }
 }
