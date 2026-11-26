@@ -21,6 +21,12 @@ describe("query terms", () => {
   it("keeps meaningful latin words and expands Chinese phrases", () => {
     expect(queryTerms("Find the PubMed abstracts")).toEqual(["pubmed", "abstracts"]);
     expect(queryTerms("检索神经肿瘤相关论文，读取摘要并追踪引用")).toEqual(expect.arrayContaining(["neuro-oncology", "glioma", "paper", "abstract", "citation"]));
+  });
+
+  it("keeps the matched Chinese terms so Chinese descriptions of mechanism plugins can match", () => {
+    const terms = queryTerms("智能体上下文记忆与权限治理");
+    expect(terms).toEqual(expect.arrayContaining(["记忆", "上下文", "权限", "memory", "context", "permission", "agent"]));
+    expect(queryTerms("Find the PubMed abstracts")).toEqual(["pubmed", "abstracts"]);
     expect(aliasesFor("没有匹配")).toEqual([]);
   });
 });
@@ -78,6 +84,14 @@ describe("plan", () => {
       ": 'Line break; rm -rf /: no upstream install entry; get it from https://github.com/x/y'",
     ]);
     expect(formatInstallScript([item], new Map([["a", "it's"]]), "zh")).toContain("dsh-med install 'it'\\''s' --profile medical");
+  });
+
+  it("tells the reader to point DSH_MED_FORMAL_INVENTORY at the formal inventory when the plan has mechanism plugins", () => {
+    const mechanism = { id: "dsh-plugin:user/added/x", name: "Memory layer", type: "dsh-plugin" as const, repo: "uni-medical/awesome-dsh-med-plugin" };
+    const lines = formatInstallScript([mechanism], new Map([[mechanism.id, mechanism.id]]), "en", new Set([mechanism.id])).split("\n");
+    expect(lines[2]).toMatch(/^: 'Mechanism plugins install from the formal inventory: .*DSH_MED_FORMAL_INVENTORY/);
+    expect(lines.at(-1)).toBe("dsh-med install 'dsh-plugin:user/added/x' --profile medical");
+    expect(formatInstallScript([mechanism], new Map([[mechanism.id, mechanism.id]]), "en")).not.toContain("DSH_MED_FORMAL_INVENTORY");
   });
 
   it("never lets upstream text reach the shell unquoted", () => {

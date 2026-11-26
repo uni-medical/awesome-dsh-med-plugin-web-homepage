@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Brand } from "./Brand";
 import { ThemeToggle } from "./ThemeToggle";
 import summary from "../data/componentSummary.json";
-import { TYPE_LABELS } from "../lib/componentCopy";
+import { MECHANISM_LABELS, TYPE_LABELS } from "../lib/componentCopy";
 import { getLandingEvidence, landingCopy } from "../lib/landing";
 import { useUiLanguage } from "../state/useUiLanguage";
 
@@ -16,7 +16,7 @@ export function LandingHeader() {
     <div className="landing-nav-links">
       <a className="landing-path-link" href="#research-path">{zh ? "研究路径" : "Research path"}</a>
       <Link viewTransition to="/marketplace">{zh ? "组件生态" : "Components"}</Link>
-      <button type="button" onClick={toggleLocale} aria-label={zh ? "Switch to English" : "切换中文"}>{zh ? "EN" : "中文"}</button>
+      <button type="button" onClick={toggleLocale} aria-label={zh ? "切换英文" : "Switch to Chinese"}>{zh ? "EN" : "中文"}</button>
       <ThemeToggle/>
       <a className="landing-github" href={repositoryUrl}>GitHub ↗</a>
     </div>
@@ -42,7 +42,7 @@ export function EvidenceCardGrid() {
         <span className="evidence-index">02 / {copy.medical}</span><strong>{formatNumber(evidence.evaluated)}</strong><p>{copy.medicalHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
       </Link>
       <Link viewTransition to="/marketplace" className="evidence-card evidence-types">
-        <span className="evidence-index">03 / {copy.types}</span><strong>{formatNumber(evidence.types.length)}</strong><div className="evidence-type-tags">{evidence.types.map(type => <span key={type}>{TYPE_LABELS[locale][type]}</span>)}</div><p>{copy.typesHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
+        <span className="evidence-index">03 / {copy.types}</span><strong>{formatNumber(evidence.types.length + evidence.mechanisms.length)}</strong><div className="evidence-type-tags">{evidence.types.map(type => <span key={type}>{TYPE_LABELS[locale][type]}</span>)}{evidence.mechanisms.map(role => <span key={role} className="is-mechanism">{MECHANISM_LABELS[locale][role]}</span>)}</div><p>{copy.typesHint}</p><span className="evidence-arrow" aria-hidden="true">↗</span>
       </Link>
       <article className="evidence-card evidence-date">
         <span className="evidence-index">04 / {copy.date}</span><span className="evidence-snapshot-mark" aria-hidden="true">⌘</span><time dateTime={evidence.snapshotAt}>{formatDate(evidence.snapshotAt)}</time><p>{copy.dateHint}</p>

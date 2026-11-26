@@ -9,11 +9,13 @@ describe("landing evidence", () => {
     expect(evidence.evaluated).toBe(summary.evaluated);
     expect(evidence.evaluated).toBeLessThanOrEqual(evidence.total);
     expect(evidence.types).toEqual(Object.keys(summary.byType).sort());
+    expect(evidence.mechanisms).toEqual(["orchestration", "contextMemory", "permissions", "evaluationFeedback"]);
+    expect(evidence.mechanismTotal).toBe(Object.values(summary.byMechanism).reduce((sum, value) => sum + value, 0));
     expect(evidence.snapshotAt).toBe(Object.values(summary.upstream).map(source => source.committedAt).sort().at(-1));
   });
 
   it("handles an empty summary", () => {
-    expect(getLandingEvidence({ total: 0, evaluated: 0, byType: {}, upstream: {} })).toEqual({ total: 0, evaluated: 0, types: [], snapshotAt: "" });
+    expect(getLandingEvidence({ total: 0, evaluated: 0, byType: {}, upstream: {} })).toEqual({ total: 0, evaluated: 0, types: [], mechanisms: [], mechanismTotal: 0, snapshotAt: "" });
   });
 
   it("offers the same information in both interface languages", () => {

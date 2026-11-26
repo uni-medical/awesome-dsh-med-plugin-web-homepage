@@ -2,7 +2,7 @@ import type { ComponentSummary } from "./components";
 import { expandQueryTerms } from "./capabilitySearch";
 
 /** URL parameters owned by the component list filters. */
-export const FILTER_KEYS = ["q", "group", "type", "risk", "fn"] as const;
+export const FILTER_KEYS = ["q", "group", "type", "risk", "fn", "mech"] as const;
 /** Value of the `risk` filter for components without a verified evaluation. */
 export const NOT_EVALUATED = "none";
 export const PAGE_SIZE = 60;
@@ -47,11 +47,13 @@ export function filterComponents(indexed: readonly IndexedComponent[], params: U
   const types = new Set(read("type"));
   const risks = new Set(read("risk"));
   const [fn] = read("fn");
+  const [mechanism] = read("mech");
   const matches = indexed.filter(({ item, text }) => {
     if (group && item.group !== group) return false;
     if (types.size && !types.has(item.type)) return false;
     if (risks.size && !risks.has(item.risk ?? NOT_EVALUATED)) return false;
     if (fn && item.functionPrimary !== fn) return false;
+    if (mechanism && item.mechanism !== mechanism) return false;
     return !compiled.length || matchesCompiled(text, compiled);
   }).map(({ item }) => item);
   const query = (ignore.includes("q") ? "" : params.get("q") ?? "").trim().toLowerCase();

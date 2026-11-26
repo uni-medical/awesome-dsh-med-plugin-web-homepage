@@ -47,7 +47,7 @@ function trimmedEdge(point: RadarPoint, radius: number) {
 }
 
 export function CandidateGraph({ selected, nodes, links, onNode }: { selected: CandidateGroup; nodes: GraphNode[]; links: NeighbourLink[]; onNode: (node: GraphNode) => void }) {
-  const { c, types, relations: relationLabels, e } = useComponentCopy();
+  const { c, types, mechanisms, relations: relationLabels, e } = useComponentCopy();
   const [active, setActive] = useState<string | null>(null);
   const catalogueCount = nodes.filter(node => node.kind === "catalogue").length;
   const inner = catalogueCount > 0 ? catalogueCount : Math.min(nodes.length, DEFAULT_INNER);
@@ -86,7 +86,7 @@ export function CandidateGraph({ selected, nodes, links, onNode }: { selected: C
         <title>{selected.name}</title>
         <circle cx={CENTER.x} cy={CENTER.y} r={CENTRE_RADIUS}/>
         {wrapLabel(selected.name, 14).map((line, index, lines) => <text key={line} x={CENTER.x} y={CENTER.y - 16 - (lines.length - 1) * 9 + index * 18} textAnchor="middle">{line}</text>)}
-        <text className="graph-centre-sub" x={CENTER.x} y={CENTER.y + 14} textAnchor="middle">{types[selected.members[0].type]}</text>
+        <text className="graph-centre-sub" x={CENTER.x} y={CENTER.y + 14} textAnchor="middle">{selected.members[0].mechanism ? mechanisms[selected.members[0].mechanism] : types[selected.members[0].type]}</text>
         <text className="graph-centre-sub" x={CENTER.x} y={CENTER.y + 32} textAnchor="middle">{selected.members.length} {c.sourceRecords}</text>
       </g>
       {nodes.map((node, index) => {

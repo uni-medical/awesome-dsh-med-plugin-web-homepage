@@ -1,7 +1,7 @@
 // Interface copy for the component ecosystem, detail dialog, plan and capability map.
 // Evaluation text (verdicts, labels, medical items) is shown as published upstream.
 
-import type { ComponentType, DomainGroup, RelationType, RiskLevel } from "./components";
+import type { ComponentType, DomainGroup, MechanismRole, RelationType, RiskLevel } from "./components";
 
 const en = {
   navEcosystem: "Component ecosystem",
@@ -28,6 +28,22 @@ const en = {
   addToPlan: "Add to plan",
   removeFromPlan: "Remove from plan",
   inPlan: "In plan",
+  filterMechanism: "Runtime mechanism",
+  mechanismPlugin: "Mechanism plugin",
+  nativeMechanism: "Native DSH mechanism",
+  nativeDescription: "A runtime mechanism built into DSH, at a pinned revision. Some paper mechanism plugins declare that they can replace it in specific profile setups; see the related components.",
+  nativeInstall: "Built into DSH and installed with the pinned DSH; no separate install.",
+  coverageTitle: "Harness coverage",
+  coverageTools: "Capability environment",
+  adaptToggle: "How each layer plugs in",
+  adaptHide: "Hide how each layer plugs in",
+  adaptProvides: "Plugins provide",
+  adaptSplit: "Preset and profile",
+  coverageMechanisms: "Runtime mechanisms",
+  coverageHint: "The capability environment supplies the tools, data, knowledge and skills medical tasks need. Runtime mechanisms fall into four classes, generated from papers.",
+  paperSource: "Source paper",
+  sourceCode: "Source code",
+  formalInstallNote: "Installed from the formal inventory: get the complete formal-inventory directory, set DSH_MED_FORMAL_INVENTORY to its path, then run the commands.",
   close: "Close",
   openMap: "Map",
   detailLoading: "Loading component details…",
@@ -175,6 +191,22 @@ const zh: ComponentCopy = {
   addToPlan: "加入方案",
   removeFromPlan: "移出方案",
   inPlan: "已在方案",
+  filterMechanism: "运行机制",
+  mechanismPlugin: "机制插件",
+  nativeMechanism: "DSH 原生机制",
+  nativeDescription: "DSH 内置的运行机制，版本固定。部分论文机制插件声明可在特定 Profile 装配下替换它，详见关联组件。",
+  nativeInstall: "DSH 内置，随固定版本的 DSH 一起安装，无需单独安装。",
+  coverageTitle: "覆盖范围",
+  coverageTools: "能力环境",
+  adaptToggle: "查看适配方式",
+  adaptHide: "收起适配方式",
+  adaptProvides: "插件提供",
+  adaptSplit: "Preset 与 Profile 分工",
+  coverageMechanisms: "运行机制",
+  coverageHint: "能力环境提供医学任务所需的工具、数据、知识和技能；运行机制归并为四类，插件由论文生成。",
+  paperSource: "来源论文",
+  sourceCode: "源码",
+  formalInstallNote: "从正式集合安装：先获取完整的 formal-inventory 目录，把 DSH_MED_FORMAL_INVENTORY 设为它的路径，再运行下面的命令。",
   close: "关闭",
   openMap: "星图",
   detailLoading: "正在加载组件详情…",
@@ -256,7 +288,7 @@ const zh: ComponentCopy = {
   install: "安装",
   installNote: "需要先安装 dsh-med CLI 和固定版本 DSH，把下面的命令复制到终端运行。",
   installGuide: "安装指南",
-  entryId: "Entry ID",
+  entryId: "条目 ID",
   copy: "复制",
   installNotReady: "上游标记该条目暂不可直接安装。",
   installCandidate: "候选条目：尚未正式准入。",
@@ -303,8 +335,55 @@ export const TYPE_LABELS: Record<"en" | "zh", Record<ComponentType, string>> = {
 };
 
 export const GROUP_LABELS: Record<"en" | "zh", Record<DomainGroup, string>> = {
-  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "Research tools" },
-  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "科研工具" },
+  en: { literature: "Literature & evidence", omics: "Omics analysis", drug: "Drug research", clinical: "Clinical & health", imaging: "Imaging & signals", tools: "Research tools", mechanisms: "Runtime mechanisms" },
+  zh: { literature: "文献与证据", omics: "组学分析", drug: "药物研究", clinical: "临床与健康", imaging: "影像与信号", tools: "科研工具", mechanisms: "运行机制" },
+};
+
+/** The four runtime mechanism classes, named as in the project's harness overview. */
+export const MECHANISM_LABELS: Record<"en" | "zh", Record<MechanismRole, string>> = {
+  en: { orchestration: "Orchestration", contextMemory: "Context and Memory", evaluationFeedback: "Evaluation and Feedback", permissions: "Permissions and Governance" },
+  zh: { orchestration: "执行编排", contextMemory: "上下文与记忆", evaluationFeedback: "评价反馈", permissions: "权限治理" },
+};
+
+/** What each mechanism class covers (harness overview, 覆盖内容). */
+export const MECHANISM_COVERAGE: Record<"en" | "zh", Record<MechanismRole, string>> = {
+  en: {
+    orchestration: "Control logic, tool scheduling, multi-agent collaboration, stop conditions, budgets and failure recovery",
+    contextMemory: "Instruction and information organisation, context compression, memory reads and writes, state saving",
+    permissions: "Access control, authorisation and approval, execution isolation and constraint checks",
+    evaluationFeedback: "Trajectory observation, result verification, cost accounting and feedback output",
+  },
+  zh: {
+    orchestration: "控制逻辑、工具调度、多智能体协作、停止条件、预算与失败恢复",
+    contextMemory: "指令与信息组织、上下文压缩、记忆读写、状态保存",
+    permissions: "访问控制、授权审批、执行隔离与约束检查",
+    evaluationFeedback: "轨迹观测、结果验证、成本统计与反馈输出",
+  },
+};
+
+/** Display order of the mechanism classes (harness overview). */
+export const MECHANISM_ORDER: readonly MechanismRole[] = ["orchestration", "contextMemory", "permissions", "evaluationFeedback"];
+
+/** Layers of the harness: the capability environment, then the mechanism classes. */
+export type HarnessLayer = "capability" | MechanismRole;
+export const HARNESS_LAYERS: readonly HarnessLayer[] = ["capability", ...MECHANISM_ORDER];
+
+/** What plugins provide in each layer and how the preset and profile split the work (harness adaptation table). */
+export const HARNESS_ADAPTATION: Record<"en" | "zh", Record<HarnessLayer, { provides: string; split: string }>> = {
+  en: {
+    capability: { provides: "Skill loading, MCP access, CLI execution and native medical tools", split: "The preset selects agent-facing capabilities; the profile configures the shared services they depend on" },
+    orchestration: { provides: "Drivers, tool scheduling, sub-agents and flow control", split: "Local rules go in the preset; the profile assembles shared drivers and sub-agent backends" },
+    contextMemory: { provides: "Prompt assembly, compression, memory policies and persistence", split: "Local prompt and information policies go in the preset; the profile assembles shared storage" },
+    permissions: { provides: "Check rules, authorisation and isolation mechanisms", split: "The preset can mount local constraints; the profile configures the shared services that enforce them" },
+    evaluationFeedback: { provides: "Trajectory capture, checkers and feedback interfaces", split: "The preset mounts task checks; the profile assembles shared logging and telemetry services" },
+  },
+  zh: {
+    capability: { provides: "Skill 加载、MCP 接入、CLI 执行及医学原生工具", split: "Preset 选择面向智能体的能力，Profile 配置其依赖的共享服务" },
+    orchestration: { provides: "驱动、工具调度、子智能体与流程控制", split: "局部规则放 Preset，共享驱动与子智能体后端由 Profile 装配" },
+    contextMemory: { provides: "提示组装、压缩、记忆策略与持久化", split: "局部提示与信息策略放 Preset，共享存储由 Profile 装配" },
+    permissions: { provides: "检查规则、授权与隔离机制", split: "Preset 可挂载局部约束，Profile 配置实际执行约束的共享服务" },
+    evaluationFeedback: { provides: "轨迹采集、检查器与反馈接口", split: "Preset 挂载任务检查，Profile 装配共享记录与遥测服务" },
+  },
 };
 
 /** Labels for risk levels; the Chinese wording matches the upstream verdicts. */

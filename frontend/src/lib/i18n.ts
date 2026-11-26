@@ -13,7 +13,7 @@ const en = {
   "nav.marketplace": "Component ecosystem",
   "nav.graph": "Capability map",
   "nav.settings": "Settings",
-  "nav.switchChinese": "切换中文",
+  "nav.switchChinese": "Switch to Chinese",
   "nav.switchEnglish": "Switch to English",
   "common.all": "All",
   "common.loading": "Loading…",

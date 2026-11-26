@@ -5,7 +5,7 @@
 // the same query, not catalogue relations: the upstream data carries no
 // dependency or call graph.
 
-import { QUERY_ALIASES, aliasesFor } from "../data/queryAliases";
+import { QUERY_ALIASES, aliasKeysIn, aliasesFor } from "../data/queryAliases";
 import { RELATION_TYPES, type CatalogueEdge, type ComponentSummary, type RelationType } from "./components";
 
 const CJK = /[㐀-鿿]/;
@@ -24,11 +24,15 @@ export function expandQueryTerms(term: string): string[] {
   return CJK.test(lower) ? [lower, ...aliasesFor(lower)] : [lower];
 }
 
-/** Query → distinct terms: latin words plus aliases of contained Chinese phrases. */
+/**
+ * Query → distinct terms: latin words, plus each known Chinese phrase in the
+ * query and its English aliases. The Chinese phrase itself matches the
+ * Chinese descriptions of paper mechanism plugins.
+ */
 export function queryTerms(query: string): string[] {
   const lower = query.toLowerCase();
   const latin = lower.replace(/[㐀-鿿]+/g, " ").split(/[^a-z0-9+#.-]+/).map(word => word.replace(/^[.-]+|[.-]+$/g, "")).filter(word => word.length >= 2 && !STOPWORDS.has(word));
-  const chinese = (lower.match(/[㐀-鿿]+/g) ?? []).flatMap(aliasesFor);
+  const chinese = (lower.match(/[㐀-鿿]+/g) ?? []).flatMap(text => [...aliasKeysIn(text), ...aliasesFor(text)]);
   return [...new Set([...latin, ...chinese])];
 }
 

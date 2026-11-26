@@ -22,6 +22,7 @@ const EXAMPLE_QUERIES = {
     "电子病历 FHIR 数据读取", "公共卫生与流行病统计分析",
     "医学影像分割", "病理全切片图像分析",
     "论文写作与引用管理", "生物信息工作流与数据可视化",
+    "智能体上下文记忆与历史摘要", "工具调用权限与安全治理",
   ],
   en: [
     "Search neuro-oncology papers, read abstracts and trace citations", "Clinical trial search and evidence review",
@@ -30,6 +31,7 @@ const EXAMPLE_QUERIES = {
     "Read EHR data through FHIR", "Public health and epidemiology statistics",
     "Medical image segmentation", "Pathology whole slide image analysis",
     "Paper writing and citation management", "Bioinformatics workflow and data visualization",
+    "Agent context memory and history summary", "Tool-call permission governance",
   ],
 };
 
@@ -39,15 +41,15 @@ function ExampleQueries({ onPick }: { onPick: (query: string) => void }) {
 }
 
 function CandidateList({ groups, selectedKey, onSelect }: { groups: CandidateGroup[]; selectedKey?: string; onSelect: (key: string) => void }) {
-  const { c, types } = useComponentCopy();
+  const { c, kindOf, sourceOf, descriptionOf } = useComponentCopy();
   return <ol className="candidate-list">{groups.map(group => {
     const lead = group.members[0];
-    const repos = [...new Set(group.members.map(member => member.repo))];
+    const repos = [...new Set(group.members.map(sourceOf))];
     return <li key={group.key} className={group.key === selectedKey ? "is-selected" : ""}>
       <button type="button" className="candidate-main" aria-pressed={group.key === selectedKey} onClick={() => onSelect(group.key)}>
         <strong>{group.name}{group.members.length > 1 && <small> ×{group.members.length}</small>}</strong>
-        <span className="candidate-description">{lead.description}</span>
-        <span className="candidate-source">{types[lead.type]} · {repos.slice(0, 2).join(" · ")}{repos.length > 2 ? ` +${repos.length - 2}` : ""}</span>
+        <span className="candidate-description">{descriptionOf(lead)}</span>
+        <span className="candidate-source">{kindOf(lead)} · {repos.slice(0, 2).join(" · ")}{repos.length > 2 ? ` +${repos.length - 2}` : ""}</span>
       </button>
       {group.members.length === 1 ? <PlanToggle component={lead} compact/> : <span className="candidate-count" title={c.members}>{group.members.length}</span>}
     </li>;
@@ -55,11 +57,11 @@ function CandidateList({ groups, selectedKey, onSelect }: { groups: CandidateGro
 }
 
 function Overview({ group, onOpen }: { group: CandidateGroup; onOpen: (id: string) => void }) {
-  const { c, types } = useComponentCopy();
+  const { c, kindOf, sourceOf, descriptionOf } = useComponentCopy();
   return <div className="candidate-overview">
     <h3>{c.members} · {group.members.length}</h3>
     <ul>{group.members.map(member => <li key={member.id}>
-      <div><strong>{member.name}</strong><small>{types[member.type]} · {member.repo}</small><p>{member.description}</p></div>
+      <div><strong>{member.name}</strong><small>{kindOf(member)} · {sourceOf(member)}</small><p>{descriptionOf(member)}</p></div>
       <div className="overview-actions"><RiskBadge level={member.risk}/><button type="button" className="dialog-secondary" onClick={() => onOpen(member.id)}>{c.details}</button><Link className="dialog-secondary" to={profileLink(member)}>{c.viewProfile} ↗</Link><PlanToggle component={member}/></div>
     </li>)}</ul>
   </div>;
