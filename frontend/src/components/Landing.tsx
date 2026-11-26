@@ -16,7 +16,7 @@ export function LandingHeader() {
     <div className="landing-nav-links">
       <a className="landing-path-link" href="#research-path">{zh ? "研究路径" : "Research path"}</a>
       <Link viewTransition to="/marketplace">{zh ? "组件生态" : "Components"}</Link>
-      <button type="button" onClick={toggleLocale} aria-label={zh ? "Switch to English" : "切换中文"}>{zh ? "EN" : "中文"}</button>
+      <button type="button" onClick={toggleLocale} aria-label={zh ? "切换英文" : "Switch to Chinese"}>{zh ? "EN" : "中文"}</button>
       <ThemeToggle/>
       <a className="landing-github" href={repositoryUrl}>GitHub ↗</a>
     </div>

@@ -92,7 +92,7 @@ export function ScrollJourney({ language }: { language: "en" | "zh" }) {
             {!reduced && <button onClick={() => setPaused(!paused)}>{paused ? (language === "en" ? "Play" : "播放") : (language === "en" ? "Pause" : "暂停")}</button>}
             <button onClick={() => move(1)} aria-label={language === "en" ? "Next slide" : "下一张"}>→</button>
           </div>
-          <div aria-label="Journey steps">
+          <div aria-label={language === "en" ? "Journey steps" : "路径步骤"}>
             {frames.map((frame, index) => (
                 <button key={frame.keyword} type="button" className={index === step ? "is-active" : ""} onClick={() => { setPaused(true); setStep(index); }} aria-label={language === "en" ? `Show ${frame.keyword}` : `显示${frame.keywordZh}`} aria-pressed={index === step}>
                 <i />
